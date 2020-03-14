@@ -25,7 +25,8 @@ package cache
 
 // String covers cv.item to string type.
 func (cv *cacheValue) String() string {
-    return cv.item.(string)
+    result, _ := cv.TryString()
+    return result
 }
 
 // String covers cv.item to string type.
@@ -37,7 +38,8 @@ func (cv *cacheValue) TryString() (string, bool) {
 
 // Int covers cv.item to int type.
 func (cv *cacheValue) Int() int {
-    return cv.item.(int)
+    result, _ := cv.TryInt()
+    return result
 }
 
 // Int covers cv.item to int type.
@@ -49,7 +51,8 @@ func (cv *cacheValue) TryInt() (int, bool) {
 
 // Int8 covers cv.item to int8 type.
 func (cv *cacheValue) Int8() int8 {
-    return cv.item.(int8)
+    result, _ := cv.TryInt8()
+    return result
 }
 
 // Int8 covers cv.item to int8 type.
@@ -61,7 +64,8 @@ func (cv *cacheValue) TryInt8() (int8, bool) {
 
 // Int16 covers cv.item to int16 type.
 func (cv *cacheValue) Int16() int16 {
-    return cv.item.(int16)
+    result, _ := cv.TryInt16()
+    return result
 }
 
 // Int16 covers cv.item to int16 type.
@@ -73,7 +77,8 @@ func (cv *cacheValue) TryInt16() (int16, bool) {
 
 // Int32 covers cv.item to int32 type.
 func (cv *cacheValue) Int32() int32 {
-    return cv.item.(int32)
+    result, _ := cv.TryInt32()
+    return result
 }
 
 // Int32 covers cv.item to int32 type.
@@ -85,7 +90,8 @@ func (cv *cacheValue) TryInt32() (int32, bool) {
 
 // Int64 covers cv.item to int64 type.
 func (cv *cacheValue) Int64() int64 {
-    return cv.item.(int64)
+    result, _ := cv.TryInt64()
+    return result
 }
 
 // Int64 covers cv.item to int64 type.
@@ -97,7 +103,8 @@ func (cv *cacheValue) TryInt64() (int64, bool) {
 
 // Float32 covers cv.item to float32 type.
 func (cv *cacheValue) Float32() float32 {
-    return cv.item.(float32)
+    result, _ := cv.TryFloat32()
+    return result
 }
 
 // Float32 covers cv.item to float32 type.
@@ -109,7 +116,8 @@ func (cv *cacheValue) TryFloat32() (float32, bool) {
 
 // Float64 covers cv.item to float64 type.
 func (cv *cacheValue) Float64() float64 {
-    return cv.item.(float64)
+    result, _ := cv.TryFloat64()
+    return result
 }
 
 // Float64 covers cv.item to float64 type.

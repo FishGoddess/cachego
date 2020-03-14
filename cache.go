@@ -14,64 +14,98 @@
 //
 // Author: fish
 // Email: fishinlove@163.com
-// Created at 2020/03/13 16:15:12
+// Created at 2020/03/14 16:28:56
 
 package cache
 
-import "time"
+import (
+    "sync"
+    "time"
+)
 
 const (
     // 默认寿命时间，60 秒
     DefaultLife = 60 * time.Second
 )
 
-// Cache is an interface representation of one kind cache.
-type Cache interface {
+var (
+    // 无效的缓存数据
+    InvalidCacheValue = NewCacheValue(nil, false, 0)
+)
 
-    // of 方法用于获取 key 对应的 value。
-    // 如果获取成功，返回获取到的 value 和 true，否则返回 nil 和 false。
-    Of(key string) *cacheValue
+// StandardCache is a standard cache implements AdvancedCache interface.
+type StandardCache struct {
+    data map[string]*cacheValue
 
-    // OfDefault 方法用于获取 key 对应的 value，和 of 方法不同的是，
-    // 如果获取成功，返回获取到的 value，否则返回 defaultValue。
-    OfDefault(key string, defaultValue interface{}) *cacheValue
+    size int
 
-    // Put 方法用于将一个 key-value 键值对数据放进缓存。
-    // 注意：建议实现类在内部为数据设置一个默认的寿命时间，比如 30s 之类的。
-    // 但是实现类并不一定同样可以不设置数据寿命时间，让数据永不死亡。
-    Put(key string, value interface{})
+    mu sync.RWMutex
 
-    // PutWithLife 方法用于将一个 key-value 键值对数据放进缓存，同时设置这个数据的寿命时间。
-    PutWithLife(key string, value interface{}, life time.Duration)
-
-    // Change 方法用于将 key 对应的数据更改为 newValue，并返回更改前的数据。
-    Change(key string, newValue interface{}) *cacheValue
-
-    // ChangeWithLife 方法用于将 key 对应的数据更改为 newValue，
-    // 并设置新的寿命，最后返回更改前的数据。
-    ChangeWithLife(key string, newValue interface{}, life time.Duration) *cacheValue
-
-    // Remove 方法用于从缓存中移除指定 key 的数据，并返回这个 key 对应的 value。
-    // 如果移除成功，返回这个 key 对应的 value 和 true，否则返回 nil 和 false。
-    Remove(key string) *cacheValue
-
-    // RemoveAll 方法用于清空缓存。
-    RemoveAll()
-
-    // Gc 方法清理死亡的数据。
-    Gc()
+    cacheValuePool *sync.Pool
 }
 
-// AdvancedCache is an extension of Cache interface.
-type AdvancedCache interface {
+// NewCache 创建一个标准的缓存对象，并返回
+func NewCache() Cache {
+    return NewCacheWithLife(DefaultLife)
+}
 
-    // Cache means an AdvancedCache implement also has the features of basic cache.
-    Cache
+func NewCacheWithLife(defaultLife time.Duration) Cache {
+    return &StandardCache{
+        data: make(map[string]*cacheValue, 16),
+        cacheValuePool: &sync.Pool{
+            New: func() interface{} {
+                return NewCacheValue(nil, true, defaultLife)
+            },
+        },
+        mu: sync.RWMutex{},
+    }
+}
 
-    // ChangeFunction is an advanced changing function to change your value on your way.
-    // Notice that the howToChange function is safe in concurrency to AdvancedCache, which
-    // means the implements should guarantee it on their own way.
-    ChangeFunction(key string, howToChange func(value *cacheValue)) *cacheValue
+func (sc *StandardCache) wrap(value interface{}) *cacheValue {
+    newCacheValue := sc.cacheValuePool.Get().(*cacheValue)
+    newCacheValue.item = value
+    return newCacheValue
+}
 
-    // extend this interface in future versions...
+func (sc *StandardCache) Of(key string) *cacheValue {
+    sc.mu.RLock()
+    result, ok := sc.data[key]
+    if !ok {
+        sc.mu.RUnlock()
+        return InvalidCacheValue
+    }
+    sc.mu.RUnlock()
+    return result
+}
+
+func (sc *StandardCache) OfDefault(key string, defaultValue interface{}) *cacheValue {
+    panic("implement me")
+}
+
+func (sc *StandardCache) Put(key string, value interface{}) {
+    panic("implement me")
+}
+
+func (sc *StandardCache) PutWithLife(key string, value interface{}, life time.Duration) {
+    panic("implement me")
+}
+
+func (sc *StandardCache) Change(key string, newValue interface{}) *cacheValue {
+    panic("implement me")
+}
+
+func (sc *StandardCache) ChangeWithLife(key string, newValue interface{}, life time.Duration) *cacheValue {
+    panic("implement me")
+}
+
+func (sc *StandardCache) Remove(key string) *cacheValue {
+    panic("implement me")
+}
+
+func (sc *StandardCache) RemoveAll() {
+    panic("implement me")
+}
+
+func (sc *StandardCache) Gc() {
+    panic("implement me")
 }
