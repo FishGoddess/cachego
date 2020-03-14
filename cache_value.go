@@ -20,47 +20,50 @@ package cache
 
 import "time"
 
+var (
+    // 无效的缓存数据
+    InvalidCacheValue = NewCacheValue(nil, 0)
+)
+
 // cacheValue is the struct representation of cached value
 type cacheValue struct {
 
-    // item 是实际缓存的数据。
-    item interface{}
+    // value 是实际缓存的数据。
+    value interface{}
 
-    // valid 指这个数据是否有效，false 表示这个数据不存在，item 是无效的。
-    valid bool
-
-    // createdTime 是数据的创建时间，以 ns 为单位。
-    createdTime int64
-
-    // deadline 是数据寿命的期限，以 ns 为单位。
-    // 当 time.Now().UnixNano() >= deadline 的时候，这个数据就死亡了，等待被回收。
+    // deadline 是数据死亡过期的时间。
+    // 当 time.Now().After(deadline) == true 的时候，这个数据就死亡了，等待被回收。
     // 当 deadline == 0 的时候，就意味着这个数据永生，不会被回收。
-    deadline int64
+    deadline time.Time
 }
 
 // NewCacheValue 方法创建一个 cacheValue 对象。
-func NewCacheValue(item interface{}, valid bool, life time.Duration) *cacheValue {
-    now := time.Now()
+func NewCacheValue(value interface{}, life time.Duration) *cacheValue {
     return &cacheValue{
-        item:        item,
-        valid:       valid,
-        createdTime: now.UnixNano(),
-        deadline:    now.Add(life).UnixNano(),
+        value:    value,
+        deadline: time.Now().Add(life),
     }
 }
 
-func (cv *cacheValue) Item() interface{} {
-    return cv.item
+// Ok 方法返回这个数据是否有效，如果数据无效返回 false
+func (cv *cacheValue) Ok() bool {
+    return cv != InvalidCacheValue
 }
 
-func (cv *cacheValue) Valid() bool {
-    return cv.valid
-}
-
+// Value 方法获取实际的缓存数据
 func (cv *cacheValue) Value() (interface{}, bool) {
-    return cv.Item(), cv.Valid()
+    return cv.value, cv.Ok()
 }
 
+// Or 方法会判断当前数据是否有效，如果无效则返回包装了 value 数据的结果
+func (cv *cacheValue) Or(value interface{}) *cacheValue {
+    if cv.Ok() {
+        return cv
+    }
+    return NewCacheValue(value, 0)
+}
+
+// Life 方法返回当前数据剩余寿命时间
 func (cv *cacheValue) Life() time.Duration {
-    return time.Duration(cv.deadline - cv.createdTime)
+    return cv.deadline.Sub(time.Now())
 }

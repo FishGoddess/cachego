@@ -23,89 +23,74 @@ import (
     "time"
 )
 
-const (
-    // 默认寿命时间，60 秒
-    DefaultLife = 60 * time.Second
-)
-
-var (
-    // 无效的缓存数据
-    InvalidCacheValue = NewCacheValue(nil, false, 0)
-)
-
 // StandardCache is a standard cache implements AdvancedCache interface.
 type StandardCache struct {
-    data map[string]*cacheValue
-
+    data map[string]cacheValue
     size int
-
-    mu sync.RWMutex
-
-    cacheValuePool *sync.Pool
+    mu   *sync.RWMutex
 }
 
-// NewCache 创建一个标准的缓存对象，并返回
+// NewCache 返回一个缓存对象
 func NewCache() Cache {
-    return NewCacheWithLife(DefaultLife)
-}
-
-func NewCacheWithLife(defaultLife time.Duration) Cache {
     return &StandardCache{
-        data: make(map[string]*cacheValue, 16),
-        cacheValuePool: &sync.Pool{
-            New: func() interface{} {
-                return NewCacheValue(nil, true, defaultLife)
-            },
-        },
-        mu: sync.RWMutex{},
+        data: make(map[string]cacheValue, 16),
+        mu:   &sync.RWMutex{},
     }
 }
 
-func (sc *StandardCache) wrap(value interface{}) *cacheValue {
-    newCacheValue := sc.cacheValuePool.Get().(*cacheValue)
-    newCacheValue.item = value
-    return newCacheValue
+func (sc *StandardCache) afterOf(key string, value cacheValue) bool {
+    if value.Life() <= 0 {
+        delete(sc.data, key)
+        return false
+    }
+    return true
 }
 
 func (sc *StandardCache) Of(key string) *cacheValue {
     sc.mu.RLock()
+    defer sc.mu.RUnlock()
     result, ok := sc.data[key]
-    if !ok {
-        sc.mu.RUnlock()
+    if !ok || !sc.afterOf(key, result) {
         return InvalidCacheValue
     }
-    sc.mu.RUnlock()
-    return result
+    return &result
 }
 
-func (sc *StandardCache) OfDefault(key string, defaultValue interface{}) *cacheValue {
-    panic("implement me")
+func (sc *StandardCache) Put(key string, value interface{}, life time.Duration) {
+    sc.mu.Lock()
+    defer sc.mu.Unlock()
+    sc.data[key] = *NewCacheValue(value, life)
+    sc.size++
 }
 
-func (sc *StandardCache) Put(key string, value interface{}) {
-    panic("implement me")
+func (sc *StandardCache) Change(key string, newValue interface{}) {
+    sc.mu.Lock()
+    defer sc.mu.Unlock()
+    oldValue := sc.data[key]
+    sc.data[key] = *NewCacheValue(newValue, (&oldValue).Life())
 }
 
-func (sc *StandardCache) PutWithLife(key string, value interface{}, life time.Duration) {
-    panic("implement me")
-}
-
-func (sc *StandardCache) Change(key string, newValue interface{}) *cacheValue {
-    panic("implement me")
-}
-
-func (sc *StandardCache) ChangeWithLife(key string, newValue interface{}, life time.Duration) *cacheValue {
-    panic("implement me")
-}
-
-func (sc *StandardCache) Remove(key string) *cacheValue {
-    panic("implement me")
+func (sc *StandardCache) Remove(key string) {
+    sc.mu.Lock()
+    defer sc.mu.Unlock()
+    delete(sc.data, key)
+    sc.size--
 }
 
 func (sc *StandardCache) RemoveAll() {
-    panic("implement me")
+    sc.mu.Lock()
+    defer sc.mu.Unlock()
+    for key := range sc.data {
+        delete(sc.data, key)
+    }
+    sc.size = 0
 }
 
 func (sc *StandardCache) Gc() {
-    panic("implement me")
+    // Do nothing...
+    // implement in future versions...
+}
+
+func (sc *StandardCache) Extend() AdvancedCache {
+    return sc
 }

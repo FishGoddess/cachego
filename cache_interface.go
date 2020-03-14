@@ -30,34 +30,23 @@ type Cache interface {
     // 如果获取成功，返回获取到的 value 和 true，否则返回 nil 和 false。
     Of(key string) *cacheValue
 
-    // OfDefault 方法用于获取 key 对应的 value，和 of 方法不同的是，
-    // 如果获取成功，返回获取到的 value，否则返回 defaultValue。
-    OfDefault(key string, defaultValue interface{}) *cacheValue
-
-    // Put 方法用于将一个 key-value 键值对数据放进缓存。
-    // 注意：建议实现类在内部为数据设置一个默认的寿命时间，比如 30s 之类的。
-    // 但是实现类并不一定同样可以不设置数据寿命时间，让数据永不死亡。
-    Put(key string, value interface{})
-
-    // PutWithLife 方法用于将一个 key-value 键值对数据放进缓存，同时设置这个数据的寿命时间。
-    PutWithLife(key string, value interface{}, life time.Duration)
+    // Put 方法用于将一个 key-value 键值对数据放进缓存，同时设置这个数据的寿命时间。
+    Put(key string, value interface{}, life time.Duration)
 
     // Change 方法用于将 key 对应的数据更改为 newValue，并返回更改前的数据。
-    Change(key string, newValue interface{}) *cacheValue
+    Change(key string, newValue interface{})
 
-    // ChangeWithLife 方法用于将 key 对应的数据更改为 newValue，
-    // 并设置新的寿命，最后返回更改前的数据。
-    ChangeWithLife(key string, newValue interface{}, life time.Duration) *cacheValue
-
-    // Remove 方法用于从缓存中移除指定 key 的数据，并返回这个 key 对应的 value。
-    // 如果移除成功，返回这个 key 对应的 value 和 true，否则返回 nil 和 false。
-    Remove(key string) *cacheValue
+    // Remove 方法用于从缓存中移除指定 key 的数据。如果 key 不存在，就不会发生任何的事情。
+    Remove(key string)
 
     // RemoveAll 方法用于清空缓存。
     RemoveAll()
 
     // Gc 方法清理死亡的数据。
     Gc()
+
+    // Extend 方法返回拥有更多高级特性的缓存对象
+    Extend() AdvancedCache
 }
 
 // AdvancedCache is an extension of Cache interface.
@@ -66,10 +55,8 @@ type AdvancedCache interface {
     // Cache means an AdvancedCache implement also has the features of basic cache.
     Cache
 
-    // ChangeFunction is an advanced changing function to change your value on your way.
-    // Notice that the howToChange function is safe in concurrency to AdvancedCache, which
-    // means the implements should guarantee it on their own way.
-    ChangeFunction(key string, howToChange func(value *cacheValue)) *cacheValue
+    // Size returns the size of current cache.
+    Size() int
 
     // Dump is for storing current cache, however, it is still a question that
     // this feature is beWorth？
