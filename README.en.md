@@ -62,14 +62,14 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=1s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **cachego** | unknown | unknown | powerful | high |
+| **cachego** | 110950164 | 98.1 ns/op | powerful | high |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
