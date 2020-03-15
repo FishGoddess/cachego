@@ -20,6 +20,7 @@ package cache
 
 import (
     "fmt"
+    "strconv"
     "testing"
     "time"
 )
@@ -55,5 +56,101 @@ func TestNewCache(t *testing.T) {
     time.Sleep(1 * time.Second)
     if cache.Of("fish").Ok() {
         t.Fatal("Ok() is wrong...")
+    }
+}
+
+// 测试标准缓存的 Of 方法
+func TestStandardCacheOf(t *testing.T) {
+    cache := NewCache()
+    cache.Put("key", 123, 5*time.Second)
+    value := cache.Of("key")
+    if value.Int() != 123 || !value.Ok() {
+        t.Fatal("Of() is wrong...")
+    }
+
+    value = cache.Of("wrong key")
+    if value != InvalidCacheValue || value.Ok() {
+        t.Fatal("Of() is wrong...")
+    }
+
+    if value.Or("456").String() != "456" {
+        t.Fatal("Of() is wrong...")
+    }
+}
+
+// 测试标准缓存的 Put 方法
+func TestStandardCachePut(t *testing.T) {
+    cache := NewCache()
+    for i := 0; i < 10; i++ {
+        if cache.Extend().Size() != i {
+            t.Fatal("Put() is wrong...")
+        }
+        cache.Put("key"+strconv.Itoa(i), 123, 5*time.Second)
+    }
+}
+
+// 测试标准缓存的 Change 方法
+func TestStandardCacheChange(t *testing.T) {
+    cache := NewCache()
+    cache.Put("key", 123, 5*time.Second)
+    value := cache.Of("key")
+    if value.Int() != 123 || !value.Ok() {
+        t.Fatal("Of() is wrong...")
+    }
+
+    cache.Change("key", 456)
+    value = cache.Of("key")
+    if value.Int() != 456 || !value.Ok() {
+        t.Fatal("Change() is wrong...")
+    }
+}
+
+// 测试标准缓存的 Remove 方法
+func TestStandardCacheRemove(t *testing.T) {
+    cache := NewCache()
+    cache.Put("key", 123, 5*time.Second)
+    value := cache.Of("key")
+    if value.Int() != 123 || !value.Ok() {
+        t.Fatal("Of() is wrong...")
+    }
+
+    cache.Remove("key")
+    value = cache.Of("key")
+    if value != InvalidCacheValue || value.Ok() {
+        t.Fatal("Remove() is wrong...")
+    }
+}
+
+// 测试标准缓存的 RemoveAll 方法
+func TestStandardCacheRemoveAll(t *testing.T) {
+    cache := NewCache()
+    cache.Put("key", 123, 50*time.Second)
+    if cache.Extend().Size() != 1 {
+        t.Fatal("Extend().Size() is wrong...")
+    }
+    for i := 0; i < 10; i++ {
+        cache.Put("key"+strconv.Itoa(i), 123, 50*time.Second)
+    }
+    if cache.Extend().Size() != 11 {
+        t.Fatal("Extend().Size() is wrong...")
+    }
+
+    value := cache.Of("key")
+    if value.Int() != 123 || !value.Ok() {
+        t.Fatal("Of() is wrong...")
+    }
+    cache.RemoveAll()
+    if cache.Extend().Size() != 0 {
+        t.Fatal("Extend().Size() is wrong...")
+    }
+    value = cache.Of("key")
+    if value != InvalidCacheValue || value.Ok() {
+        t.Fatal("RemoveAll() is wrong...")
+    }
+    for i := 0; i < 10; i++ {
+        value = cache.Of("key" + strconv.Itoa(i))
+        if value != InvalidCacheValue || value.Ok() {
+            t.Fatal("RemoveAll() is wrong...")
+        }
     }
 }

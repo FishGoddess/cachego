@@ -38,7 +38,14 @@ func NewCache() Cache {
     }
 }
 
-func (sc *StandardCache) afterOf(key string, value cacheValue) bool {
+func (sc *StandardCache) checkResult(key string, value cacheValue, ok bool) bool {
+
+    // 如果 ok 是 false，说明数据无效，检查不通过
+    if !ok {
+        return false
+    }
+
+    // 说明这个数据已经死亡过期，删除数据
     if value.Life() <= 0 {
         delete(sc.data, key)
         return false
@@ -50,7 +57,7 @@ func (sc *StandardCache) Of(key string) *cacheValue {
     sc.mu.RLock()
     defer sc.mu.RUnlock()
     result, ok := sc.data[key]
-    if !ok || !sc.afterOf(key, result) {
+    if !sc.checkResult(key, result, ok) {
         return InvalidCacheValue
     }
     return &result
