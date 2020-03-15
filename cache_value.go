@@ -21,33 +21,49 @@ package cache
 import "time"
 
 var (
-    // 无效的缓存数据
-    InvalidCacheValue = NewCacheValue(nil, 0)
+    // InvalidCacheValue is the representation of invalid cache value.
+    invalidCacheValue = NewCacheValue(nil, 0)
 )
 
-// cacheValue is the struct representation of cached value
+const (
+    // NeverDie means this value will not be dead (cleaned up by gc).
+    NeverDie = time.Duration(0)
+)
+
+// cacheValue is the struct representation of cached value.
 type cacheValue struct {
 
-    // value 是实际缓存的数据。
+    // value is the real value of this cacheValue.
     value interface{}
 
-    // deadline 是数据死亡过期的时间。
-    // 当 time.Now().After(deadline) == true 的时候，这个数据就死亡了，等待被回收。
-    // 当 deadline == 0 的时候，就意味着这个数据永生，不会被回收。
+    // deadline is the time when this value will be dead.
+    // When time.Now().After(deadline) == true, it's dead.
     deadline time.Time
 }
 
 // NewCacheValue 方法创建一个 cacheValue 对象。
 func NewCacheValue(value interface{}, life time.Duration) *cacheValue {
+    var deadline time.Time
+    if life != NeverDie {
+        deadline = time.Now().Add(life)
+    } else {
+        deadline = time.Unix(0, 0)
+    }
+
     return &cacheValue{
         value:    value,
-        deadline: time.Now().Add(life),
+        deadline: deadline,
     }
+}
+
+// InvalidCacheValue returns an invalid cache value.
+func InvalidCacheValue() *cacheValue {
+    return invalidCacheValue
 }
 
 // Ok 方法返回这个数据是否有效，如果数据无效返回 false
 func (cv *cacheValue) Ok() bool {
-    return cv != InvalidCacheValue
+    return cv != InvalidCacheValue()
 }
 
 // Value 方法获取实际的缓存数据
@@ -66,4 +82,10 @@ func (cv *cacheValue) Or(value interface{}) *cacheValue {
 // Life 方法返回当前数据剩余寿命时间
 func (cv *cacheValue) Life() time.Duration {
     return cv.deadline.Sub(time.Now())
+}
+
+func (cv *cacheValue) Dead() bool {
+    // cv.deadline.Unix() != int64(NeverDie) 表示这个数据是凡人，是会死的
+    // cv.Life() <= 0 表示阳寿已尽
+    return cv.deadline.Unix() != int64(NeverDie) && cv.Life() <= 0
 }

@@ -62,7 +62,7 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=12s
 ```
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
@@ -71,9 +71,15 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **cachego** | 98780428 | 111 ns/op | 强大 | 高 |
+| **cachego** | 127152241 | 104 ns/op | 强大 | 高 |
+| freeCache | 132629332 | 107 ns/op | 正常 | 正常 |
+| go-cache | 276515510 | &nbsp; 44 ns/op | 正常 | 正常 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
+
+注意：
+1. freeCache 的过期时间远大于 cachego 和 go-cache，也就意味着单次 GC 的量要少得多，
+所以这个结果应该是偏好的，实际生产环境可能要更差（个人想法）。
 
 ### 👥 贡献者
 

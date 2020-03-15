@@ -62,7 +62,7 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
+$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=12s
 ```
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
@@ -71,9 +71,16 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **cachego** | 98780428 | 111 ns/op | powerful | high |
+| **cachego** | 127152241 | 104 ns/op | powerful | high |
+| freeCache | 132629332 | 107 ns/op | normal | normal |
+| go-cache | 276515510 | &nbsp; 44 ns/op | normal | normal |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
+
+Notice:
+1. freeCache has a bigger expired time so one gc task does less work. So
+it is not fair to cachego and go-cache. Actually, freeCache may slower than 
+this benchmark shown (my personal thought).
 
 ### 👥 Contributing
 

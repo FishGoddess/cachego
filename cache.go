@@ -24,21 +24,36 @@ import (
 )
 
 // StandardCache is a standard cache implements AdvancedCache interface.
+// It is a k-v entry cache that stores in memory. Actually, this cache
+// is a concurrency-safe map essentially. That means it can be visited
+// with many goroutines at the same time. More than a map does, It keeps
+// a background task that removes all dead key and value, also, you can
+// call Gc() manually to invoke this clean up process.
 type StandardCache struct {
+
+    // data is the map stores all k-v entries.
+    // Cache is a concurrency-safe map essentially, remember?
     data map[string]cacheValue
+
+    // mu is for concurrency-safe. It is a lock.
+    mu *sync.RWMutex
+
+    // size is a field representation of how many entries are storing in current cache.
     size int
-    mu   *sync.RWMutex
 }
 
-// NewCache 返回一个缓存对象
+// NewCache Returns a cache implemented AdvancedCache interface.
+// Notice that default gc duration is ten minutes. The gc duration will affect the performance
+// of cache, so do not set it too small.
 func NewCache() Cache {
-    return NewCacheWithGcDuration(5 * time.Second)
+    return NewCacheWithGcDuration(10 * time.Minute)
 }
 
-// NewCacheWithGcDuration 返回一个缓存对象
+// NewCacheWithGcDuration Returns a cache implemented AdvancedCache interface.
+// The gc duration will affect the performance of cache, so do not set it too small.
 func NewCacheWithGcDuration(gcDuration time.Duration) Cache {
     standardCache := &StandardCache{
-        data: make(map[string]cacheValue, 16),
+        data: make(map[string]cacheValue, 64),
         mu:   &sync.RWMutex{},
     }
 
@@ -47,6 +62,7 @@ func NewCacheWithGcDuration(gcDuration time.Duration) Cache {
     return standardCache
 }
 
+// startGcTask starts a goroutine to clean up dead entries at fixed gcDuration.
 func (sc *StandardCache) startGcTask(gcDuration time.Duration) {
     go func() {
         ticker := time.NewTicker(gcDuration)
@@ -59,7 +75,8 @@ func (sc *StandardCache) startGcTask(gcDuration time.Duration) {
     }()
 }
 
-func (sc *StandardCache) checkResult(key string, value cacheValue, ok bool) bool {
+// checkResult
+func (sc *StandardCache) verifyResult(key string, value cacheValue, ok bool) bool {
 
     // 如果 ok 是 false，说明数据无效，检查不通过
     if !ok {
@@ -67,7 +84,7 @@ func (sc *StandardCache) checkResult(key string, value cacheValue, ok bool) bool
     }
 
     // 说明这个数据已经死亡过期，删除数据
-    if value.Life() <= 0 {
+    if value.Dead() {
         delete(sc.data, key)
         return false
     }
@@ -78,8 +95,8 @@ func (sc *StandardCache) Of(key string) *cacheValue {
     sc.mu.RLock()
     defer sc.mu.RUnlock()
     result, ok := sc.data[key]
-    if !sc.checkResult(key, result, ok) {
-        return InvalidCacheValue
+    if !sc.verifyResult(key, result, ok) {
+        return InvalidCacheValue()
     }
     return &result
 }
@@ -94,8 +111,10 @@ func (sc *StandardCache) Put(key string, value interface{}, life time.Duration) 
 func (sc *StandardCache) Change(key string, newValue interface{}) {
     sc.mu.Lock()
     defer sc.mu.Unlock()
-    oldValue := sc.data[key]
-    sc.data[key] = *NewCacheValue(newValue, (&oldValue).Life())
+    oldValue, ok := sc.data[key]
+    if ok {
+        sc.data[key] = *NewCacheValue(newValue, (&oldValue).Life())
+    }
 }
 
 func (sc *StandardCache) Remove(key string) {
@@ -108,9 +127,7 @@ func (sc *StandardCache) Remove(key string) {
 func (sc *StandardCache) RemoveAll() {
     sc.mu.Lock()
     defer sc.mu.Unlock()
-    for key := range sc.data {
-        delete(sc.data, key)
-    }
+    sc.data = make(map[string]cacheValue, 64)
     sc.size = 0
 }
 
@@ -118,7 +135,7 @@ func (sc *StandardCache) Gc() {
     sc.mu.Lock()
     defer sc.mu.Unlock()
     for key, value := range sc.data {
-        if value.Life() <= 0 {
+        if value.Dead() {
             delete(sc.data, key)
             sc.size--
         }

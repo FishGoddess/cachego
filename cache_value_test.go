@@ -47,7 +47,7 @@ func TestCacheValueOk(t *testing.T) {
     if !value.Ok() {
         t.Fatal("Ok() is wrong...")
     }
-    value = InvalidCacheValue
+    value = InvalidCacheValue()
     if value.Ok() {
         t.Fatal("Ok() is wrong...")
     }
@@ -60,7 +60,7 @@ func TestCacheValueValue(t *testing.T) {
     if v != interface{}(123) || !ok {
         t.Fatal("Value() is wrong...")
     }
-    value = InvalidCacheValue
+    value = InvalidCacheValue()
     v, ok = value.Value()
     if v != interface{}(nil) || ok {
         t.Fatal("Value() is wrong...")
@@ -73,7 +73,7 @@ func TestCacheValueOr(t *testing.T) {
     if value.Or(456).Int() != interface{}(123) {
         t.Fatal("Or() is wrong...")
     }
-    value = InvalidCacheValue
+    value = InvalidCacheValue()
     if value.Or(456).Int() != interface{}(456) {
         t.Fatal("Or() is wrong...")
     }

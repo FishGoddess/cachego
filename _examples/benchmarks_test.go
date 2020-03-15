@@ -19,7 +19,6 @@
 package _examples
 
 import (
-    "fmt"
     "strconv"
     "testing"
     "time"
@@ -47,5 +46,62 @@ func BenchmarkCachego(b *testing.B) {
     for i := 0; i < b.N; i++ {
         testTask(i)
     }
-    fmt.Println(c.Extend().Size())
+    //fmt.Println(c.Extend().Size())
 }
+
+//// 测试 go-cache 性能
+//func BenchmarkGoCache(b *testing.B) {
+//    c := gocache.New(gocache.DefaultExpiration, 5*time.Second)
+//    go func() {
+//        for i := 0; i < 1000000; i++ {
+//            key := strconv.Itoa(i)
+//            c.Set(key, key, time.Duration(i*100)*time.Microsecond)
+//        }
+//    }()
+//
+//    testTask := func() string {
+//        v, ok := c.Get("100000")
+//        if !ok {
+//            return ""
+//        }
+//        value := v.(string)
+//        return value
+//    }
+//
+//    b.ReportAllocs()
+//    b.StartTimer()
+//    for i := 0; i < b.N; i++ {
+//        testTask()
+//    }
+//    fmt.Println(c.ItemCount())
+//}
+//
+//// 测试 freecache 性能
+//func BenchmarkFreeCache(b *testing.B) {
+//    cacheSize := 100 * 1024 * 1024
+//    fcache := freecache.NewCache(cacheSize)
+//    debug.SetGCPercent(20)
+//
+//    go func() {
+//        for i := 0; i < 1000000; i++ {
+//            key := strconv.Itoa(i)
+//            // Expired time is less than cachego and go-cache. So this is not fair to the other guys.
+//            fcache.Set([]byte(key), []byte(key), i)
+//        }
+//    }()
+//
+//    testTask := func() string {
+//        v, err := fcache.Get([]byte("100000"))
+//        if err != nil {
+//            return ""
+//        }
+//        return string(v)
+//    }
+//
+//    b.ReportAllocs()
+//    b.StartTimer()
+//    for i := 0; i < b.N; i++ {
+//        testTask()
+//    }
+//    fmt.Println(fcache.EntryCount())
+//}
