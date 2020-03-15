@@ -154,3 +154,42 @@ func TestStandardCacheRemoveAll(t *testing.T) {
         }
     }
 }
+
+func TestStandardCacheGc(t *testing.T) {
+    cache := NewCache()
+    for i := 1; i <= 20; i++ {
+        cache.Put("key"+strconv.Itoa(i), i, time.Duration(i)*time.Second)
+    }
+    value := cache.Of("key3")
+    if value.Int() != 3 || !value.Ok() {
+        t.Fatal("Of() is wrong...")
+    }
+    value = cache.Of("key7")
+    if value.Int() != 7 || !value.Ok() {
+        t.Fatal("Of() is wrong...")
+    }
+    if cache.Extend().Size() != 20 {
+        t.Fatal("Extend().Size() is wrong...")
+    }
+    time.Sleep(5500 * time.Millisecond)
+    value = cache.Of("key3")
+    if value != InvalidCacheValue || value.Ok() {
+        t.Fatal("Gc() is wrong...")
+    }
+    value = cache.Of("key7")
+    if value.Int() != 7 || !value.Ok() {
+        t.Fatal("Gc() is wrong...")
+    }
+    if cache.Extend().Size() != 15 {
+        t.Fatal("Gc() is wrong...")
+    }
+    time.Sleep(5 * time.Second)
+    value = cache.Of("key7")
+    if value != InvalidCacheValue || value.Ok() {
+        t.Fatal("Gc() is wrong...")
+    }
+    fmt.Println(cache.Extend().Size())
+    if cache.Extend().Size() != 10 {
+        t.Fatal("Gc() is wrong...")
+    }
+}

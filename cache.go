@@ -32,10 +32,31 @@ type StandardCache struct {
 
 // NewCache 返回一个缓存对象
 func NewCache() Cache {
-    return &StandardCache{
+    return NewCacheWithGcDuration(5 * time.Second)
+}
+
+// NewCacheWithGcDuration 返回一个缓存对象
+func NewCacheWithGcDuration(gcDuration time.Duration) Cache {
+    standardCache := &StandardCache{
         data: make(map[string]cacheValue, 16),
         mu:   &sync.RWMutex{},
     }
+
+    // 开启 GC 后台任务
+    standardCache.startGcTask(gcDuration)
+    return standardCache
+}
+
+func (sc *StandardCache) startGcTask(gcDuration time.Duration) {
+    go func() {
+        ticker := time.NewTicker(gcDuration)
+        for {
+            select {
+            case <-ticker.C:
+                sc.Gc()
+            }
+        }
+    }()
 }
 
 func (sc *StandardCache) checkResult(key string, value cacheValue, ok bool) bool {
@@ -94,8 +115,14 @@ func (sc *StandardCache) RemoveAll() {
 }
 
 func (sc *StandardCache) Gc() {
-    // Do nothing...
-    // implement in future versions...
+    sc.mu.Lock()
+    defer sc.mu.Unlock()
+    for key, value := range sc.data {
+        if value.Life() <= 0 {
+            delete(sc.data, key)
+            sc.size--
+        }
+    }
 }
 
 func (sc *StandardCache) Extend() AdvancedCache {

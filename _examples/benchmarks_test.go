@@ -19,6 +19,7 @@
 package _examples
 
 import (
+    "fmt"
     "strconv"
     "testing"
     "time"
@@ -29,16 +30,16 @@ import (
 // 测试 Cachego 的性能
 func BenchmarkCachego(b *testing.B) {
 
-    c := cache.NewCache()
+    c := cache.NewCacheWithGcDuration(5 * time.Second)
     go func() {
-        for i := 0; i < 100000; i++ {
+        for i := 0; i < 1000000; i++ {
             key := strconv.Itoa(i)
-            c.Put(key, i, 5*time.Second)
+            c.Put(key, i, time.Duration(i*100)*time.Microsecond)
         }
     }()
 
     testTask := func(i int) {
-        c.Of("10000").Int()
+        c.Of("100000").Int()
     }
 
     b.ReportAllocs()
@@ -46,4 +47,5 @@ func BenchmarkCachego(b *testing.B) {
     for i := 0; i < b.N; i++ {
         testTask(i)
     }
+    fmt.Println(c.Extend().Size())
 }

@@ -67,9 +67,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 > 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
+> 写入缓存和读取缓存并发进行，将缓存 GC 时间设置为 5 秒/次，总缓存数据为 100 万条
+
 | 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
 | -----------|--------|-------------|-------------|-------------|
-| **cachego** | 110950164 | 98.1 ns/op | 强大 | 高 |
+| **cachego** | 98780428 | 111 ns/op | 强大 | 高 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 

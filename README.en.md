@@ -67,9 +67,11 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=10s
 
 > Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
 
+> Write and read are processing concurrently, gc duration is set to 5 seconds, total is 1 million data
+
 | test case | times ran (large is better) |  ns/op (small is better) | features | extension |
 | -----------|--------|-------------|-------------|-------------|
-| **cachego** | 110950164 | 98.1 ns/op | powerful | high |
+| **cachego** | 98780428 | 111 ns/op | powerful | high |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
