@@ -41,7 +41,7 @@ type cacheValue struct {
     deadline time.Time
 }
 
-// NewCacheValue 方法创建一个 cacheValue 对象。
+// NewCacheValue returns a new cache value including real cached value and its life.
 func NewCacheValue(value interface{}, life time.Duration) *cacheValue {
     var deadline time.Time
     if life != NeverDie {
@@ -61,17 +61,20 @@ func InvalidCacheValue() *cacheValue {
     return invalidCacheValue
 }
 
-// Ok 方法返回这个数据是否有效，如果数据无效返回 false
+// Ok returns if this value is valid.
+// In current cache, it means this value existed or not normally.
 func (cv *cacheValue) Ok() bool {
     return cv != InvalidCacheValue()
 }
 
-// Value 方法获取实际的缓存数据
+// Value returns the real value in cache.
+// If this value is invalid, then nil and false will be returned.
 func (cv *cacheValue) Value() (interface{}, bool) {
     return cv.value, cv.Ok()
 }
 
-// Or 方法会判断当前数据是否有效，如果无效则返回包装了 value 数据的结果
+// Or is for more elegance. As you know, this value may not exist in cache,
+// then we need a default value to let our code have more elasticity.
 func (cv *cacheValue) Or(value interface{}) *cacheValue {
     if cv.Ok() {
         return cv
@@ -79,11 +82,15 @@ func (cv *cacheValue) Or(value interface{}) *cacheValue {
     return NewCacheValue(value, 0)
 }
 
-// Life 方法返回当前数据剩余寿命时间
+// Life returns the leftover life of this value.
+// Notice that this has nothing to do with those never die value (such as invalidCacheValue).
+// So do not use this method to judge if this value is dead, which is Dead() method doing.
 func (cv *cacheValue) Life() time.Duration {
     return cv.deadline.Sub(time.Now())
 }
 
+// Dead returns if this value is dead.
+// A dead value will be cleaned up by gc.
 func (cv *cacheValue) Dead() bool {
     // cv.deadline.Unix() != int64(NeverDie) 表示这个数据是凡人，是会死的
     // cv.Life() <= 0 表示阳寿已尽

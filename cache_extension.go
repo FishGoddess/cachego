@@ -20,6 +20,7 @@ package cache
 
 import "io"
 
+// Size returns the count of entries in cache.
 func (sc *StandardCache) Size() int {
     sc.mu.RLock()
     size := sc.size
@@ -27,7 +28,11 @@ func (sc *StandardCache) Size() int {
     return size
 }
 
+// Dump is for endurance.
+// It will write all alive data by w, which means one gc task will be invoked
+// before writing. It will be implemented in future versions...
 func (sc *StandardCache) Dump(w io.Writer) {
-    // Do nothing...
-    // implement in future versions...
+
+    // 在持久化数据之前先清理一次死亡过期数据，减少不必要的 IO 操作
+    sc.Gc()
 }

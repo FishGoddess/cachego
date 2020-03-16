@@ -75,7 +75,8 @@ func (sc *StandardCache) startGcTask(gcDuration time.Duration) {
     }()
 }
 
-// checkResult
+// verifyResult check this result is valid or not.
+// Return false if the result is invalid.
 func (sc *StandardCache) verifyResult(key string, value cacheValue, ok bool) bool {
 
     // 如果 ok 是 false，说明数据无效，检查不通过
@@ -91,6 +92,8 @@ func (sc *StandardCache) verifyResult(key string, value cacheValue, ok bool) boo
     return true
 }
 
+// Of returns the value of this key.
+// Return invalidCacheValue if this key is absent in cache.
 func (sc *StandardCache) Of(key string) *cacheValue {
     sc.mu.RLock()
     defer sc.mu.RUnlock()
@@ -101,6 +104,7 @@ func (sc *StandardCache) Of(key string) *cacheValue {
     return &result
 }
 
+// Put stores an entry (key, value) to cache, and sets the life of this entry.
 func (sc *StandardCache) Put(key string, value interface{}, life time.Duration) {
     sc.mu.Lock()
     defer sc.mu.Unlock()
@@ -108,6 +112,8 @@ func (sc *StandardCache) Put(key string, value interface{}, life time.Duration) 
     sc.size++
 }
 
+// Change changes the value of key to newValue.
+// If this key is not existed, nothing will happen.
 func (sc *StandardCache) Change(key string, newValue interface{}) {
     sc.mu.Lock()
     defer sc.mu.Unlock()
@@ -117,6 +123,8 @@ func (sc *StandardCache) Change(key string, newValue interface{}) {
     }
 }
 
+// Remove removes the value of key.
+// If this key is not existed, nothing will happen.
 func (sc *StandardCache) Remove(key string) {
     sc.mu.Lock()
     defer sc.mu.Unlock()
@@ -124,6 +132,7 @@ func (sc *StandardCache) Remove(key string) {
     sc.size--
 }
 
+// RemoveAll is for removing all data in cache.
 func (sc *StandardCache) RemoveAll() {
     sc.mu.Lock()
     defer sc.mu.Unlock()
@@ -131,6 +140,10 @@ func (sc *StandardCache) RemoveAll() {
     sc.size = 0
 }
 
+// Gc is for cleaning up dead data.
+// Notice that this method will take lots of time to remove all dead data
+// if there are many entries in cache. So it is not recommended to call Gc()
+// manually. Let cachego do this automatically will be better.
 func (sc *StandardCache) Gc() {
     sc.mu.Lock()
     defer sc.mu.Unlock()
@@ -142,6 +155,9 @@ func (sc *StandardCache) Gc() {
     }
 }
 
+// Extend returns a cache instance with advanced features.
+// Notice that this method is for extension, so implement it is not required.
+// You can just return a nil in method body.
 func (sc *StandardCache) Extend() AdvancedCache {
     return sc
 }

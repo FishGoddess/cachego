@@ -2,20 +2,22 @@
 
 [![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-**cachego** is a easy-to-use and memory-based cache for [GoLang](https://golang.org) applications.
+**cachego** is a chain-programming and memory-based cache for [GoLang](https://golang.org) applications.
 
 [阅读中文版的 Read me](./README.md).
 
 ### 🥇 Features
 
 * Cache as key-value and for concurrency, automatically clean up expired data supports
-* Use more fine-grained segmented lock mechanism to guarantee higher performance (coming soon)
-* Lazy cleanup mechanism supports, clean up expired data before visiting (coming soon)
-* Sentinel cleanup mechanism supports, clean up expired data at fixed interval (coming soon)
+* Splitting basic features and advanced features design, more friendly to new users
+* Chain-programming api supports, more readability to all users
+* Lazy cleanup mechanism supports, clean up expired data before visiting
+* Sentinel cleanup mechanism supports, clean up expired data at fixed interval
 * Memory limit supports, to protect memory from unlimited uses (coming soon)
 * Cache count limit supports, to protect hash performance from too many data (coming soon)
 * Memory limit strategy supports, you can customize your strategy to handle memory exceeding (coming soon)
 * Cache count limit strategy supports, you can customize your strategy to handle cache count exceeding (coming soon)
+* Use more fine-grained segmented lock mechanism to guarantee higher performance (coming soon)
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
