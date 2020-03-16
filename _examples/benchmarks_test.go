@@ -16,7 +16,7 @@
 // Email: fishinlove@163.com
 // Created at 2020/03/14 23:43:52
 
-package _examples
+package main
 
 import (
     "strconv"
