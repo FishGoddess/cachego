@@ -155,6 +155,7 @@ func TestStandardCacheRemoveAll(t *testing.T) {
     }
 }
 
+// 测试标准缓存的 Gc 方法
 func TestStandardCacheGc(t *testing.T) {
     cache := NewCacheWithGcDuration(5 * time.Second)
     for i := 1; i <= 20; i++ {

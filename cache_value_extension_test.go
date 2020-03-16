@@ -23,24 +23,6 @@ import (
     "time"
 )
 
-// 测试 cacheValue 的 String 和 TryString 方法
-func TestCacheValueString(t *testing.T) {
-    value := NewCacheValue("str", 30*time.Second)
-    if value.String() != "str" {
-        t.Fatal("String() is wrong!")
-    }
-    s, ok := value.TryString()
-    if s != "str" || !ok {
-        t.Fatal("TryString() is wrong!")
-    }
-
-    value = NewCacheValue(123, 30*time.Second)
-    s, ok = value.TryString()
-    if ok {
-        t.Fatal("TryString() is wrong!")
-    }
-}
-
 // 测试 cacheValue 的 Int 和 TryInt 方法
 func TestCacheValueInt(t *testing.T) {
     value := NewCacheValue(123, 30*time.Second)
@@ -164,5 +146,23 @@ func TestCacheValueFloat64(t *testing.T) {
     i, ok = value.TryFloat64()
     if ok {
         t.Fatal("TryFloat64() is wrong!")
+    }
+}
+
+// 测试 cacheValue 的 String 和 TryString 方法
+func TestCacheValueString(t *testing.T) {
+    value := NewCacheValue("str", 30*time.Second)
+    if value.String() != "str" {
+        t.Fatal("String() is wrong!")
+    }
+    s, ok := value.TryString()
+    if s != "str" || !ok {
+        t.Fatal("TryString() is wrong!")
+    }
+
+    value = NewCacheValue(123, 30*time.Second)
+    s, ok = value.TryString()
+    if ok {
+        t.Fatal("TryString() is wrong!")
     }
 }
