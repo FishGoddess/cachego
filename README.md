@@ -98,7 +98,8 @@ func main() {
 
 ### 📖 参考案例
 
-* 开发中...
+* [basic](./_examples/basic.go)
+* [cache_value](./_examples/cache_value.go)
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_
 
