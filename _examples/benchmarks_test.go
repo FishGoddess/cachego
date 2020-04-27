@@ -12,41 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
+// Author: FishGoddess
 // Email: fishinlove@163.com
 // Created at 2020/03/14 23:43:52
 
 package main
 
 import (
-    "strconv"
-    "testing"
-    "time"
+	"strconv"
+	"testing"
+	"time"
 
-    "github.com/FishGoddess/cachego"
+	"github.com/FishGoddess/cachego"
 )
 
 // 测试 Cachego 的性能
 func BenchmarkCachego(b *testing.B) {
 
-    c := cache.NewCacheWithGcDuration(5 * time.Second)
-    go func() {
-        for i := 0; i < 1000000; i++ {
-            key := strconv.Itoa(i)
-            c.Put(key, i, time.Duration(i*100)*time.Microsecond)
-        }
-    }()
+	c := cache.NewCacheWithGcDuration(5 * time.Second)
+	go func() {
+		for i := 0; i < 1000000; i++ {
+			key := strconv.Itoa(i)
+			c.Put(key, i, time.Duration(i*100)*time.Microsecond)
+		}
+	}()
 
-    testTask := func(i int) {
-        c.Of("100000").Int()
-    }
+	testTask := func(i int) {
+		c.Of("100000").Int()
+	}
 
-    b.ReportAllocs()
-    b.StartTimer()
-    for i := 0; i < b.N; i++ {
-        testTask(i)
-    }
-    //fmt.Println(c.Extend().Size())
+	b.ReportAllocs()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		testTask(i)
+	}
+	//fmt.Println(c.Extend().Size())
 }
 
 //// 测试 go-cache 性能
