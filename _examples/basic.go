@@ -41,7 +41,7 @@ func main() {
 	v := newCache.Of("key").Int()
 	fmt.Println(v) // Output: 666
 
-	// If you want change the value of key, try this:
+	// If you want to change the value of key, try this:
 	newCache.Change("key", "value")
 
 	// Then you can call String() behind Of().
