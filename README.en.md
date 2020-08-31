@@ -106,25 +106,22 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=12s
+$ go test -v ./_examples/performance_test.go
 ```
 
-> Benchmark file：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
+> Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
 
-> Write and read are processing concurrently, gc duration is set to 5 seconds, total is 1 million data
+> Data size is 1 million, concurrency is 10000, loop is 100.
 
-| test case | times ran (large is better) |  ns/op (small is better) | features | extension |
-| -----------|--------|-------------|-------------|-------------|
-| **cachego** | 127152241 | 104 ns/op | powerful | high |
-| freeCache | 132629332 | 107 ns/op | normal | normal |
-| go-cache | 276515510 | &nbsp; 44 ns/op | normal | normal |
+| tests | write time (less is better) | read time (less is better) | mixed time (less is better) |
+| -----------|-------------|-------------|-------------|
+| **cachego** | **1.64 s** | **0.98 s** | **2.52 s** |
+| go-cache | 1.12 s | 1.00 s | 1.94 s |
+| freeCache | 1.03 s | 0.76 s | 0.73 s |
 
 > Environment：I7-6700HQ CPU @ 2.6 GHZ, 16 GB RAM
 
-Notice:
-1. freeCache has a bigger expired time so one gc task does less work. So
-it is not fair to cachego and go-cache. Actually, freeCache may slower than 
-this benchmark shown (my personal thought).
+As you can see, cachego is not good enough, so there are some plans to do, such as lock granularity refinement.
 
 ### 👥 Contributing
 

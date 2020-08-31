@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Author: fish
-// Email: fishinlove@163.com
+// Author: FishGoddess
+// Email: fishgoddess@qq.com
 // Created at 2020/03/14 22:43:18
 
 package cache
@@ -22,10 +22,10 @@ import "io"
 
 // Size returns the count of entries in cache.
 func (sc *StandardCache) Size() int {
-    sc.mu.RLock()
-    size := sc.size
-    sc.mu.RUnlock()
-    return size
+	sc.mu.RLock()
+	size := sc.size
+	sc.mu.RUnlock()
+	return size
 }
 
 // Dump is for endurance.
@@ -33,6 +33,6 @@ func (sc *StandardCache) Size() int {
 // before writing. It will be implemented in future versions...
 func (sc *StandardCache) Dump(w io.Writer) {
 
-    // 在持久化数据之前先清理一次死亡过期数据，减少不必要的 IO 操作
-    sc.Gc()
+	// 在持久化数据之前先清理一次死亡过期数据，减少不必要的 IO 操作
+	sc.Gc()
 }
