@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2020/03/14 16:06:00
 
-package cache
+package cachego
 
 import (
 	"testing"

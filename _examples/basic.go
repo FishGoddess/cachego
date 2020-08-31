@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"time"
 
-	cache "github.com/FishGoddess/cachego"
+	"github.com/FishGoddess/cachego"
 )
 
 func main() {
 
 	// Create a cache with default gc duration (10 minutes).
-	newCache := cache.NewCache()
+	newCache := cachego.NewCache()
 
 	// Put a new entry in cache.
 	// This entry will be dead after 5 seconds.

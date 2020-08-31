@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2020/03/14 22:58:02
 
-package cache
+package cachego
 
 import (
 	"fmt"

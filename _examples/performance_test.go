@@ -26,7 +26,7 @@ import (
 	"testing"
 	//"time"
 
-	cache "github.com/FishGoddess/cachego"
+	"github.com/FishGoddess/cachego"
 	//"github.com/coocood/freecache"
 	//gocache "github.com/patrickmn/go-cache"
 )
@@ -65,16 +65,16 @@ func testTask(task func()) {
 // 测试 cachego 写入的性能
 func TestCacheGoWrite(t *testing.T) {
 
-	c := cache.NewCache()
+	c := cachego.NewCache()
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cache.NeverDie)
+		c.Put(key, key, cachego.NeverDie)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key, cache.NeverDie)
+			c.Put(key, key, cachego.NeverDie)
 		})
 	}
 }
@@ -82,10 +82,10 @@ func TestCacheGoWrite(t *testing.T) {
 // 测试 cachego 读取的性能
 func TestCacheGoRead(t *testing.T) {
 
-	c := cache.NewCache()
+	c := cachego.NewCache()
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cache.NeverDie)
+		c.Put(key, key, cachego.NeverDie)
 	}
 
 	for i := 0; i < loop; i++ {
@@ -99,16 +99,16 @@ func TestCacheGoRead(t *testing.T) {
 // 测试 cachego 的性能
 func TestCacheGo(t *testing.T) {
 
-	c := cache.NewCache()
+	c := cachego.NewCache()
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cache.NeverDie)
+		c.Put(key, key, cachego.NeverDie)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key, cache.NeverDie)
+			c.Put(key, key, cachego.NeverDie)
 			c.Of(key)
 		})
 	}

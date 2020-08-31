@@ -16,7 +16,7 @@
 // Email: fishgoddess@qq.com
 // Created at 2020/03/14 15:28:41
 
-package cache
+package cachego
 
 // *********************************************************
 // These functions extend cacheValue to more convenient!     *
