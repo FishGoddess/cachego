@@ -106,24 +106,22 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 ### 🔥 性能测试
 
 ```bash
-$ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=12s
+$ go test -v ./_examples/performance_test.go
 ```
 
-> 测试文件：[_examples/benchmarks_test.go](./_examples/benchmarks_test.go)
+> 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
 
-> 写入缓存和读取缓存并发进行，将缓存 GC 时间设置为 5 秒/次，总缓存数据为 100 万条
+> 总缓存数据为 100 万条，并发数为 10000，循环测试写入和读取次数为 100 次。
 
-| 测试 | 单位时间内运行次数 (越大越好) |  每个操作消耗时间 (越小越好) | 功能性 | 扩展性 |
-| -----------|--------|-------------|-------------|-------------|
-| **cachego** | 127152241 | 104 ns/op | 强大 | 高 |
-| freeCache | 132629332 | 107 ns/op | 正常 | 正常 |
-| go-cache | 276515510 | &nbsp; 44 ns/op | 正常 | 正常 |
+| 测试 | 写入消耗时间 (越小越好) | 读取消耗时间 (越小越好) | 综合消耗时间 (越小越好) |
+| -----------|-------------|-------------|-------------|
+| **cachego** | **1.64 秒** | **0.98 秒** | **2.52 秒** |
+| go-cache | 1.12 秒 | 1.00 秒 | 1.94 秒 |
+| freeCache | 1.03 秒 | 0.76 秒 | 0.73 秒 |
 
 > 测试环境：I7-6700HQ CPU @ 2.6 GHZ，16 GB RAM
 
-注意：
-1. freeCache 的过期时间远大于 cachego 和 go-cache，也就意味着单次 GC 的量要少得多，
-所以这个结果应该是偏好的，实际生产环境可能要更差（个人想法）。
+可以看出，性能相比主流的缓存库还是有比较大的差距的，后续会进行优化，比如锁粒度细化等。
 
 ### 👥 贡献者
 
@@ -134,4 +132,3 @@ $ go test -v ./_examples/benchmarks_test.go -bench=. -benchtime=12s
 | 项目 | 作者 | 描述 |
 | -----------|--------|-------------|
 |  |  |  |
-
