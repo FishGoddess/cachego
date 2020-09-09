@@ -20,6 +20,8 @@ package main
 
 import (
 	"math/rand"
+	"time"
+
 	//"runtime/debug"
 	"strconv"
 	"sync"
@@ -31,9 +33,9 @@ import (
 	//gocache "github.com/patrickmn/go-cache"
 )
 
-//--- PASS: TestCacheGoWrite (1.64s)
+//--- PASS: TestCacheGoWrite (1.24s)
 //--- PASS: TestCacheGoRead (0.98s)
-//--- PASS: TestCacheGo (2.52s)
+//--- PASS: TestCacheGo (2.24s)
 //--- PASS: TestGoCacheWrite (1.12s)
 //--- PASS: TestGoCacheRead (1.00s)
 //--- PASS: TestGoCache (1.94s)
@@ -48,7 +50,7 @@ const (
 	concurrency = 10000
 )
 
-// 测试任务
+// testTask is the task of benchmark.
 func testTask(task func()) {
 
 	wg := &sync.WaitGroup{}
@@ -62,30 +64,32 @@ func testTask(task func()) {
 	wg.Wait()
 }
 
-// 测试 cachego 写入的性能
+//
 func TestCacheGoWrite(t *testing.T) {
 
 	c := cachego.NewCache()
+	c.AutoGc(30 * time.Minute)
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cachego.NeverDie)
+		c.Put(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key, cachego.NeverDie)
+			c.Put(key, key)
 		})
 	}
 }
 
-// 测试 cachego 读取的性能
+//
 func TestCacheGoRead(t *testing.T) {
 
 	c := cachego.NewCache()
+	c.AutoGc(30 * time.Minute)
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cachego.NeverDie)
+		c.Put(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
@@ -96,19 +100,19 @@ func TestCacheGoRead(t *testing.T) {
 	}
 }
 
-// 测试 cachego 的性能
+//
 func TestCacheGo(t *testing.T) {
 
 	c := cachego.NewCache()
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cachego.NeverDie)
+		c.Put(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key, cachego.NeverDie)
+			c.Put(key, key)
 			c.Of(key)
 		})
 	}

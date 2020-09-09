@@ -14,25 +14,25 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/14 22:43:18
+// Created at 2020/03/14 15:51:02
 
 package cachego
 
-import "io"
+import (
+	"testing"
+	"time"
+)
 
-// Size returns the count of entries in cache.
-func (sc *StandardCache) Size() int {
-	sc.mu.RLock()
-	size := sc.size
-	sc.mu.RUnlock()
-	return size
-}
+// go test -cover -run=^TestValue$
+func TestValue(t *testing.T) {
 
-// Dump is for endurance.
-// It will write all alive data by w, which means one gc task will be invoked
-// before writing. It will be implemented in future versions...
-func (sc *StandardCache) Dump(w io.Writer) {
+	v := newValue(nil, 1)
+	if !v.alive() {
+		t.Fatal("V should be alive!")
+	}
 
-	// 在持久化数据之前先清理一次死亡过期数据，减少不必要的 IO 操作
-	sc.Gc()
+	time.Sleep(2 * time.Second)
+	if v.alive() {
+		t.Fatal("V should be dead!")
+	}
 }

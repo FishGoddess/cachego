@@ -69,19 +69,19 @@ func (m *Map) segmentOf(key string) *segment {
 	return m.segments[m.index(key)&(m.segmentSize-1)]
 }
 
-func (m *Map) Set(key string, value interface{}) {
-	segment := m.segmentOf(key)
-	segment.lock.Lock()
-	segment.data[key] = value
-	segment.lock.Unlock()
-}
-
 func (m *Map) Get(key string) (interface{}, bool) {
 	segment := m.segmentOf(key)
 	segment.lock.RLock()
 	result, ok := segment.data[key]
 	segment.lock.RUnlock()
 	return result, ok
+}
+
+func (m *Map) Set(key string, value interface{}) {
+	segment := m.segmentOf(key)
+	segment.lock.Lock()
+	segment.data[key] = value
+	segment.lock.Unlock()
 }
 
 func (m *Map) Delete(key string) {
