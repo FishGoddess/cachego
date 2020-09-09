@@ -34,22 +34,22 @@ type Cache struct {
 	size int
 
 	// mu is for concurrency-safe. It is a lock.
-	mu *sync.RWMutex
+	lock *sync.RWMutex
 }
 
 func NewCache() *Cache {
 	return &Cache{
 		data: make(map[string]*value, 1024),
 		size: 0,
-		mu:   &sync.RWMutex{},
+		lock: &sync.RWMutex{},
 	}
 }
 
 // Of returns the value of this key.
 // Return invalidCacheValue if this key is absent in cache.
 func (c *Cache) Of(key string) (interface{}, bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	if value, ok := c.data[key]; ok && value.alive() {
 		return value.data, true
 	}
@@ -61,8 +61,8 @@ func (c *Cache) Put(key string, value interface{}) {
 }
 
 func (c *Cache) PutWithTTL(key string, value interface{}, ttl int64) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	if _, ok := c.data[key]; !ok {
 		c.size++
 	}
@@ -72,23 +72,23 @@ func (c *Cache) PutWithTTL(key string, value interface{}, ttl int64) {
 // Remove removes the value of key.
 // If this key is not existed, nothing will happen.
 func (c *Cache) Delete(key string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.size--
 	delete(c.data, key)
 }
 
 // RemoveAll is for removing all data in cache.
 func (c *Cache) Reset() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.size = 0
 	c.data = make(map[string]*value, 1024)
 }
 
 func (c *Cache) Size() int {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	return c.size
 }
 
@@ -97,8 +97,8 @@ func (c *Cache) Size() int {
 // if there are many entries in cache. So it is not recommended to call Gc()
 // manually. Let cachego do this automatically will be better.
 func (c *Cache) Gc() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	for key, value := range c.data {
 		if !value.alive() {
 			c.size--
