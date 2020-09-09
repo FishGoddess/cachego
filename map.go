@@ -31,7 +31,7 @@ type segment struct {
 
 func newSegment() *segment {
 	return &segment{
-		data: make(map[string]interface{}),
+		data: make(map[string]interface{}, defaultSegmentSize),
 		lock: &sync.RWMutex{},
 	}
 }
@@ -47,12 +47,14 @@ func newSegments(segmentSize int) []*segment {
 type Map struct {
 	segments    []*segment
 	segmentSize int
+	size        int
 }
 
 func NewMap() *Map {
 	return &Map{
 		segmentSize: defaultSegmentSize,
 		segments:    newSegments(defaultSegmentSize),
+		size:        0,
 	}
 }
 
@@ -89,4 +91,8 @@ func (m *Map) Delete(key string) {
 	segment.lock.Lock()
 	delete(segment.data, key)
 	segment.lock.Unlock()
+}
+
+func (m *Map) Size() int {
+	return 0
 }

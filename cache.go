@@ -19,7 +19,6 @@
 package cachego
 
 import (
-	"sync"
 	"time"
 )
 
@@ -28,30 +27,20 @@ type Cache struct {
 
 	// data is the map stores all k-v entries.
 	// Cache is a concurrency-safe map essentially, remember?
-	data map[string]*value
-
-	// size is a field representation of how many entries are storing in current cache.
-	size int
-
-	// mu is for concurrency-safe. It is a lock.
-	lock *sync.RWMutex
+	data *Map
 }
 
 func NewCache() *Cache {
 	return &Cache{
-		data: make(map[string]*value, 1024),
-		size: 0,
-		lock: &sync.RWMutex{},
+		data: NewMap(),
 	}
 }
 
 // Of returns the value of this key.
 // Return invalidCacheValue if this key is absent in cache.
 func (c *Cache) Of(key string) (interface{}, bool) {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	if value, ok := c.data[key]; ok && value.alive() {
-		return value.data, true
+	if v, ok := c.data.Get(key); ok && v.(*value).alive() {
+		return v.(*value).data, true
 	}
 	return nil, false
 }
@@ -61,35 +50,22 @@ func (c *Cache) Put(key string, value interface{}) {
 }
 
 func (c *Cache) PutWithTTL(key string, value interface{}, ttl int64) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	if _, ok := c.data[key]; !ok {
-		c.size++
-	}
-	c.data[key] = newValue(value, ttl)
+	c.data.Set(key, newValue(value, ttl))
 }
 
 // Remove removes the value of key.
 // If this key is not existed, nothing will happen.
 func (c *Cache) Delete(key string) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.size--
-	delete(c.data, key)
+	c.data.Delete(key)
 }
 
 // RemoveAll is for removing all data in cache.
 func (c *Cache) Reset() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.size = 0
-	c.data = make(map[string]*value, 1024)
+	c.data = NewMap()
 }
 
 func (c *Cache) Size() int {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	return c.size
+	return c.data.Size()
 }
 
 // Gc is for cleaning up dead data.
@@ -97,14 +73,7 @@ func (c *Cache) Size() int {
 // if there are many entries in cache. So it is not recommended to call Gc()
 // manually. Let cachego do this automatically will be better.
 func (c *Cache) Gc() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	for key, value := range c.data {
-		if !value.alive() {
-			c.size--
-			delete(c.data, key)
-		}
-	}
+	// TODO implement gc
 }
 
 func (c *Cache) AutoGc(duration time.Duration) chan<- bool {

@@ -33,9 +33,9 @@ import (
 	//gocache "github.com/patrickmn/go-cache"
 )
 
-//--- PASS: TestCacheGoWrite (1.24s)
-//--- PASS: TestCacheGoRead (0.98s)
-//--- PASS: TestCacheGo (2.24s)
+//--- PASS: TestCacheGoWrite (0.76s)
+//--- PASS: TestCacheGoRead (0.69s)
+//--- PASS: TestCacheGo (0.71s)
 //--- PASS: TestGoCacheWrite (1.12s)
 //--- PASS: TestGoCacheRead (1.00s)
 //--- PASS: TestGoCache (1.94s)
