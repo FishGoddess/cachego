@@ -30,23 +30,23 @@ func TestCache(t *testing.T) {
 
 	key := "key"
 	value := 123
-	cache.Put(key, value)
-	if v, ok := cache.Of(key); !ok || v != value {
+	cache.Set(key, value)
+	if v, ok := cache.Get(key); !ok || v != value {
 		t.Fatal("Before reset cache, cache.Of(key) returns wrong ok or value!")
 	}
 
-	cache.Reset()
-	if _, ok := cache.Of(key); ok || cache.Size() != 0 {
+	cache.RemoveAll()
+	if _, ok := cache.Get(key); ok || cache.Size() != 0 {
 		t.Fatal("Cache should be reset!")
 	}
 
-	cache.Put(key, value)
-	if v, ok := cache.Of(key); !ok || v != value {
+	cache.Set(key, value)
+	if v, ok := cache.Get(key); !ok || v != value {
 		t.Fatal("Before delete key, cache.Of(key) returns wrong ok or value!")
 	}
 
-	cache.Delete(key)
-	if _, ok := cache.Of(key); ok {
+	cache.Remove(key)
+	if _, ok := cache.Get(key); ok {
 		t.Fatal("After deleting key, key should be dead!")
 	}
 }
@@ -59,13 +59,13 @@ func TestCacheTTL(t *testing.T) {
 
 	key := "key"
 	value := 123
-	cache.PutWithTTL(key, value, 1)
-	if v, ok := cache.Of(key); !ok || cache.Size() != 1 || v != value {
+	cache.SetWithTTL(key, value, 1)
+	if v, ok := cache.Get(key); !ok || cache.Size() != 1 || v != value {
 		t.Fatal("Before ttl, returns wrong ok or size or value!")
 	}
 
 	time.Sleep(2 * time.Second)
-	if _, ok := cache.Of(key); ok {
+	if _, ok := cache.Get(key); ok {
 		t.Fatal("After ttl, key should be dead!")
 	}
 
@@ -87,13 +87,13 @@ func TestCacheAutoGc(t *testing.T) {
 
 	key := "key"
 	value := 123
-	cache.PutWithTTL(key, value, 1)
-	if v, ok := cache.Of(key); !ok || cache.Size() != 1 || v != value {
+	cache.SetWithTTL(key, value, 1)
+	if v, ok := cache.Get(key); !ok || cache.Size() != 1 || v != value {
 		t.Fatal("Before gc, returns wrong ok or size or value!")
 	}
 
 	time.Sleep(3 * time.Second)
-	if _, ok := cache.Of(key); ok || cache.Size() != 1 {
+	if _, ok := cache.Get(key); ok || cache.Size() != 1 {
 		t.Fatal("After gc, key should be dead!")
 	}
 }

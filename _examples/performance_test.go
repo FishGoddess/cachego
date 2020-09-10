@@ -33,9 +33,9 @@ import (
 	//gocache "github.com/patrickmn/go-cache"
 )
 
-//--- PASS: TestCacheGoWrite (0.76s)
-//--- PASS: TestCacheGoRead (0.69s)
-//--- PASS: TestCacheGo (0.71s)
+//--- PASS: TestCacheGoWrite (0.77s)
+//--- PASS: TestCacheGoRead (0.84s)
+//--- PASS: TestCacheGo (0.70s)
 //--- PASS: TestGoCacheWrite (1.12s)
 //--- PASS: TestGoCacheRead (1.00s)
 //--- PASS: TestGoCache (1.94s)
@@ -71,13 +71,13 @@ func TestCacheGoWrite(t *testing.T) {
 	c.AutoGc(30 * time.Minute)
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key)
+		c.Set(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key)
+			c.Set(key, key)
 		})
 	}
 }
@@ -89,13 +89,13 @@ func TestCacheGoRead(t *testing.T) {
 	c.AutoGc(30 * time.Minute)
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key)
+		c.Set(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Of(key)
+			c.Get(key)
 		})
 	}
 }
@@ -106,14 +106,14 @@ func TestCacheGo(t *testing.T) {
 	c := cachego.NewCache()
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key)
+		c.Set(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key)
-			c.Of(key)
+			c.Set(key, key)
+			c.Get(key)
 		})
 	}
 }

@@ -29,21 +29,21 @@ func main() {
 	// Create a cache for use.
 	cache := cachego.NewCache()
 
-	// Put a new entry in cache.
-	cache.Put("key", 666)
+	// Set a new entry to cache.
+	cache.Set("key", 666)
 
-	// Of returns the value of this key.
-	v, ok := cache.Of("key")
+	// Get returns the value of this key.
+	v, ok := cache.Get("key")
 	fmt.Println(v, ok) // Output: 666 true
 
-	// If you want to change the value of a key, just put a new value of this key.
-	cache.Put("key", "value")
+	// If you want to change the value of a key, just set a new value of this key.
+	cache.Set("key", "value")
 
 	// See what value it has.
-	v, ok = cache.Of("key")
+	v, ok = cache.Get("key")
 	fmt.Println(v, ok) // Output: value true
 
 	// If you pass a not existed key to of method, nil and false will be returned.
-	v, ok = cache.Of("not existed key")
+	v, ok = cache.Get("not existed key")
 	fmt.Println(v, ok) // Output: <nil> false
 }

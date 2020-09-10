@@ -22,50 +22,77 @@ import (
 	"time"
 )
 
+const (
+	defaultMapSize     = 1024
+	defaultSegmentSize = 1024
+)
+
 // Cache is a struct of cache.
 type Cache struct {
-
-	// data is the map stores all k-v entries.
-	// Cache is a concurrency-safe map essentially, remember?
-	data *Map
+	mapSize     int
+	segmentSize int
+	segments    []*segment
 }
 
 func NewCache() *Cache {
 	return &Cache{
-		data: NewMap(),
+		mapSize:     defaultMapSize,
+		segmentSize: defaultSegmentSize,
+		segments:    newSegments(defaultMapSize, defaultSegmentSize),
 	}
 }
 
-// Of returns the value of this key.
-// Return invalidCacheValue if this key is absent in cache.
-func (c *Cache) Of(key string) (interface{}, bool) {
-	if v, ok := c.data.Get(key); ok && v.(*value).alive() {
-		return v.(*value).data, true
+func newSegments(mapSize int, segmentSize int) []*segment {
+	segments := make([]*segment, segmentSize)
+	for i := 0; i < segmentSize; i++ {
+		segments[i] = newSegment(mapSize)
 	}
-	return nil, false
+	return segments
 }
 
-func (c *Cache) Put(key string, value interface{}) {
-	c.PutWithTTL(key, value, NeverDie)
+func index(key string) int {
+	index := 0
+	keyBytes := []byte(key)
+	for _, b := range keyBytes {
+		index = 31*index + int(b&0xff)
+	}
+	return index
 }
 
-func (c *Cache) PutWithTTL(key string, value interface{}, ttl int64) {
-	c.data.Set(key, newValue(value, ttl))
+func (c *Cache) segmentOf(key string) *segment {
+	return c.segments[index(key)&(c.segmentSize-1)]
+}
+
+func (c *Cache) Get(key string) (interface{}, bool) {
+	return c.segmentOf(key).get(key)
+}
+
+func (c *Cache) Set(key string, value interface{}) {
+	c.SetWithTTL(key, value, NeverDie)
+}
+
+func (c *Cache) SetWithTTL(key string, value interface{}, ttl int64) {
+	c.segmentOf(key).set(key, value, ttl)
 }
 
 // Remove removes the value of key.
 // If this key is not existed, nothing will happen.
-func (c *Cache) Delete(key string) {
-	c.data.Delete(key)
+func (c *Cache) Remove(key string) {
+	c.segmentOf(key).remove(key)
 }
 
-// RemoveAll is for removing all data in cache.
-func (c *Cache) Reset() {
-	c.data = NewMap()
+func (c *Cache) RemoveAll() {
+	for _, segment := range c.segments {
+		segment.removeAll()
+	}
 }
 
 func (c *Cache) Size() int {
-	return c.data.Size()
+	size := 0
+	for _, segment := range c.segments {
+		size += segment.size()
+	}
+	return size
 }
 
 // Gc is for cleaning up dead data.
@@ -73,7 +100,9 @@ func (c *Cache) Size() int {
 // if there are many entries in cache. So it is not recommended to call Gc()
 // manually. Let cachego do this automatically will be better.
 func (c *Cache) Gc() {
-	// TODO implement gc
+	for _, segment := range c.segments {
+		segment.gc()
+	}
 }
 
 func (c *Cache) AutoGc(duration time.Duration) chan<- bool {
