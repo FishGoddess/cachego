@@ -34,7 +34,7 @@ type Cache struct {
 	segments    []*segment
 }
 
-// NewCache returns a new Cache holder.
+// NewCache returns a new Cache holder for use.
 func NewCache() *Cache {
 	return &Cache{
 		mapSize:     defaultMapSize,
