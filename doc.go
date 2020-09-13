@@ -42,6 +42,53 @@ Package cache provides an easy way to use foundation for your caching operations
 	v, ok = cache.Get("not existed key")
 	fmt.Println(v, ok) // Output: <nil> false
 
+2. the ttl usage:
+
+	// Create a cache and set an entry to cache.
+	// The ttl is 3 seconds.
+	cache := cachego.NewCache()
+	cache.SetWithTTL("key", "value", 3)
+
+	// Check if the key is alive.
+	value, ok := cache.Get("key")
+	fmt.Println(value, ok) // Output: value true
+
+	// Wait for 5 seconds and check again.
+	// Now the key is gone.
+	time.Sleep(5 * time.Second)
+	value, ok = cache.Get("key")
+	fmt.Println(value, ok) // Output: <nil> false
+
+3. the gc usage:
+
+	// Create a cache and set an entry to cache.
+	// The ttl is 1 second.
+	cache := cachego.NewCache()
+	cache.SetWithTTL("key", "value", 1)
+
+	// Wait for 2 seconds and check the key.
+	time.Sleep(2 * time.Second)
+
+	// We can see this key is gone and we can't get it anymore.
+	value, ok := cache.Get("key")
+	fmt.Println(value, ok) // Output: <nil> false
+
+	// However, the key still stores in cache and occupies the space.
+	size := cache.Size()
+	fmt.Println(size) // Output: 1
+
+	// We should call Gc() to clean up these dead entries.
+	// Notice that this method will takes some CPU time to finish this task.
+	cache.Gc()
+	size = cache.Size()
+	fmt.Println(size) // Output: 0
+
+	// Also, we provide an automatic way to do this job at fixed duration.
+	// It returns a <-chan type which can be used to stop this automatic job.
+	// If you want to stop it, just send an true or false to the chan!
+	stopAutoGc := cache.AutoGc(10 * time.Minute)
+	stopAutoGc <- true
+
 */
 package cachego // import "github.com/FishGoddess/cachego"
 

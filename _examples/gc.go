@@ -36,17 +36,17 @@ func main() {
 
 	// We can see this key is gone and we can't get it anymore.
 	value, ok := cache.Get("key")
-	fmt.Println(value, ok)
+	fmt.Println(value, ok) // Output: <nil> false
 
 	// However, the key still stores in cache and occupies the space.
 	size := cache.Size()
-	fmt.Println(size)
+	fmt.Println(size) // Output: 1
 
 	// We should call Gc() to clean up these dead entries.
 	// Notice that this method will takes some CPU time to finish this task.
 	cache.Gc()
 	size = cache.Size()
-	fmt.Println(size)
+	fmt.Println(size) // Output: 0
 
 	// Also, we provide an automatic way to do this job at fixed duration.
 	// It returns a <-chan type which can be used to stop this automatic job.
