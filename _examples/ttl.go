@@ -14,24 +14,30 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/14 15:51:02
-package cachego
+// Created at 2020/09/13 19:13:33
+package main
 
 import (
-	"testing"
+	"fmt"
 	"time"
+
+	"github.com/FishGoddess/cachego"
 )
 
-// go test -cover -run=^TestValue$
-func TestValue(t *testing.T) {
+func main() {
 
-	v := newValue(nil, 1)
-	if !v.alive() {
-		t.Fatal("V should be alive!")
-	}
+	// Create a cache and set an entry to cache.
+	// The ttl is 3 seconds.
+	cache := cachego.NewCache()
+	cache.SetWithTTL("key", "value", 3)
 
-	time.Sleep(2 * time.Second)
-	if v.alive() {
-		t.Fatal("V should be dead!")
-	}
+	// Check if the key is alive.
+	value, ok := cache.Get("key")
+	fmt.Println(value, ok) // Output: value true
+
+	// Wait for 5 seconds and check again.
+	// Now the key is gone.
+	time.Sleep(5 * time.Second)
+	value, ok = cache.Get("key")
+	fmt.Println(value, ok) // Output: <nil> false
 }

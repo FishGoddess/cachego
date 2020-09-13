@@ -15,7 +15,6 @@
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
 // Created at 2020/03/14 16:28:56
-
 package cachego
 
 import (
@@ -23,15 +22,26 @@ import (
 )
 
 const (
-	defaultMapSize     = 1024
+	// defaultMapSize determines the initialized map size of one segment.
+	defaultMapSize = 1024
+
+	// defaultSegmentSize determines the size of segments.
+	// This value will affect the performance of concurrency.
 	defaultSegmentSize = 1024
 )
 
 // Cache is a struct of cache.
 type Cache struct {
-	mapSize     int
+
+	// mapSize is the size of map inside.
+	mapSize int
+
+	// segmentSize is the size of segments.
+	// This value will affect the performance of concurrency.
 	segmentSize int
-	segments    []*segment
+
+	// segments is a slice stores the real data.
+	segments []*segment
 }
 
 // NewCache returns a new Cache holder for use.
@@ -43,6 +53,7 @@ func NewCache() *Cache {
 	}
 }
 
+// newSegments returns a slice of initialized segments.
 func newSegments(mapSize int, segmentSize int) []*segment {
 	segments := make([]*segment, segmentSize)
 	for i := 0; i < segmentSize; i++ {
@@ -51,6 +62,7 @@ func newSegments(mapSize int, segmentSize int) []*segment {
 	return segments
 }
 
+// index returns a position in segments of this key.
 func index(key string) int {
 	index := 0
 	keyBytes := []byte(key)
@@ -60,18 +72,23 @@ func index(key string) int {
 	return index
 }
 
+// segmentOf returns the segment of this key.
 func (c *Cache) segmentOf(key string) *segment {
 	return c.segments[index(key)&(c.segmentSize-1)]
 }
 
+// Get returns the value of key and a false if not found.
 func (c *Cache) Get(key string) (interface{}, bool) {
 	return c.segmentOf(key).get(key)
 }
 
+// Set sets key and value to Cache.
+// The key will not expire.
 func (c *Cache) Set(key string, value interface{}) {
 	c.SetWithTTL(key, value, NeverDie)
 }
 
+// SetWithTTL sets key and value to Cache with a ttl.
 func (c *Cache) SetWithTTL(key string, value interface{}, ttl int64) {
 	c.segmentOf(key).set(key, value, ttl)
 }
@@ -82,12 +99,16 @@ func (c *Cache) Remove(key string) {
 	c.segmentOf(key).remove(key)
 }
 
+// RemoveAll removes all keys in Cache.
+// Notice that this method is weak-consistency.
 func (c *Cache) RemoveAll() {
 	for _, segment := range c.segments {
 		segment.removeAll()
 	}
 }
 
+// Size returns the size of Cache.
+// Notice that this method is weak-consistency.
 func (c *Cache) Size() int {
 	size := 0
 	for _, segment := range c.segments {
@@ -96,16 +117,17 @@ func (c *Cache) Size() int {
 	return size
 }
 
-// Gc is for cleaning up dead data.
-// Notice that this method will take lots of time to remove all dead data
-// if there are many entries in cache. So it is not recommended to call Gc()
-// manually. Let cachego do this automatically will be better.
+// Gc removes dead entries in Cache.
+// Notice that this method is weak-consistency and
+// it doesn't guarantee 100% removed.
 func (c *Cache) Gc() {
 	for _, segment := range c.segments {
 		segment.gc()
 	}
 }
 
+// AutoGc starts a goroutine to execute Gc() at fixed duration.
+// It returns a <-chan type which can be used to stop this goroutine.
 func (c *Cache) AutoGc(duration time.Duration) chan<- bool {
 	quitChan := make(chan bool)
 	go func() {

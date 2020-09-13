@@ -15,7 +15,6 @@
 // Author: fish
 // Email: fishgoddess@qq.com
 // Created at 2020/09/01 00:00:00
-
 package main
 
 import (
@@ -33,21 +32,21 @@ import (
 	//gocache "github.com/patrickmn/go-cache"
 )
 
-//--- PASS: TestCacheGoWrite (0.77s)
-//--- PASS: TestCacheGoRead (0.84s)
-//--- PASS: TestCacheGo (0.70s)
-//--- PASS: TestGoCacheWrite (1.12s)
-//--- PASS: TestGoCacheRead (1.00s)
-//--- PASS: TestGoCache (1.94s)
-//--- PASS: TestFreeCacheWrite (1.03s)
-//--- PASS: TestFreeCacheRead (0.76s)
-//--- PASS: TestFreeCache (0.73s)
+//--- PASS: TestCacheGoWrite (3.51s)
+//--- PASS: TestCacheGoRead (2.93s)
+//--- PASS: TestCacheGo (2.97s)
+//--- PASS: TestGoCacheWrite (5.73s)
+//--- PASS: TestGoCacheRead (2.19s)
+//--- PASS: TestGoCache (9.78s)
+//--- PASS: TestFreeCacheWrite (2.43s)
+//--- PASS: TestFreeCacheRead (2.09s)
+//--- PASS: TestFreeCache (2.58s)
 
 const (
 	dataSize = 100_0000
 
-	loop        = 100
-	concurrency = 10000
+	loop        = 50
+	concurrency = 100000
 )
 
 // testTask is the task of benchmark.
