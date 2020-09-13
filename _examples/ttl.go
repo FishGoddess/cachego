@@ -14,25 +14,30 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/14 22:43:18
+// Created at 2020/09/13 19:13:33
+package main
 
-package cache
+import (
+	"fmt"
+	"time"
 
-import "io"
+	"github.com/FishGoddess/cachego"
+)
 
-// Size returns the count of entries in cache.
-func (sc *StandardCache) Size() int {
-	sc.mu.RLock()
-	size := sc.size
-	sc.mu.RUnlock()
-	return size
-}
+func main() {
 
-// Dump is for endurance.
-// It will write all alive data by w, which means one gc task will be invoked
-// before writing. It will be implemented in future versions...
-func (sc *StandardCache) Dump(w io.Writer) {
+	// Create a cache and set an entry to cache.
+	// The ttl is 3 seconds.
+	cache := cachego.NewCache()
+	cache.SetWithTTL("key", "value", 3)
 
-	// 在持久化数据之前先清理一次死亡过期数据，减少不必要的 IO 操作
-	sc.Gc()
+	// Check if the key is alive.
+	value, ok := cache.Get("key")
+	fmt.Println(value, ok) // Output: value true
+
+	// Wait for 5 seconds and check again.
+	// Now the key is gone.
+	time.Sleep(5 * time.Second)
+	value, ok = cache.Get("key")
+	fmt.Println(value, ok) // Output: <nil> false
 }

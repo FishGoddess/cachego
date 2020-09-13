@@ -15,149 +15,131 @@
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
 // Created at 2020/03/14 16:28:56
-
-package cache
+package cachego
 
 import (
-	"sync"
 	"time"
 )
 
-// StandardCache is a standard cache implements AdvancedCache interface.
-// It is a k-v entry cache that stores in memory. Actually, this cache
-// is a concurrency-safe map essentially. That means it can be visited
-// with many goroutines at the same time. More than a map does, It keeps
-// a background task that removes all dead key and value, also, you can
-// call Gc() manually to invoke this clean up process.
-type StandardCache struct {
+const (
+	// defaultMapSize determines the initialized map size of one segment.
+	defaultMapSize = 1024
 
-	// data is the map stores all k-v entries.
-	// Cache is a concurrency-safe map essentially, remember?
-	data map[string]cacheValue
+	// defaultSegmentSize determines the size of segments.
+	// This value will affect the performance of concurrency.
+	defaultSegmentSize = 1024
+)
 
-	// mu is for concurrency-safe. It is a lock.
-	mu *sync.RWMutex
+// Cache is a struct of cache.
+type Cache struct {
 
-	// size is a field representation of how many entries are storing in current cache.
-	size int
+	// mapSize is the size of map inside.
+	mapSize int
+
+	// segmentSize is the size of segments.
+	// This value will affect the performance of concurrency.
+	segmentSize int
+
+	// segments is a slice stores the real data.
+	segments []*segment
 }
 
-// NewCache Returns a cache implemented AdvancedCache interface.
-// Notice that default gc duration is ten minutes. The gc duration will affect the performance
-// of cache, so do not set it too small.
-func NewCache() Cache {
-	return NewCacheWithGcDuration(10 * time.Minute)
-}
-
-// NewCacheWithGcDuration Returns a cache implemented AdvancedCache interface.
-// The gc duration will affect the performance of cache, so do not set it too small.
-func NewCacheWithGcDuration(gcDuration time.Duration) Cache {
-	standardCache := &StandardCache{
-		data: make(map[string]cacheValue, 64),
-		mu:   &sync.RWMutex{},
+// NewCache returns a new Cache holder for use.
+func NewCache() *Cache {
+	return &Cache{
+		mapSize:     defaultMapSize,
+		segmentSize: defaultSegmentSize,
+		segments:    newSegments(defaultMapSize, defaultSegmentSize),
 	}
-
-	// 开启 GC 后台任务
-	standardCache.startGcTask(gcDuration)
-	return standardCache
 }
 
-// startGcTask starts a goroutine to clean up dead entries at fixed gcDuration.
-func (sc *StandardCache) startGcTask(gcDuration time.Duration) {
-	go func() {
-		ticker := time.NewTicker(gcDuration)
-		for {
-			select {
-			case <-ticker.C:
-				sc.Gc()
-			}
-		}
-	}()
-}
-
-// verifyResult check this result is valid or not.
-// Return false if the result is invalid.
-func (sc *StandardCache) verifyResult(key string, value cacheValue, ok bool) bool {
-
-	// 如果 ok 是 false，说明数据无效，检查不通过
-	if !ok {
-		return false
+// newSegments returns a slice of initialized segments.
+func newSegments(mapSize int, segmentSize int) []*segment {
+	segments := make([]*segment, segmentSize)
+	for i := 0; i < segmentSize; i++ {
+		segments[i] = newSegment(mapSize)
 	}
-
-	// 说明这个数据已经死亡过期，删除数据
-	if value.Dead() {
-		delete(sc.data, key)
-		return false
-	}
-	return true
+	return segments
 }
 
-// Of returns the value of this key.
-// Return invalidCacheValue if this key is absent in cache.
-func (sc *StandardCache) Of(key string) *cacheValue {
-	sc.mu.RLock()
-	defer sc.mu.RUnlock()
-	result, ok := sc.data[key]
-	if !sc.verifyResult(key, result, ok) {
-		return InvalidCacheValue()
+// index returns a position in segments of this key.
+func index(key string) int {
+	index := 0
+	keyBytes := []byte(key)
+	for _, b := range keyBytes {
+		index = 31*index + int(b&0xff)
 	}
-	return &result
+	return index
 }
 
-// Put stores an entry (key, value) to cache, and sets the life of this entry.
-func (sc *StandardCache) Put(key string, value interface{}, life time.Duration) {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
-	sc.data[key] = *NewCacheValue(value, life)
-	sc.size++
+// segmentOf returns the segment of this key.
+func (c *Cache) segmentOf(key string) *segment {
+	return c.segments[index(key)&(c.segmentSize-1)]
 }
 
-// Change changes the value of key to newValue.
-// If this key is not existed, nothing will happen.
-func (sc *StandardCache) Change(key string, newValue interface{}) {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
-	oldValue, ok := sc.data[key]
-	if ok {
-		sc.data[key] = *NewCacheValue(newValue, (&oldValue).Life())
-	}
+// Get returns the value of key and a false if not found.
+func (c *Cache) Get(key string) (interface{}, bool) {
+	return c.segmentOf(key).get(key)
+}
+
+// Set sets key and value to Cache.
+// The key will not expire.
+func (c *Cache) Set(key string, value interface{}) {
+	c.SetWithTTL(key, value, NeverDie)
+}
+
+// SetWithTTL sets key and value to Cache with a ttl.
+func (c *Cache) SetWithTTL(key string, value interface{}, ttl int64) {
+	c.segmentOf(key).set(key, value, ttl)
 }
 
 // Remove removes the value of key.
 // If this key is not existed, nothing will happen.
-func (sc *StandardCache) Remove(key string) {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
-	delete(sc.data, key)
-	sc.size--
+func (c *Cache) Remove(key string) {
+	c.segmentOf(key).remove(key)
 }
 
-// RemoveAll is for removing all data in cache.
-func (sc *StandardCache) RemoveAll() {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
-	sc.data = make(map[string]cacheValue, 64)
-	sc.size = 0
-}
-
-// Gc is for cleaning up dead data.
-// Notice that this method will take lots of time to remove all dead data
-// if there are many entries in cache. So it is not recommended to call Gc()
-// manually. Let cachego do this automatically will be better.
-func (sc *StandardCache) Gc() {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
-	for key, value := range sc.data {
-		if value.Dead() {
-			delete(sc.data, key)
-			sc.size--
-		}
+// RemoveAll removes all keys in Cache.
+// Notice that this method is weak-consistency.
+func (c *Cache) RemoveAll() {
+	for _, segment := range c.segments {
+		segment.removeAll()
 	}
 }
 
-// Extend returns a cache instance with advanced features.
-// Notice that this method is for extension, so implement it is not required.
-// You can just return a nil in method body.
-func (sc *StandardCache) Extend() AdvancedCache {
-	return sc
+// Size returns the size of Cache.
+// Notice that this method is weak-consistency.
+func (c *Cache) Size() int {
+	size := 0
+	for _, segment := range c.segments {
+		size += segment.size()
+	}
+	return size
+}
+
+// Gc removes dead entries in Cache.
+// Notice that this method is weak-consistency and
+// it doesn't guarantee 100% removed.
+func (c *Cache) Gc() {
+	for _, segment := range c.segments {
+		segment.gc()
+	}
+}
+
+// AutoGc starts a goroutine to execute Gc() at fixed duration.
+// It returns a <-chan type which can be used to stop this goroutine.
+func (c *Cache) AutoGc(duration time.Duration) chan<- bool {
+	quitChan := make(chan bool)
+	go func() {
+		ticker := time.NewTicker(duration)
+		for {
+			select {
+			case <-ticker.C:
+				c.Gc()
+			case <-quitChan:
+				return
+			}
+		}
+	}()
+	return quitChan
 }

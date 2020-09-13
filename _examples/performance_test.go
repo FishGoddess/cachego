@@ -15,40 +15,41 @@
 // Author: fish
 // Email: fishgoddess@qq.com
 // Created at 2020/09/01 00:00:00
-
 package main
 
 import (
 	"math/rand"
+	"time"
+
 	//"runtime/debug"
 	"strconv"
 	"sync"
 	"testing"
 	//"time"
 
-	cache "github.com/FishGoddess/cachego"
+	"github.com/FishGoddess/cachego"
 	//"github.com/coocood/freecache"
 	//gocache "github.com/patrickmn/go-cache"
 )
 
-//--- PASS: TestCacheGoWrite (1.64s)
-//--- PASS: TestCacheGoRead (0.98s)
-//--- PASS: TestCacheGo (2.52s)
-//--- PASS: TestGoCacheWrite (1.12s)
-//--- PASS: TestGoCacheRead (1.00s)
-//--- PASS: TestGoCache (1.94s)
-//--- PASS: TestFreeCacheWrite (1.03s)
-//--- PASS: TestFreeCacheRead (0.76s)
-//--- PASS: TestFreeCache (0.73s)
+//--- PASS: TestCacheGoWrite (3.51s)
+//--- PASS: TestCacheGoRead (2.93s)
+//--- PASS: TestCacheGo (2.97s)
+//--- PASS: TestGoCacheWrite (5.73s)
+//--- PASS: TestGoCacheRead (2.19s)
+//--- PASS: TestGoCache (9.78s)
+//--- PASS: TestFreeCacheWrite (2.43s)
+//--- PASS: TestFreeCacheRead (2.09s)
+//--- PASS: TestFreeCache (2.58s)
 
 const (
 	dataSize = 100_0000
 
-	loop        = 100
-	concurrency = 10000
+	loop        = 50
+	concurrency = 100000
 )
 
-// 测试任务
+// testTask is the task of benchmark.
 func testTask(task func()) {
 
 	wg := &sync.WaitGroup{}
@@ -62,54 +63,56 @@ func testTask(task func()) {
 	wg.Wait()
 }
 
-// 测试 cachego 写入的性能
+//
 func TestCacheGoWrite(t *testing.T) {
 
-	c := cache.NewCache()
+	c := cachego.NewCache()
+	c.AutoGc(30 * time.Minute)
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cache.NeverDie)
+		c.Set(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key, cache.NeverDie)
+			c.Set(key, key)
 		})
 	}
 }
 
-// 测试 cachego 读取的性能
+//
 func TestCacheGoRead(t *testing.T) {
 
-	c := cache.NewCache()
+	c := cachego.NewCache()
+	c.AutoGc(30 * time.Minute)
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cache.NeverDie)
+		c.Set(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Of(key)
+			c.Get(key)
 		})
 	}
 }
 
-// 测试 cachego 的性能
+//
 func TestCacheGo(t *testing.T) {
 
-	c := cache.NewCache()
+	c := cachego.NewCache()
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
-		c.Put(key, key, cache.NeverDie)
+		c.Set(key, key)
 	}
 
 	for i := 0; i < loop; i++ {
 		testTask(func() {
 			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Put(key, key, cache.NeverDie)
-			c.Of(key)
+			c.Set(key, key)
+			c.Get(key)
 		})
 	}
 }

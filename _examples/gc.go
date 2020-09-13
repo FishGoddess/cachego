@@ -14,52 +14,17 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/03/13 16:15:56
+// Created at 2020/09/13 19:30:24
+package main
 
-/*
-Package cache provides an easy way to use foundation for your caching operations.
+import (
+	"fmt"
+	"time"
 
-1. the basic usage:
+	"github.com/FishGoddess/cachego"
+)
 
-	// Create a cache for use.
-	cache := cachego.NewCache()
-
-	// Set a new entry to cache.
-	cache.Set("key", 666)
-
-	// Get returns the value of this key.
-	v, ok := cache.Get("key")
-	fmt.Println(v, ok) // Output: 666 true
-
-	// If you want to change the value of a key, just set a new value of this key.
-	cache.Set("key", "value")
-
-	// See what value it has.
-	v, ok = cache.Get("key")
-	fmt.Println(v, ok) // Output: value true
-
-	// If you pass a not existed key to of method, nil and false will be returned.
-	v, ok = cache.Get("not existed key")
-	fmt.Println(v, ok) // Output: <nil> false
-
-2. the ttl usage:
-
-	// Create a cache and set an entry to cache.
-	// The ttl is 3 seconds.
-	cache := cachego.NewCache()
-	cache.SetWithTTL("key", "value", 3)
-
-	// Check if the key is alive.
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // Output: value true
-
-	// Wait for 5 seconds and check again.
-	// Now the key is gone.
-	time.Sleep(5 * time.Second)
-	value, ok = cache.Get("key")
-	fmt.Println(value, ok) // Output: <nil> false
-
-3. the gc usage:
+func main() {
 
 	// Create a cache and set an entry to cache.
 	// The ttl is 1 second.
@@ -88,9 +53,4 @@ Package cache provides an easy way to use foundation for your caching operations
 	// If you want to stop it, just send an true or false to the chan!
 	stopAutoGc := cache.AutoGc(10 * time.Minute)
 	stopAutoGc <- true
-
-*/
-package cachego // import "github.com/FishGoddess/cachego"
-
-// Version is the version string representation of cachego.
-const Version = "v0.1.0"
+}
