@@ -64,7 +64,7 @@ func testTask(task func()) {
 	wg.Wait()
 }
 
-//
+// 测试 cachego 写入的性能
 func TestCacheGoWrite(t *testing.T) {
 
 	c := cachego.NewCache()
@@ -82,7 +82,7 @@ func TestCacheGoWrite(t *testing.T) {
 	}
 }
 
-//
+// 测试 cachego 读取的性能
 func TestCacheGoRead(t *testing.T) {
 
 	c := cachego.NewCache()
@@ -100,7 +100,7 @@ func TestCacheGoRead(t *testing.T) {
 	}
 }
 
-//
+// 测试 cachego 的性能
 func TestCacheGo(t *testing.T) {
 
 	c := cachego.NewCache()
