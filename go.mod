@@ -1,3 +1,3 @@
 module github.com/FishGoddess/cachego
 
-go 1.15
+go 1.14

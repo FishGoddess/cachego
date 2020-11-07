@@ -15,6 +15,7 @@
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
 // Created at 2020/03/14 14:43:24
+
 package cachego
 
 import (
@@ -51,5 +52,5 @@ func newValue(data interface{}, ttl int64) *value {
 
 // alive returns if this value is alive or not.
 func (v *value) alive() bool {
-	return v.ttl == NeverDie || time.Now().Sub(v.ctime).Milliseconds() < v.ttl*1000
+	return v.ttl == NeverDie || time.Now().Before(v.ctime.Add(time.Duration(v.ttl) * time.Second))
 }

@@ -72,7 +72,7 @@ $ go test -v ./_examples/performance_test.go
 > Environment：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
 
 | tests | write time (less is better) | read time (less is better) | mixed time (less is better) |
-| -----------|-------------|-------------|-------------|
+|-----------|-------------|-------------|-------------|
 | **cachego** | **3.51 秒** | **2.93 秒** | **2.97 秒** |
 | go-cache | 5.73 秒 | 2.19 秒 | 9.78 秒 |
 | freeCache | 2.43 秒 | 2.09 秒 | 2.58 秒 |
