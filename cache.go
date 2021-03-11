@@ -68,7 +68,7 @@ func index(key string) int {
 	index := 0
 	keyBytes := []byte(key)
 	for _, b := range keyBytes {
-		index = 31*index + int(b&0xff)
+		index = (index << 5) - index + int(b&0xff)
 	}
 	return index
 }

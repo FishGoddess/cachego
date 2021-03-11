@@ -17,7 +17,9 @@ _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more infor
 
 ### 🚀 Installation
 
-cachego has no more external dependencies, the only requirement is the [Golang Programming Language](https://golang.org).
+cachego has no more external dependencies, the only requirement is the [Golang Programming Language](https://golang.org)
+.
+
 ```bash
 $ go get -u github.com/FishGoddess/cachego
 ```
@@ -63,23 +65,24 @@ _Check more examples in [_examples](./_examples)._
 ### 🔥 Benchmarks
 
 > Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
+
 ```bash
 $ go test -v ./_examples/performance_test.go
 ```
 
 > Data size is 1 million, concurrency is 100 thousands, loop is 50
 
-> Environment：R7-4700U CPU @ 2.0 GHZ，16 GB RAM
+> Environment：R7-5800X CPU @ 3.8GHZ GHZ, 32 GB RAM
 
-| tests | write time (less is better) | read time (less is better) | mixed time (less is better) |
+| tests | write time (less is better) | read time (less is better) | mixed-operation time (less is better) |
 |-----------|-------------|-------------|-------------|
-| **cachego** | **3.51 秒** | **2.93 秒** | **2.97 秒** |
-| go-cache | 5.73 秒 | 2.19 秒 | 9.78 秒 |
-| freeCache | 2.43 秒 | 2.09 秒 | 2.58 秒 |
+| **cachego** | **965ms** | **949ms** | **991ms** |
+| go-cache | 3216ms | 980ms | 4508ms |
+| freeCache | 954ms | 968ms | 987ms |
 
-As you can see, cachego has a high writing performance in concurrent, but the reading performance is not good because of segmented lock mechanism.
-Segmented lock mechanism has one-more-time positioning operation, so if the price of locking is less than the cost of positioning, this mechanism is dragging.
-The reading performance will be optimized in the future version!
+As you can see, cachego has a high performance in concurrent, but segmented lock mechanism has one-more-time positioning
+operation, so if the price of locking is less than the cost of positioning, this mechanism is dragging. The reading
+performance will be optimized in the future version!
 
 ### 👥 Contributing
 
