@@ -19,29 +19,28 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
-	"time"
-
-	//"runtime/debug"
 	"strconv"
 	"sync"
 	"testing"
-	//"time"
+	//"runtime/debug"
+	"time"
 
 	"github.com/FishGoddess/cachego"
 	//"github.com/coocood/freecache"
 	//gocache "github.com/patrickmn/go-cache"
 )
 
-//--- PASS: TestCacheGoWrite (3.51s)
-//--- PASS: TestCacheGoRead (2.93s)
-//--- PASS: TestCacheGo (2.97s)
-//--- PASS: TestGoCacheWrite (5.73s)
-//--- PASS: TestGoCacheRead (2.19s)
-//--- PASS: TestGoCache (9.78s)
-//--- PASS: TestFreeCacheWrite (2.43s)
-//--- PASS: TestFreeCacheRead (2.09s)
-//--- PASS: TestFreeCache (2.58s)
+//TestCacheGoWrite   spent  965ms
+//TestCacheGoRead    spent  949ms
+//TestCacheGo        spent  991ms
+//TestGoCacheWrite   spent 3216ms
+//TestGoCacheRead    spent  980ms
+//TestGoCache        spent 4508ms
+//TestFreeCacheWrite spent  954ms
+//TestFreeCacheRead  spent  968ms
+//TestFreeCache      spent  987ms
 
 const (
 	dataSize = 100_0000
@@ -64,7 +63,15 @@ func testTask(task func()) {
 	wg.Wait()
 }
 
-// 测试 cachego 写入的性能
+// timeTask is for recording time of task.
+// unit is ms.
+func timeTask(task func()) int64 {
+	begin := time.Now().UnixNano()
+	task()
+	return (time.Now().UnixNano() - begin) / 1000_000
+}
+
+// go test -v -run=^TestCacheGoWrite$
 func TestCacheGoWrite(t *testing.T) {
 
 	c := cachego.NewCache()
@@ -74,15 +81,18 @@ func TestCacheGoWrite(t *testing.T) {
 		c.Set(key, key)
 	}
 
-	for i := 0; i < loop; i++ {
-		testTask(func() {
-			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Set(key, key)
-		})
-	}
+	spent := timeTask(func() {
+		for i := 0; i < loop; i++ {
+			testTask(func() {
+				key := strconv.Itoa(rand.Intn(dataSize))
+				c.Set(key, key)
+			})
+		}
+	})
+	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 }
 
-// 测试 cachego 读取的性能
+// go test -v -run=^TestCacheGoRead$
 func TestCacheGoRead(t *testing.T) {
 
 	c := cachego.NewCache()
@@ -92,15 +102,18 @@ func TestCacheGoRead(t *testing.T) {
 		c.Set(key, key)
 	}
 
-	for i := 0; i < loop; i++ {
-		testTask(func() {
-			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Get(key)
-		})
-	}
+	spent := timeTask(func() {
+		for i := 0; i < loop; i++ {
+			testTask(func() {
+				key := strconv.Itoa(rand.Intn(dataSize))
+				c.Get(key)
+			})
+		}
+	})
+	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 }
 
-// 测试 cachego 的性能
+// go test -v -run=^TestCacheGo$
 func TestCacheGo(t *testing.T) {
 
 	c := cachego.NewCache()
@@ -109,16 +122,19 @@ func TestCacheGo(t *testing.T) {
 		c.Set(key, key)
 	}
 
-	for i := 0; i < loop; i++ {
-		testTask(func() {
-			key := strconv.Itoa(rand.Intn(dataSize))
-			c.Set(key, key)
-			c.Get(key)
-		})
-	}
+	spent := timeTask(func() {
+		for i := 0; i < loop; i++ {
+			testTask(func() {
+				key := strconv.Itoa(rand.Intn(dataSize))
+				c.Set(key, key)
+				c.Get(key)
+			})
+		}
+	})
+	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 }
 
-//// 测试 go-cache 写入的性能
+//// go test -v -run=^TestGoCacheWrite$
 //func TestGoCacheWrite(t *testing.T) {
 //
 //	c := gocache.New(gocache.NoExpiration, 10*time.Minute)
@@ -127,15 +143,18 @@ func TestCacheGo(t *testing.T) {
 //		c.Set(key, key, gocache.NoExpiration)
 //	}
 //
-//	for i := 0; i < loop; i++ {
-//		testTask(func() {
-//			key := strconv.Itoa(rand.Intn(dataSize))
-//			c.Set(key, key, gocache.NoExpiration)
-//		})
-//	}
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				c.Set(key, key, gocache.NoExpiration)
+//			})
+//		}
+//	})
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
-//// 测试 go-cache 读取的性能
+//// go test -v -run=^TestGoCacheRead$
 //func TestGoCacheRead(t *testing.T) {
 //
 //	c := gocache.New(gocache.NoExpiration, 10*time.Minute)
@@ -144,15 +163,18 @@ func TestCacheGo(t *testing.T) {
 //		c.Set(key, key, gocache.NoExpiration)
 //	}
 //
-//	for i := 0; i < loop; i++ {
-//		testTask(func() {
-//			key := strconv.Itoa(rand.Intn(dataSize))
-//			c.Get(key)
-//		})
-//	}
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				c.Get(key)
+//			})
+//		}
+//	})
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
-//// 测试 go-cache 的性能
+//// go test -v -run=^TestGoCache$
 //func TestGoCache(t *testing.T) {
 //
 //	c := gocache.New(gocache.NoExpiration, 10*time.Minute)
@@ -161,16 +183,19 @@ func TestCacheGo(t *testing.T) {
 //		c.Set(key, key, gocache.NoExpiration)
 //	}
 //
-//	for i := 0; i < loop; i++ {
-//		testTask(func() {
-//			key := strconv.Itoa(rand.Intn(dataSize))
-//			c.Set(key, key, gocache.NoExpiration)
-//			c.Get(key)
-//		})
-//	}
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				c.Set(key, key, gocache.NoExpiration)
+//				c.Get(key)
+//			})
+//		}
+//	})
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
-//// 测试 freecache 写入的性能
+//// go test -v -run=^TestFreeCacheWrite$
 //func TestFreeCacheWrite(t *testing.T) {
 //
 //	fcache := freecache.NewCache(10 * dataSize)
@@ -181,15 +206,18 @@ func TestCacheGo(t *testing.T) {
 //		fcache.Set([]byte(key), []byte(key), 0)
 //	}
 //
-//	for i := 0; i < loop; i++ {
-//		testTask(func() {
-//			key := strconv.Itoa(rand.Intn(dataSize))
-//			fcache.Set([]byte(key), []byte(key), 0)
-//		})
-//	}
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				fcache.Set([]byte(key), []byte(key), 0)
+//			})
+//		}
+//	})
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
-//// 测试 freecache 读取的性能
+//// go test -v -run=^TestFreeCacheRead$
 //func TestFreeCacheRead(t *testing.T) {
 //
 //	fcache := freecache.NewCache(10 * dataSize)
@@ -200,15 +228,18 @@ func TestCacheGo(t *testing.T) {
 //		fcache.Set([]byte(key), []byte(key), 0)
 //	}
 //
-//	for i := 0; i < loop; i++ {
-//		testTask(func() {
-//			key := strconv.Itoa(rand.Intn(dataSize))
-//			fcache.Get([]byte(key))
-//		})
-//	}
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				fcache.Get([]byte(key))
+//			})
+//		}
+//	})
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
-//// 测试 freecache 的性能
+//// go test -v -run=^TestFreeCache$
 //func TestFreeCache(t *testing.T) {
 //
 //	fcache := freecache.NewCache(10 * dataSize)
@@ -219,11 +250,14 @@ func TestCacheGo(t *testing.T) {
 //		fcache.Set([]byte(key), []byte(key), 0)
 //	}
 //
-//	for i := 0; i < loop; i++ {
-//		testTask(func() {
-//			key := strconv.Itoa(rand.Intn(dataSize))
-//			fcache.Set([]byte(key), []byte(key), 0)
-//			fcache.Get([]byte(key))
-//		})
-//	}
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				fcache.Set([]byte(key), []byte(key), 0)
+//				fcache.Get([]byte(key))
+//			})
+//		}
+//	})
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
