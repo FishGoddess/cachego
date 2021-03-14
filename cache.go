@@ -65,10 +65,11 @@ func newSegments(mapSize int, segmentSize int) []*segment {
 
 // index returns a position in segments of this key.
 func index(key string) int {
-	index := 0
+	index := 1469598103934665603
 	keyBytes := []byte(key)
 	for _, b := range keyBytes {
 		index = (index << 5) - index + int(b&0xff)
+		index *= 1099511628211
 	}
 	return index
 }

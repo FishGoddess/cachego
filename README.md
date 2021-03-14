@@ -84,4 +84,6 @@ $ go test -v ./_examples/performance_test.go
 
 ### 👥 贡献者
 
+* [cristiane](https://gitee.com/cristiane)：提供 hash 算法的优化建议
+
 如果您觉得 cachego 缺少您需要的功能，请不要犹豫，马上参与进来，发起一个 _**issue**_。

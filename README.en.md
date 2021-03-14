@@ -84,6 +84,8 @@ As you can see, cachego has a high performance in concurrent, but segmented lock
 operation, so if the price of locking is less than the cost of positioning, this mechanism is dragging. The reading
 performance will be optimized in the future version!
 
-### 👥 Contributing
+### 👥 Contributors
+
+* [cristiane](https://gitee.com/cristiane): Provide some optimizations about hash
 
 If you find that something is not working as expected please open an _**issue**_.
