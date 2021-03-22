@@ -15,6 +15,8 @@
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 
+具体设计可以参考 [架构设计介绍](./docs/架构介绍.md) 文档。
+
 ### 🚀 安装方式
 
 cachego 没有任何其他额外的依赖，唯一需要的依赖就是 [Golang 运行环境](https://golang.org)。
@@ -85,5 +87,6 @@ $ go test -v ./_examples/performance_test.go
 ### 👥 贡献者
 
 * [cristiane](https://gitee.com/cristiane)：提供 hash 算法的优化建议
+* [hzy15610046011](https://gitee.com/hzy15610046011)：提供架构设计文档和图片
 
 如果您觉得 cachego 缺少您需要的功能，请不要犹豫，马上参与进来，发起一个 _**issue**_。

@@ -15,6 +15,8 @@
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
+See more designing detail in [architecture design introduction](./docs/架构介绍.md).
+
 ### 🚀 Installation
 
 cachego has no more external dependencies, the only requirement is the [Golang Programming Language](https://golang.org)
@@ -87,5 +89,6 @@ performance will be optimized in the future version!
 ### 👥 Contributors
 
 * [cristiane](https://gitee.com/cristiane): Provide some optimizations about hash
+* [hzy15610046011](https://gitee.com/hzy15610046011): Provide architecture design documents and pictures
 
-If you find that something is not working as expected please open an _**issue**_.
+Please open an _**issue**_ if you find something is not working as expected.
