@@ -107,7 +107,8 @@ Package cache provides an easy way to use foundation for your caching operations
 
 	// Every option has its function, and you should use them for some purposes.
 	// WithDebugPoint runs a http server and registers some handlers for debug.
-	cachego.WithDebugPoint(":8888")
+	cachego.WithDebugPoint(":8888") // try to visit :8888
+	time.Sleep(time.Minute)
 
 */
 package cachego // import "github.com/FishGoddess/cachego"
