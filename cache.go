@@ -46,12 +46,20 @@ type Cache struct {
 }
 
 // NewCache returns a new Cache holder for use.
-func NewCache() *Cache {
-	return &Cache{
+func NewCache(options ...Option) *Cache {
+
+	cache := &Cache{
 		mapSize:     defaultMapSize,
 		segmentSize: defaultSegmentSize,
-		segments:    newSegments(defaultMapSize, defaultSegmentSize),
 	}
+
+	// Initializing with options
+	for _, applyOption := range options {
+		applyOption(cache)
+	}
+
+	cache.segments = newSegments(cache.mapSize, cache.segmentSize)
+	return cache
 }
 
 // newSegments returns a slice of initialized segments.
@@ -91,6 +99,7 @@ func (c *Cache) Set(key string, value interface{}) {
 }
 
 // SetWithTTL sets key and value to Cache with a ttl.
+// The unit of ttl is second.
 func (c *Cache) SetWithTTL(key string, value interface{}, ttl int64) {
 	c.segmentOf(key).set(key, value, ttl)
 }

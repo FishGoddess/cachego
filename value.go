@@ -42,6 +42,7 @@ type value struct {
 }
 
 // newValue returns a new value with data and ttl.
+// The unit is second.
 func newValue(data interface{}, ttl int64) *value {
 	return &value{
 		data:  data,
@@ -52,5 +53,5 @@ func newValue(data interface{}, ttl int64) *value {
 
 // alive returns if this value is alive or not.
 func (v *value) alive() bool {
-	return v.ttl == NeverDie || time.Now().Before(v.ctime.Add(time.Duration(v.ttl) * time.Second))
+	return v.ttl == NeverDie || time.Now().Unix() <= v.ctime.Unix() + v.ttl
 }

@@ -18,13 +18,18 @@
 
 package cachego
 
-import "sync"
+import (
+	"sync"
+)
 
 // segment is the struct storing the real data.
 type segment struct {
 
 	// mapSize is the initialized size of map inside.
 	mapSize int
+
+	// aliveSize is the size of alive values in data.
+	aliveSize int
 
 	// data stores all entries.
 	data map[string]*value
@@ -36,9 +41,10 @@ type segment struct {
 // newSegment returns a segment holder with mapSize.
 func newSegment(mapSize int) *segment {
 	return &segment{
-		mapSize: mapSize,
-		data:    make(map[string]*value, mapSize),
-		lock:    &sync.RWMutex{},
+		mapSize:   mapSize,
+		aliveSize: 0,
+		data:      make(map[string]*value, mapSize),
+		lock: &sync.RWMutex{},
 	}
 }
 
@@ -55,9 +61,13 @@ func (s *segment) get(key string) (interface{}, bool) {
 // set sets key and value with a ttl.
 // If you want this key to be alive forever, just give it a NeverDie ttl.
 // See value.
+// The unit of ttl is second.
 func (s *segment) set(key string, value interface{}, ttl int64) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+	if _, ok := s.data[key]; !ok {
+		s.aliveSize++
+	}
 	s.data[key] = newValue(value, ttl)
 }
 
@@ -65,6 +75,9 @@ func (s *segment) set(key string, value interface{}, ttl int64) {
 func (s *segment) remove(key string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+	if _, ok := s.data[key]; ok {
+		s.aliveSize--
+	}
 	delete(s.data, key)
 }
 
@@ -72,6 +85,7 @@ func (s *segment) remove(key string) {
 func (s *segment) removeAll() {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+	s.aliveSize = 0
 	s.data = make(map[string]*value, s.mapSize)
 }
 
@@ -79,7 +93,7 @@ func (s *segment) removeAll() {
 func (s *segment) size() int {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
-	return len(s.data)
+	return s.aliveSize
 }
 
 // gc removes all dead entries in segment.
@@ -88,6 +102,7 @@ func (s *segment) gc() {
 	defer s.lock.Unlock()
 	for key, value := range s.data {
 		if !value.alive() {
+			s.aliveSize--
 			delete(s.data, key)
 		}
 	}

@@ -9,6 +9,7 @@
 ### 🕹 Features
 
 * Cache as entries with minimalist API design
+* Use option function mode to customize the creation of cache
 * Use fine-grained and segmented lock mechanism to provide a high performance in concurrency
 * Lazy cleanup supports, expired before accessing
 * Sentinel cleanup supports, cleaning up at fixed duration
@@ -33,6 +34,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/FishGoddess/cachego"
 )
@@ -40,7 +42,9 @@ import (
 func main() {
 
 	// Create a cache for use.
-	cache := cachego.NewCache()
+	// We use option function to customize the creation of cache.
+	// WithAutoGC means it will do gc automatically.
+	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
 	cache.Set("key", 666)
@@ -49,16 +53,14 @@ func main() {
 	v, ok := cache.Get("key")
 	fmt.Println(v, ok) // Output: 666 true
 
-	// If you want to change the value of a key, just set a new value of this key.
-	cache.Set("key", "value")
-
-	// See what value it has.
-	v, ok = cache.Get("key")
-	fmt.Println(v, ok) // Output: value true
-
 	// If you pass a not existed key to of method, nil and false will be returned.
 	v, ok = cache.Get("not existed key")
 	fmt.Println(v, ok) // Output: <nil> false
+
+	// SetWithTTL sets an entry with expired time.
+	// The unit of expired time is second.
+	// See more information in example of ttl.
+	cache.SetWithTTL("ttlKey", 123, 10)
 }
 ```
 

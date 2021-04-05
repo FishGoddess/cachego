@@ -14,12 +14,11 @@
 //
 // Author: FishGoddess
 // Email: fishgoddess@qq.com
-// Created at 2020/09/13 19:13:33
+// Created at 2021/04/05 17:31:18
 
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/FishGoddess/cachego"
@@ -27,22 +26,19 @@ import (
 
 func main() {
 
-	// Create a cache and set an entry to cache.
-	// The ttl is 3 seconds.
+	// We use option function to customize the creation of cache.
+	// You can just new it without options.
 	cache := cachego.NewCache()
-	cache.SetWithTTL("key", "value", 3)
+	cache.Set("key", "value")
 
-	// Check if the key is alive.
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // Output: value true
+	// You can set it to a cache with automatic gc if you want
+	//  Try WithAutoGC.
+	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
-	// Wait for 5 seconds and check again.
-	// Now the key is gone.
-	time.Sleep(5 * time.Second)
-	value, ok = cache.Get("key")
-	fmt.Println(value, ok) // Output: <nil> false
+	// Also, you can add more than one option to cache.
+	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
 
-	// However, the key is still in cache and you should remove it by Remove() or RemoveAll().
-	// So, we provide an automatic way to remove those who are dead. See more information in example of gc.
-	cache.AutoGc(10 * time.Minute)
+	// Every option has its function, and you should use them for some purposes.
+	// WithDebugPoint runs a http server and registers some handlers for debug.
+	cachego.WithDebugPoint(":8888")
 }

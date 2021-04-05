@@ -9,6 +9,7 @@
 ### 🕹 功能特性
 
 * 以键值对形式缓存数据，极简的 API 设计风格
+* 引入 option function 模式，可定制化创建缓存的过程
 * 使用粒度更细的分段锁机制进行设计，具有非常高的并发性能
 * 支持懒清理机制，每一次访问的时候判断是否过期
 * 支持哨兵清理机制，每隔一定的时间间隔进行清理
@@ -18,8 +19,6 @@ _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新�
 具体设计可以参考 [架构设计介绍](./docs/架构介绍.md) 文档。
 
 ### 🚀 安装方式
-
-cachego 没有任何其他额外的依赖，唯一需要的依赖就是 [Golang 运行环境](https://golang.org)。
 
 ```bash
 $ go get -u github.com/FishGoddess/cachego
@@ -32,6 +31,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/FishGoddess/cachego"
 )
@@ -39,7 +39,9 @@ import (
 func main() {
 
 	// Create a cache for use.
-	cache := cachego.NewCache()
+	// We use option function to customize the creation of cache.
+	// WithAutoGC means it will do gc automatically.
+	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
 	cache.Set("key", 666)
@@ -48,16 +50,14 @@ func main() {
 	v, ok := cache.Get("key")
 	fmt.Println(v, ok) // Output: 666 true
 
-	// If you want to change the value of a key, just set a new value of this key.
-	cache.Set("key", "value")
-
-	// See what value it has.
-	v, ok = cache.Get("key")
-	fmt.Println(v, ok) // Output: value true
-
 	// If you pass a not existed key to of method, nil and false will be returned.
 	v, ok = cache.Get("not existed key")
 	fmt.Println(v, ok) // Output: <nil> false
+
+	// SetWithTTL sets an entry with expired time.
+	// The unit of expired time is second.
+	// See more information in example of ttl.
+	cache.SetWithTTL("ttlKey", 123, 10)
 }
 ```
 

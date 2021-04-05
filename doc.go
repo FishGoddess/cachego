@@ -31,16 +31,14 @@ Package cache provides an easy way to use foundation for your caching operations
 	v, ok := cache.Get("key")
 	fmt.Println(v, ok) // Output: 666 true
 
-	// If you want to change the value of a key, just set a new value of this key.
-	cache.Set("key", "value")
-
-	// See what value it has.
-	v, ok = cache.Get("key")
-	fmt.Println(v, ok) // Output: value true
-
 	// If you pass a not existed key to of method, nil and false will be returned.
 	v, ok = cache.Get("not existed key")
 	fmt.Println(v, ok) // Output: <nil> false
+
+	// SetWithTTL sets an entry with expired time.
+	// The unit of expired time is second.
+	// See more information in example of ttl.
+	cache.SetWithTTL("ttlKey", 123, 10)
 
 2. the ttl usage:
 
@@ -58,6 +56,10 @@ Package cache provides an easy way to use foundation for your caching operations
 	time.Sleep(5 * time.Second)
 	value, ok = cache.Get("key")
 	fmt.Println(value, ok) // Output: <nil> false
+
+	// However, the key is still in cache and you should remove it by Remove() or RemoveAll().
+	// So, we provide an automatic way to remove those who are dead. See more information in example of gc.
+	cache.AutoGc(10 * time.Minute)
 
 3. the gc usage:
 
@@ -89,8 +91,26 @@ Package cache provides an easy way to use foundation for your caching operations
 	stopAutoGc := cache.AutoGc(10 * time.Minute)
 	stopAutoGc <- true
 
+4. the option usage:
+
+	// We use option function to customize the creation of cache.
+	// You can just new it without options.
+	cache := cachego.NewCache()
+	cache.Set("key", "value")
+
+	// You can set it to a cache with automatic gc if you want
+	//  Try WithAutoGC.
+	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
+
+	// Also, you can add more than one option to cache.
+	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
+
+	// Every option has its function, and you should use them for some purposes.
+	// WithDebugPoint runs a http server and registers some handlers for debug.
+	cachego.WithDebugPoint(":8888")
+
 */
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.1.3"
+const Version = "v0.2.0-alpha"
