@@ -114,4 +114,4 @@ Package cache provides an easy way to use foundation for your caching operations
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.2.0-alpha"
+const Version = "v0.2.1"

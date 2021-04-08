@@ -10,6 +10,7 @@
 
 * Cache as entries with minimalist API design
 * Use option function mode to customize the creation of cache
+* Provide debug point for developing and checking cache
 * Use fine-grained and segmented lock mechanism to provide a high performance in concurrency
 * Lazy cleanup supports, expired before accessing
 * Sentinel cleanup supports, cleaning up at fixed duration
