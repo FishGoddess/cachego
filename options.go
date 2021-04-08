@@ -75,7 +75,7 @@ func debugPointHandler(cache *Cache) http.Handler {
 			},
 			"version": Version,
 			"time":    time.Now().Format("2006-01-02 15:04:05"),
-			"operations": map[string]string{
+			"points": map[string]string{
 				"/get": "Get a value from cache, ex: /get?key=test",
 				"/remove": "Remove a value from cache, ex: /remove?key=test",
 				"/size": "Get size of cache",
