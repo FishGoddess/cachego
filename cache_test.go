@@ -83,7 +83,7 @@ func TestCacheTTL(t *testing.T) {
 func TestCacheAutoGc(t *testing.T) {
 
 	cache := NewCache()
-	cache.AutoGc(2 * time.Second) <- true
+	cache.AutoGc(2 * time.Second) <- struct{}{}
 
 	key := "key"
 	value := 123
@@ -95,5 +95,27 @@ func TestCacheAutoGc(t *testing.T) {
 	time.Sleep(3 * time.Second)
 	if _, ok := cache.Get(key); ok || cache.Size() != 1 {
 		t.Fatal("After gc, key should be dead!")
+	}
+}
+
+// go test -cover -run=^TestGetWithLoad$
+func TestGetWithLoad(t *testing.T) {
+
+	cache := NewCache()
+
+	loadFunc := func() (data interface{}, ttl int64, err error) {
+		return "loadFunc", 1, nil
+	}
+
+	key := "key"
+	value := "get"
+	cache.SetWithTTL(key, value, 1)
+	if v, err := cache.GetWithLoad(key, loadFunc); err != nil || v.(string) != value {
+		t.Fatalf("Before Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
+	}
+
+	time.Sleep(2 * time.Second)
+	if v, err := cache.GetWithLoad(key, loadFunc); err != nil || v.(string) != "loadFunc" {
+		t.Fatalf("After Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 }

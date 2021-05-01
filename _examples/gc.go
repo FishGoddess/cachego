@@ -50,8 +50,8 @@ func main() {
 	fmt.Println(size) // Output: 0
 
 	// Also, we provide an automatic way to do this job at fixed duration.
-	// It returns a <-chan type which can be used to stop this automatic job.
+	// It returns a channel which can be used to stop this automatic job.
 	// If you want to stop it, just send an true or false to the chan!
 	stopAutoGc := cache.AutoGc(10 * time.Minute)
-	stopAutoGc <- true
+	stopAutoGc <- struct{}{}
 }

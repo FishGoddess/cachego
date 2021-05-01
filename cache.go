@@ -92,6 +92,26 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	return c.segmentOf(key).get(key)
 }
 
+// GetWithLoad fetches value of key from c first, and returns it if ok.
+// It will invoke onMissed() to fetch data and load it to c if missed.
+// The unit of ttl is second.
+func (c *Cache) GetWithLoad(key string, onMissed func() (data interface{}, ttl int64, err error)) (interface{}, error) {
+
+	v, ok := c.Get(key)
+	if ok {
+		return v, nil
+	}
+
+	// missed in cache
+	data, ttl, err := onMissed()
+	if err != nil {
+		return nil, err
+	}
+
+	c.SetWithTTL(key, data, ttl)
+	return data, nil
+}
+
 // Set sets key and value to Cache.
 // The key will not expire.
 func (c *Cache) Set(key string, value interface{}) {
@@ -138,9 +158,9 @@ func (c *Cache) Gc() {
 }
 
 // AutoGc starts a goroutine to execute Gc() at fixed duration.
-// It returns a <-chan type which can be used to stop this goroutine.
-func (c *Cache) AutoGc(duration time.Duration) chan<- bool {
-	quitChan := make(chan bool)
+// It returns a channel which can be used to stop this goroutine.
+func (c *Cache) AutoGc(duration time.Duration) chan<- struct{} {
+	quitChan := make(chan struct{})
 	go func() {
 		ticker := time.NewTicker(duration)
 		for {

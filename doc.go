@@ -22,7 +22,9 @@ Package cache provides an easy way to use foundation for your caching operations
 1. the basic usage:
 
 	// Create a cache for use.
-	cache := cachego.NewCache()
+	// We use option function to customize the creation of cache.
+	// WithAutoGC means it will do gc automatically.
+	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
 	cache.Set("key", 666)
@@ -39,6 +41,12 @@ Package cache provides an easy way to use foundation for your caching operations
 	// The unit of expired time is second.
 	// See more information in example of ttl.
 	cache.SetWithTTL("ttlKey", 123, 10)
+
+	// Also, you can get value from cache first, then load it to cache if missed.
+	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	cache.GetWithLoad("newKey", func() (data interface{}, ttl int64, err error) {
+		return "newValue", 3, nil
+	})
 
 2. the ttl usage:
 
@@ -86,10 +94,10 @@ Package cache provides an easy way to use foundation for your caching operations
 	fmt.Println(size) // Output: 0
 
 	// Also, we provide an automatic way to do this job at fixed duration.
-	// It returns a <-chan type which can be used to stop this automatic job.
+	// It returns a channel which can be used to stop this automatic job.
 	// If you want to stop it, just send an true or false to the chan!
 	stopAutoGc := cache.AutoGc(10 * time.Minute)
-	stopAutoGc <- true
+	stopAutoGc <- struct{}{}
 
 4. the option usage:
 
@@ -114,4 +122,4 @@ Package cache provides an easy way to use foundation for your caching operations
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.2.1"
+const Version = "v0.2.2"

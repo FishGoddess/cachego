@@ -59,6 +59,12 @@ func main() {
 	// The unit of expired time is second.
 	// See more information in example of ttl.
 	cache.SetWithTTL("ttlKey", 123, 10)
+
+	// Also, you can get value from cache first, then load it to cache if missed.
+	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	cache.GetWithLoad("newKey", func() (data interface{}, ttl int64, err error) {
+		return "newValue", 3, nil
+	})
 }
 ```
 
