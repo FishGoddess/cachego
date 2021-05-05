@@ -118,6 +118,26 @@ func (c *Cache) Set(key string, value interface{}) {
 	c.SetWithTTL(key, value, NeverDie)
 }
 
+// AutoSet starts a goroutine to execute Set() at fixed duration.
+// It returns a channel which can be used to stop this goroutine.
+func (c *Cache) AutoSet(key string, loadFunc func() (interface{}, error), duration time.Duration) chan<- struct{} {
+	quitChan := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(duration)
+		for {
+			select {
+			case <-ticker.C:
+				if data, err := loadFunc(); err == nil {
+					c.Set(key, data)
+				}
+			case <-quitChan:
+				return
+			}
+		}
+	}()
+	return quitChan
+}
+
 // SetWithTTL sets key and value to Cache with a ttl.
 // The unit of ttl is second.
 func (c *Cache) SetWithTTL(key string, value interface{}, ttl int64) {
