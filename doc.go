@@ -17,7 +17,7 @@
 // Created at 2020/03/13 16:15:56
 
 /*
-Package cache provides an easy way to use foundation for your caching operations.
+Package cachego provides an easy way to use foundation for your caching operations.
 
 1. the basic usage:
 
@@ -47,6 +47,16 @@ Package cache provides an easy way to use foundation for your caching operations
 	cache.GetWithLoad("newKey", func() (data interface{}, ttl int64, err error) {
 		return "newValue", 3, nil
 	})
+
+	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
+	stopAutoSet := cache.AutoSet("autoKey", 1*time.Second, func() (interface{}, error) {
+		fmt.Println("AutoSet invoking...")
+		return nil, nil
+	})
+
+	// Keep main running in order to see what AutoSet did
+	time.Sleep(5 * time.Second)
+	stopAutoSet <- struct{}{}
 
 2. the ttl usage:
 
@@ -122,4 +132,4 @@ Package cache provides an easy way to use foundation for your caching operations
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.2.2"
+const Version = "v0.2.3-alpha"

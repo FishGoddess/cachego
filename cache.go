@@ -120,7 +120,7 @@ func (c *Cache) Set(key string, value interface{}) {
 
 // AutoSet starts a goroutine to execute Set() at fixed duration.
 // It returns a channel which can be used to stop this goroutine.
-func (c *Cache) AutoSet(key string, loadFunc func() (interface{}, error), duration time.Duration) chan<- struct{} {
+func (c *Cache) AutoSet(key string, duration time.Duration, loadFunc func() (interface{}, error)) chan<- struct{} {
 	quitChan := make(chan struct{})
 	go func() {
 		ticker := time.NewTicker(duration)
@@ -131,6 +131,7 @@ func (c *Cache) AutoSet(key string, loadFunc func() (interface{}, error), durati
 					c.Set(key, data)
 				}
 			case <-quitChan:
+				ticker.Stop()
 				return
 			}
 		}
@@ -188,6 +189,7 @@ func (c *Cache) AutoGc(duration time.Duration) chan<- struct{} {
 			case <-ticker.C:
 				c.Gc()
 			case <-quitChan:
+				ticker.Stop()
 				return
 			}
 		}
