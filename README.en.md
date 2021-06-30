@@ -4,6 +4,8 @@
 
 **cachego** is a high-performance and memory-based cache for [GoLang](https://golang.org) applications.
 
+> It has been used by many services in production, and even 8w/s qps is ok for it, so just use it if you want!
+
 [阅读中文版的 Read me](./README.md).
 
 ### 🕹 Features
