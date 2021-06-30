@@ -53,4 +53,14 @@ func main() {
 	cache.GetWithLoad("newKey", func() (data interface{}, ttl int64, err error) {
 		return "newValue", 3, nil
 	})
+
+	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
+	stopAutoSet := cache.AutoSet("autoKey", 1*time.Second, func() (interface{}, error) {
+		fmt.Println("AutoSet invoking...")
+		return nil, nil
+	})
+
+	// Keep main running in order to see what AutoSet did
+	time.Sleep(5 * time.Second)
+	stopAutoSet <- struct{}{}
 }

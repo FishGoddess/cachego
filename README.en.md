@@ -1,8 +1,13 @@
 # 📝 cachego
 
-[![License](./license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/cachego)
+[![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](_icons/build.svg)](_icons/build.svg)
+[![License](_icons/coverage.svg)](_icons/coverage.svg)
 
 **cachego** is a high-performance and memory-based cache for [GoLang](https://golang.org) applications.
+
+> It has been used by many services in production, and even 8w/s qps is ok for it, so just use it if you want!
 
 [阅读中文版的 Read me](./README.md).
 
@@ -17,7 +22,7 @@
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
-See more designing detail in [architecture design introduction](./docs/架构介绍.md).
+See more designing detail in [architecture design introduction](_docs/架构介绍.md).
 
 ### 🚀 Installation
 
