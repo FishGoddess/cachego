@@ -24,21 +24,21 @@ import (
 
 const (
 	// defaultMapSize determines the initialized map size of one segment.
-	defaultMapSize = 1024
+	defaultMapSize = 256
 
 	// defaultSegmentSize determines the size of segments.
 	// This value will affect the performance of concurrency.
-	defaultSegmentSize = 1024
+	defaultSegmentSize = 256
 )
 
 // Cache is a struct of cache.
 type Cache struct {
-
 	// mapSize is the size of map inside.
 	mapSize int
 
 	// segmentSize is the size of segments.
 	// This value will affect the performance of concurrency.
+	// It should be the pow of 2 (such as 64) or the segments may be uneven.
 	segmentSize int
 
 	// segments is a slice stores the real data.
@@ -47,7 +47,6 @@ type Cache struct {
 
 // NewCache returns a new Cache holder for use.
 func NewCache(options ...Option) *Cache {
-
 	cache := &Cache{
 		mapSize:     defaultMapSize,
 		segmentSize: defaultSegmentSize,
@@ -65,9 +64,11 @@ func NewCache(options ...Option) *Cache {
 // newSegments returns a slice of initialized segments.
 func newSegments(mapSize int, segmentSize int) []*segment {
 	segments := make([]*segment, segmentSize)
+
 	for i := 0; i < segmentSize; i++ {
 		segments[i] = newSegment(mapSize)
 	}
+
 	return segments
 }
 
@@ -75,10 +76,12 @@ func newSegments(mapSize int, segmentSize int) []*segment {
 func index(key string) int {
 	index := 1469598103934665603
 	keyBytes := []byte(key)
+
 	for _, b := range keyBytes {
 		index = (index << 5) - index + int(b&0xff)
 		index *= 1099511628211
 	}
+
 	return index
 }
 
@@ -96,7 +99,6 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 // It will invoke onMissed() to fetch data and load it to c if missed.
 // The unit of ttl is second.
 func (c *Cache) GetWithLoad(key string, onMissed func() (data interface{}, ttl int64, err error)) (interface{}, error) {
-
 	v, ok := c.Get(key)
 	if ok {
 		return v, nil
@@ -122,6 +124,7 @@ func (c *Cache) Set(key string, value interface{}) {
 // It returns a channel which can be used to stop this goroutine.
 func (c *Cache) AutoSet(key string, duration time.Duration, loadFunc func() (interface{}, error)) chan<- struct{} {
 	quitChan := make(chan struct{})
+
 	go func() {
 		ticker := time.NewTicker(duration)
 		for {
@@ -136,6 +139,7 @@ func (c *Cache) AutoSet(key string, duration time.Duration, loadFunc func() (int
 			}
 		}
 	}()
+
 	return quitChan
 }
 
@@ -163,9 +167,11 @@ func (c *Cache) RemoveAll() {
 // Notice that this method is weak-consistency.
 func (c *Cache) Size() int {
 	size := 0
+
 	for _, segment := range c.segments {
 		size += segment.size()
 	}
+
 	return size
 }
 
@@ -182,6 +188,7 @@ func (c *Cache) Gc() {
 // It returns a channel which can be used to stop this goroutine.
 func (c *Cache) AutoGc(duration time.Duration) chan<- struct{} {
 	quitChan := make(chan struct{})
+
 	go func() {
 		ticker := time.NewTicker(duration)
 		for {
@@ -194,5 +201,6 @@ func (c *Cache) AutoGc(duration time.Duration) chan<- struct{} {
 			}
 		}
 	}()
+
 	return quitChan
 }

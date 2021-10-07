@@ -51,15 +51,17 @@ const (
 
 // testTask is the task of benchmark.
 func testTask(task func()) {
-
 	wg := &sync.WaitGroup{}
+
 	for i := 0; i < concurrency; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 			task()
 		}()
 	}
+
 	wg.Wait()
 }
 
@@ -73,9 +75,9 @@ func timeTask(task func()) int64 {
 
 // go test -v -run=^TestCacheGoWrite$
 func TestCacheGoWrite(t *testing.T) {
-
 	c := cachego.NewCache()
 	c.AutoGc(30 * time.Minute)
+
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
 		c.Set(key, key)
@@ -89,14 +91,15 @@ func TestCacheGoWrite(t *testing.T) {
 			})
 		}
 	})
+
 	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 }
 
 // go test -v -run=^TestCacheGoRead$
 func TestCacheGoRead(t *testing.T) {
-
 	c := cachego.NewCache()
 	c.AutoGc(30 * time.Minute)
+
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
 		c.Set(key, key)
@@ -110,13 +113,14 @@ func TestCacheGoRead(t *testing.T) {
 			})
 		}
 	})
+
 	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 }
 
 // go test -v -run=^TestCacheGo$
 func TestCacheGo(t *testing.T) {
-
 	c := cachego.NewCache()
+
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
 		c.Set(key, key)
@@ -131,13 +135,14 @@ func TestCacheGo(t *testing.T) {
 			})
 		}
 	})
+
 	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 }
 
 //// go test -v -run=^TestGoCacheWrite$
 //func TestGoCacheWrite(t *testing.T) {
-//
 //	c := gocache.New(gocache.NoExpiration, 10*time.Minute)
+//
 //	for i := 0; i < dataSize; i++ {
 //		key := strconv.Itoa(i)
 //		c.Set(key, key, gocache.NoExpiration)
@@ -151,13 +156,14 @@ func TestCacheGo(t *testing.T) {
 //			})
 //		}
 //	})
+//
 //	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
 //// go test -v -run=^TestGoCacheRead$
 //func TestGoCacheRead(t *testing.T) {
-//
 //	c := gocache.New(gocache.NoExpiration, 10*time.Minute)
+//
 //	for i := 0; i < dataSize; i++ {
 //		key := strconv.Itoa(i)
 //		c.Set(key, key, gocache.NoExpiration)
@@ -171,13 +177,14 @@ func TestCacheGo(t *testing.T) {
 //			})
 //		}
 //	})
+//
 //	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
 //// go test -v -run=^TestGoCache$
 //func TestGoCache(t *testing.T) {
-//
 //	c := gocache.New(gocache.NoExpiration, 10*time.Minute)
+//
 //	for i := 0; i < dataSize; i++ {
 //		key := strconv.Itoa(i)
 //		c.Set(key, key, gocache.NoExpiration)
@@ -192,12 +199,12 @@ func TestCacheGo(t *testing.T) {
 //			})
 //		}
 //	})
+//
 //	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
 //// go test -v -run=^TestFreeCacheWrite$
 //func TestFreeCacheWrite(t *testing.T) {
-//
 //	fcache := freecache.NewCache(10 * dataSize)
 //	debug.SetGCPercent(20)
 //
@@ -214,12 +221,12 @@ func TestCacheGo(t *testing.T) {
 //			})
 //		}
 //	})
+//
 //	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
 //// go test -v -run=^TestFreeCacheRead$
 //func TestFreeCacheRead(t *testing.T) {
-//
 //	fcache := freecache.NewCache(10 * dataSize)
 //	debug.SetGCPercent(20)
 //
@@ -236,12 +243,12 @@ func TestCacheGo(t *testing.T) {
 //			})
 //		}
 //	})
+//
 //	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}
 //
 //// go test -v -run=^TestFreeCache$
 //func TestFreeCache(t *testing.T) {
-//
 //	fcache := freecache.NewCache(10 * dataSize)
 //	debug.SetGCPercent(20)
 //
@@ -259,5 +266,6 @@ func TestCacheGo(t *testing.T) {
 //			})
 //		}
 //	})
+//
 //	fmt.Printf("%s spent %dms\n", t.Name(), spent)
 //}

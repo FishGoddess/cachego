@@ -24,7 +24,6 @@ import (
 
 // segment is the struct storing the real data.
 type segment struct {
-
 	// mapSize is the initialized size of map inside.
 	mapSize int
 
@@ -44,7 +43,7 @@ func newSegment(mapSize int) *segment {
 		mapSize:   mapSize,
 		aliveSize: 0,
 		data:      make(map[string]*value, mapSize),
-		lock: &sync.RWMutex{},
+		lock:      &sync.RWMutex{},
 	}
 }
 
@@ -52,9 +51,11 @@ func newSegment(mapSize int) *segment {
 func (s *segment) get(key string) (interface{}, bool) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+
 	if value, ok := s.data[key]; ok && value.alive() {
 		return value.data, true
 	}
+
 	return nil, false
 }
 
@@ -65,19 +66,23 @@ func (s *segment) get(key string) (interface{}, bool) {
 func (s *segment) set(key string, value interface{}, ttl int64) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+
 	if _, ok := s.data[key]; !ok {
 		s.aliveSize++
 	}
+
 	s.data[key] = newValue(value, ttl)
 }
 
-// remove removes the key in segment.
+// remove will remove the key in segment.
 func (s *segment) remove(key string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+
 	if _, ok := s.data[key]; ok {
 		s.aliveSize--
 	}
+
 	delete(s.data, key)
 }
 
@@ -100,6 +105,7 @@ func (s *segment) size() int {
 func (s *segment) gc() {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+
 	for key, value := range s.data {
 		if !value.alive() {
 			s.aliveSize--

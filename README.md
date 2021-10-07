@@ -43,7 +43,6 @@ import (
 )
 
 func main() {
-
 	// Create a cache for use.
 	// We use option function to customize the creation of cache.
 	// WithAutoGC means it will do gc automatically.
