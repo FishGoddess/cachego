@@ -103,5 +103,6 @@ performance will be optimized in the future version!
 
 * [cristiane](https://gitee.com/cristiane): Provide some optimizations about hash
 * [hzy15610046011](https://gitee.com/hzy15610046011): Provide architecture design documents and pictures
+* [chen661](https://gitee.com/chen661): Provide the limit thought of argument in WithSegmentSize Option
 
 Please open an _**issue**_ if you find something is not working as expected.
