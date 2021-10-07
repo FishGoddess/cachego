@@ -99,5 +99,6 @@ $ go test -v ./_examples/performance_test.go
 
 * [cristiane](https://gitee.com/cristiane)：提供 hash 算法的优化建议
 * [hzy15610046011](https://gitee.com/hzy15610046011)：提供架构设计文档和图片
+* [chen661](https://gitee.com/chen661)：提供 segmentSize 设置选项的参数限制想法
 
 如果您觉得 cachego 缺少您需要的功能，请不要犹豫，马上参与进来，发起一个 _**issue**_。
