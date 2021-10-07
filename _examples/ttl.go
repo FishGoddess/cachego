@@ -26,7 +26,6 @@ import (
 )
 
 func main() {
-
 	// Create a cache and set an entry to cache.
 	// The ttl is 3 seconds.
 	cache := cachego.NewCache()

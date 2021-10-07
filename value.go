@@ -29,7 +29,6 @@ const (
 
 // value is a box of data.
 type value struct {
-
 	// data stores the real thing inside.
 	data interface{}
 

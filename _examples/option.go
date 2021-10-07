@@ -25,9 +25,8 @@ import (
 )
 
 func main() {
-
 	// We use option function to customize the creation of cache.
-	// You can just new it without options.
+	// You can just new one without options.
 	cache := cachego.NewCache()
 	cache.Set("key", "value")
 

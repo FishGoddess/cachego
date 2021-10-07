@@ -25,7 +25,6 @@ import (
 
 // go test -cover -run=^TestCache$
 func TestCache(t *testing.T) {
-
 	cache := NewCache()
 
 	key := "key"
@@ -53,7 +52,6 @@ func TestCache(t *testing.T) {
 
 // go test -cover -run=^TestCacheTTL$
 func TestCacheTTL(t *testing.T) {
-
 	cache := NewCache()
 	cache.AutoGc(3 * time.Second)
 
@@ -81,7 +79,6 @@ func TestCacheTTL(t *testing.T) {
 
 // go test -cover -run=^TestCacheAutoGc$
 func TestCacheAutoGc(t *testing.T) {
-
 	cache := NewCache()
 	cache.AutoGc(2 * time.Second) <- struct{}{}
 
@@ -100,7 +97,6 @@ func TestCacheAutoGc(t *testing.T) {
 
 // go test -cover -run=^TestGetWithLoad$
 func TestGetWithLoad(t *testing.T) {
-
 	cache := NewCache()
 
 	loadFunc := func() (data interface{}, ttl int64, err error) {

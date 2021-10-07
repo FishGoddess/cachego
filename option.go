@@ -21,6 +21,7 @@ package cachego
 import (
 	"encoding/json"
 	"fmt"
+	"math/bits"
 	"net/http"
 	"time"
 )
@@ -29,16 +30,21 @@ import (
 type Option func(cache *Cache)
 
 // WithMapSize is an option setting initializing map size of cache.
-func WithMapSize(mapSize int) Option {
+func WithMapSize(mapSize uint) Option {
 	return func(cache *Cache) {
-		cache.mapSize = mapSize
+		cache.mapSize = int(mapSize)
 	}
 }
 
 // WithSegmentSize is an option setting initializing segment size of cache.
-func WithSegmentSize(segmentSize int) Option {
+// segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.
+func WithSegmentSize(segmentSize uint) Option {
+	if bits.OnesCount(segmentSize) > 1 {
+		panic("segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
+	}
+
 	return func(cache *Cache) {
-		cache.segmentSize = segmentSize
+		cache.segmentSize = int(segmentSize)
 	}
 }
 
@@ -51,16 +57,15 @@ func WithAutoGC(gcDuration time.Duration) Option {
 
 // debugPointHandler returns debug http handler.
 func debugPointHandler(cache *Cache) http.Handler {
-
-	// for responding Json
 	writeAsJson := func(writer http.ResponseWriter, data map[string]interface{}) {
-
 		dataBytes, err := json.Marshal(data)
+
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			writer.Write([]byte(fmt.Sprintf("err: %+v\ndata: %+v", err, data)))
 			return
 		}
+
 		writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		writer.Write(dataBytes)
 	}
@@ -84,36 +89,46 @@ func debugPointHandler(cache *Cache) http.Handler {
 			},
 		})
 	})
+
 	mux.HandleFunc("/get", func(writer http.ResponseWriter, request *http.Request) {
 		key := request.URL.Query().Get("key")
 		data, ok := cache.Get(key)
+
 		writeAsJson(writer, map[string]interface{}{
 			"data": data,
 			"ok":   ok,
 		})
 	})
+
 	mux.HandleFunc("/remove", func(writer http.ResponseWriter, request *http.Request) {
 		key := request.URL.Query().Get("key")
 		cache.Remove(key)
+
 		writeAsJson(writer, map[string]interface{}{
 			"ok": true,
 		})
 	})
+
 	mux.HandleFunc("/size", func(writer http.ResponseWriter, request *http.Request) {
 		writeAsJson(writer, map[string]interface{}{
 			"size": cache.Size(),
 		})
 	})
+
 	mux.HandleFunc("/gc", func(writer http.ResponseWriter, request *http.Request) {
 		cache.Gc()
+
 		writeAsJson(writer, map[string]interface{}{
 			"ok": true,
 		})
 	})
+
 	mux.HandleFunc("/detail", func(writer http.ResponseWriter, request *http.Request) {
 		data := make(map[string]interface{}, cache.segmentSize)
+
 		for i, segment := range cache.segments {
 			values := make(map[string]interface{}, len(segment.data))
+
 			for k, v := range segment.data {
 				values[k] = map[string]interface{}{
 					"data":  v.data,
@@ -122,11 +137,13 @@ func debugPointHandler(cache *Cache) http.Handler {
 					"alive": v.alive(),
 				}
 			}
+
 			data[fmt.Sprintf("segment.%d", i)] = map[string]interface{}{
 				"size": segment.aliveSize,
 				"values":    values,
 			}
 		}
+
 		writeAsJson(writer, data)
 	})
 

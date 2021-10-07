@@ -25,13 +25,14 @@ import (
 
 // go test -cover -run=^TestValue$
 func TestValue(t *testing.T) {
-
 	v := newValue(nil, 1)
+
 	if !v.alive() {
 		t.Fatal("V should be alive!")
 	}
 
 	time.Sleep(2 * time.Second)
+
 	if v.alive() {
 		t.Fatal("V should be dead!")
 	}

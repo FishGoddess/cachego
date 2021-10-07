@@ -30,7 +30,6 @@ import (
 
 // runSetServer runs a set server for demo.
 func runSetServer(cache *cachego.Cache, port string) {
-
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Write([]byte(`
 							<html>
@@ -48,9 +47,11 @@ func runSetServer(cache *cachego.Cache, port string) {
 							</body>
 							</html>`))
 	})
+
 	http.HandleFunc("/set", func(writer http.ResponseWriter, request *http.Request) {
 		key := request.FormValue("key")
 		value := request.FormValue("value")
+
 		ttlStr := request.FormValue("ttl")
 		ttl, err := strconv.ParseInt(ttlStr, 10, 64)
 		if err != nil {
@@ -59,6 +60,7 @@ func runSetServer(cache *cachego.Cache, port string) {
 			writer.Write([]byte(fmt.Sprintf("inputed ttl %d is not an integer!", ttlStr)))
 			return
 		}
+
 		cache.SetWithTTL(key, value, ttl)
 		writer.WriteHeader(http.StatusOK)
 		writer.Write([]byte(`<a href="http://127.0.0.1:` + port + `">http://127.0.0.1:` + port + `</a>`))
@@ -71,7 +73,6 @@ func runSetServer(cache *cachego.Cache, port string) {
 }
 
 func main() {
-
 	fmt.Println("You can visit http://127.0.0.1:8080 first and set some data to cache.")
 	fmt.Println("Then, you should visit http://127.0.0.1:6789 to use debug point.")
 	fmt.Println("(Press ctrl+c / control+c to stop this demo)")
