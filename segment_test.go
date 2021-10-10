@@ -29,7 +29,7 @@ func TestSegmentSize(t *testing.T) {
 		size := s.size()
 
 		if size != should {
-			t.Fatalf("Seq %d ==> Segment should have %d size but got %d", seq, should, size)
+			t.Errorf("Seq %d ==> Segment should have %d size but got %d", seq, should, size)
 		}
 	}
 

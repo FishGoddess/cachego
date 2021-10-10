@@ -31,22 +31,22 @@ func TestCache(t *testing.T) {
 	value := 123
 	cache.Set(key, value)
 	if v, ok := cache.Get(key); !ok || v != value {
-		t.Fatal("Before reset cache, cache.Of(key) returns wrong ok or value!")
+		t.Error("Before reset cache, cache.Of(key) returns wrong ok or value!")
 	}
 
 	cache.RemoveAll()
 	if _, ok := cache.Get(key); ok || cache.Size() != 0 {
-		t.Fatal("Cache should be reset!")
+		t.Error("Cache should be reset!")
 	}
 
 	cache.Set(key, value)
 	if v, ok := cache.Get(key); !ok || v != value {
-		t.Fatal("Before delete key, cache.Of(key) returns wrong ok or value!")
+		t.Error("Before delete key, cache.Of(key) returns wrong ok or value!")
 	}
 
 	cache.Remove(key)
 	if _, ok := cache.Get(key); ok {
-		t.Fatal("After deleting key, key should be dead!")
+		t.Error("After deleting key, key should be dead!")
 	}
 }
 
@@ -59,21 +59,21 @@ func TestCacheTTL(t *testing.T) {
 	value := 123
 	cache.SetWithTTL(key, value, 1)
 	if v, ok := cache.Get(key); !ok || cache.Size() != 1 || v != value {
-		t.Fatal("Before ttl, returns wrong ok or size or value!")
+		t.Error("Before ttl, returns wrong ok or size or value!")
 	}
 
 	time.Sleep(2 * time.Second)
 	if _, ok := cache.Get(key); ok {
-		t.Fatal("After ttl, key should be dead!")
+		t.Error("After ttl, key should be dead!")
 	}
 
 	if cache.Size() != 1 {
-		t.Fatal("After ttl, size should be 1!")
+		t.Error("After ttl, size should be 1!")
 	}
 
 	time.Sleep(2 * time.Second)
 	if cache.Size() != 0 {
-		t.Fatal("After gc, size should be 0!")
+		t.Error("After gc, size should be 0!")
 	}
 }
 
@@ -86,12 +86,12 @@ func TestCacheAutoGc(t *testing.T) {
 	value := 123
 	cache.SetWithTTL(key, value, 1)
 	if v, ok := cache.Get(key); !ok || cache.Size() != 1 || v != value {
-		t.Fatal("Before gc, returns wrong ok or size or value!")
+		t.Error("Before gc, returns wrong ok or size or value!")
 	}
 
 	time.Sleep(3 * time.Second)
 	if _, ok := cache.Get(key); ok || cache.Size() != 1 {
-		t.Fatal("After gc, key should be dead!")
+		t.Error("After gc, key should be dead!")
 	}
 }
 
@@ -107,11 +107,11 @@ func TestGetWithLoad(t *testing.T) {
 	value := "get"
 	cache.SetWithTTL(key, value, 1)
 	if v, err := cache.GetWithLoad(key, loadFunc); err != nil || v.(string) != value {
-		t.Fatalf("Before Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
+		t.Errorf("Before Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 
 	time.Sleep(2 * time.Second)
 	if v, err := cache.GetWithLoad(key, loadFunc); err != nil || v.(string) != "loadFunc" {
-		t.Fatalf("After Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
+		t.Errorf("After Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 }
