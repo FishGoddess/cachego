@@ -34,7 +34,7 @@ type segment struct {
 	data map[string]*value
 
 	// lock is for concurrency.
-	lock *sync.RWMutex
+	lock sync.RWMutex
 }
 
 // newSegment returns a segment holder with mapSize.
@@ -43,7 +43,7 @@ func newSegment(mapSize int) *segment {
 		mapSize:   mapSize,
 		aliveSize: 0,
 		data:      make(map[string]*value, mapSize),
-		lock:      &sync.RWMutex{},
+		lock:      sync.RWMutex{},
 	}
 }
 
