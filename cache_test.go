@@ -19,6 +19,7 @@
 package cachego
 
 import (
+	"context"
 	"testing"
 	"time"
 )
@@ -30,22 +31,22 @@ func TestCache(t *testing.T) {
 	key := "key"
 	value := 123
 	cache.Set(key, value)
-	if v, ok := cache.Get(key); !ok || v != value {
-		t.Error("Before reset cache, cache.Of(key) returns wrong ok or value!")
+	if v, err := cache.Get(key); IsNotFound(err) || v != value {
+		t.Error("Before reset cache, cache.Of(key) returns wrong err or value!")
 	}
 
-	cache.RemoveAll()
-	if _, ok := cache.Get(key); ok || cache.Size() != 0 {
+	cache.DeleteAll()
+	if _, err := cache.Get(key); !IsNotFound(err) || cache.Size() != 0 {
 		t.Error("Cache should be reset!")
 	}
 
 	cache.Set(key, value)
-	if v, ok := cache.Get(key); !ok || v != value {
-		t.Error("Before delete key, cache.Of(key) returns wrong ok or value!")
+	if v, err := cache.Get(key); IsNotFound(err) || v != value {
+		t.Error("Before delete key, cache.Of(key) returns wrong err or value!")
 	}
 
-	cache.Remove(key)
-	if _, ok := cache.Get(key); ok {
+	cache.Delete(key)
+	if _, err := cache.Get(key); !IsNotFound(err) {
 		t.Error("After deleting key, key should be dead!")
 	}
 }
@@ -57,13 +58,13 @@ func TestCacheTTL(t *testing.T) {
 
 	key := "key"
 	value := 123
-	cache.SetWithTTL(key, value, 1)
-	if v, ok := cache.Get(key); !ok || cache.Size() != 1 || v != value {
-		t.Error("Before ttl, returns wrong ok or size or value!")
+	cache.Set(key, value, WithSetTTL(1*time.Second))
+	if v, err := cache.Get(key); IsNotFound(err) || cache.Size() != 1 || v != value {
+		t.Error("Before ttl, returns wrong err or size or value!")
 	}
 
 	time.Sleep(2 * time.Second)
-	if _, ok := cache.Get(key); ok {
+	if _, err := cache.Get(key); !IsNotFound(err) {
 		t.Error("After ttl, key should be dead!")
 	}
 
@@ -84,13 +85,13 @@ func TestCacheAutoGc(t *testing.T) {
 
 	key := "key"
 	value := 123
-	cache.SetWithTTL(key, value, 1)
-	if v, ok := cache.Get(key); !ok || cache.Size() != 1 || v != value {
-		t.Error("Before gc, returns wrong ok or size or value!")
+	cache.Set(key, value, WithSetTTL(1*time.Second))
+	if v, err := cache.Get(key); IsNotFound(err) || cache.Size() != 1 || v != value {
+		t.Error("Before gc, returns wrong err or size or value!")
 	}
 
 	time.Sleep(3 * time.Second)
-	if _, ok := cache.Get(key); ok || cache.Size() != 1 {
+	if _, err := cache.Get(key); !IsNotFound(err) || cache.Size() != 1 {
 		t.Error("After gc, key should be dead!")
 	}
 }
@@ -99,19 +100,19 @@ func TestCacheAutoGc(t *testing.T) {
 func TestGetWithLoad(t *testing.T) {
 	cache := NewCache()
 
-	loadFunc := func() (data interface{}, ttl int64, err error) {
-		return "loadFunc", 1, nil
+	loadFunc := func(ctx context.Context) (data interface{}, err error) {
+		return "loadFunc", nil
 	}
 
 	key := "key"
 	value := "get"
-	cache.SetWithTTL(key, value, 1)
-	if v, err := cache.GetWithLoad(key, loadFunc); err != nil || v.(string) != value {
+	cache.Set(key, value, WithSetTTL(1*time.Second))
+	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetOnMissedSetTTL(time.Second)); err != nil || v.(string) != value {
 		t.Errorf("Before Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 
 	time.Sleep(2 * time.Second)
-	if v, err := cache.GetWithLoad(key, loadFunc); err != nil || v.(string) != "loadFunc" {
+	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetOnMissedSetTTL(time.Second)); err != nil || v.(string) != "loadFunc" {
 		t.Errorf("After Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 }

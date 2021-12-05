@@ -27,9 +27,8 @@ import (
 
 func main() {
 	// Create a cache and set an entry to cache.
-	// The ttl is 1 second.
 	cache := cachego.NewCache()
-	cache.SetWithTTL("key", "value", 1)
+	cache.Set("key", "value", cachego.WithSetTTL(1*time.Second))
 
 	// Wait for 2 seconds and check the key.
 	time.Sleep(2 * time.Second)

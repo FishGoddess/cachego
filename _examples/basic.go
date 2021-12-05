@@ -19,6 +19,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -32,6 +33,8 @@ func main() {
 	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
+	// Both of them are set a key-value with no TTL.
+	//cache.Set("key", 666, cachego.WithSetNoTTL())
 	cache.Set("key", 666)
 
 	// Get returns the value of this key.
@@ -43,21 +46,21 @@ func main() {
 	fmt.Println(v, ok) // Output: <nil> false
 
 	// SetWithTTL sets an entry with expired time.
-	// The unit of expired time is second.
 	// See more information in example of ttl.
-	cache.SetWithTTL("ttlKey", 123, 10)
+	cache.Set("ttlKey", 123, cachego.WithSetTTL(10*time.Second))
 
 	// Also, you can get value from cache first, then load it to cache if missed.
-	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
-	cache.GetWithLoad("newKey", func() (data interface{}, ttl int64, err error) {
-		return "newValue", 3, nil
-	})
+	// OnMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	// Notice ctx in onMissed is passed by Get option.
+	cache.Get("newKey", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+		return "newValue", nil
+	}))
 
 	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
-	stopAutoSet := cache.AutoSet("autoKey", 1*time.Second, func() (interface{}, error) {
+	stopAutoSet := cache.AutoSet("autoKey", func(ctx context.Context) (interface{}, error) {
 		fmt.Println("AutoSet invoking...")
 		return nil, nil
-	})
+	}, cachego.WithAutoSetGap(1*time.Second))
 
 	// Keep main running in order to see what AutoSet did
 	time.Sleep(5 * time.Second)

@@ -47,15 +47,15 @@ func TestSegmentSize(t *testing.T) {
 
 	checkSize(t, 3, s, 110)
 	for i := int64(0); i < 50; i++ {
-		s.remove(strconv.FormatInt(i, 10))
+		s.delete(strconv.FormatInt(i, 10))
 	}
 
 	checkSize(t, 4, s, 60)
 	for i := int64(0); i < 50; i++ {
-		s.remove(strconv.FormatInt(999999999 + i, 10))
+		s.delete(strconv.FormatInt(999999999 + i, 10))
 	}
 
 	checkSize(t, 5, s, 60)
-	s.removeAll()
+	s.deleteAll()
 	checkSize(t, 6, s, 0)
 }

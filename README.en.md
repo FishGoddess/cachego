@@ -9,6 +9,8 @@
 
 > It has been used by many services in production, and even 8w/s qps is ok for it, so just use it if you want!
 
+> I am thinking about v0.3.x which will be better in APIs and features, so issue me if you have something fun!!!
+
 [阅读中文版的 Read me](./README.md).
 
 ### 🕹 Features

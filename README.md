@@ -9,6 +9,8 @@
 
 > 目前已经在多个线上服务中运行良好，也抵御过最高 8w/s qps 的冲击，可以稳定使用！
 
+> 我正在构思 v0.3.x 版本，这将在 API 以及功能上达到全新的使用体验，敬请期待，也期待大家的建议！！！
+
 [Read me in English](./README.en.md).
 
 ### 🕹 功能特性
@@ -66,7 +68,7 @@ func main() {
 
 	// Also, you can get value from cache first, then load it to cache if missed.
 	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
-	cache.GetWithLoad("newKey", func() (data interface{}, ttl int64, err error) {
+	cache.GetWithLoad("newKey", func() (data interface{}, ttl time.Duration, err error) {
 		return "newValue", 3, nil
 	})
 }

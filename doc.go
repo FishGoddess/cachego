@@ -75,8 +75,8 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	value, ok = cache.Get("key")
 	fmt.Println(value, ok) // Output: <nil> false
 
-	// However, the key is still in cache and you should remove it by Remove() or RemoveAll().
-	// So, we provide an automatic way to remove those who are dead. See more information in example of gc.
+	// However, the key is still in cache and you should delete it by Delete() or DeleteAll().
+	// So, we provide an automatic way to delete those who are dead. See more information in example of gc.
 	cache.AutoGc(10 * time.Minute)
 
 3. the gc usage:

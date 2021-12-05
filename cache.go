@@ -19,7 +19,10 @@
 package cachego
 
 import (
+	"context"
 	"time"
+
+	"github.com/FishGoddess/cachego/internal/config"
 )
 
 const (
@@ -46,16 +49,11 @@ type Cache struct {
 }
 
 // NewCache returns a new Cache holder for use.
-func NewCache(options ...Option) *Cache {
-	cache := &Cache{
+func NewCache(opts ...Option) *Cache {
+	cache := applyOptions(&Cache{
 		mapSize:     defaultMapSize,
 		segmentSize: defaultSegmentSize,
-	}
-
-	// Initializing with options
-	for _, applyOption := range options {
-		applyOption(cache)
-	}
+	}, opts...)
 
 	cache.segments = newSegments(cache.mapSize, cache.segmentSize)
 	return cache
@@ -72,8 +70,8 @@ func newSegments(mapSize int, segmentSize int) []*segment {
 	return segments
 }
 
-// index returns a position in segments of this key.
-func index(key string) int {
+// indexOf returns a position in segments of this key.
+func (c *Cache) indexOf(key string) int {
 	index := 1469598103934665603
 	keyBytes := []byte(key)
 
@@ -87,54 +85,34 @@ func index(key string) int {
 
 // segmentOf returns the segment of this key.
 func (c *Cache) segmentOf(key string) *segment {
-	return c.segments[index(key)&(c.segmentSize-1)]
-}
-
-// Get returns the value of key and a false if not found.
-func (c *Cache) Get(key string) (interface{}, bool) {
-	return c.segmentOf(key).get(key)
-}
-
-// GetWithLoad fetches value of key from c first, and returns it if ok.
-// It will invoke onMissed() to fetch data and load it to c if missed.
-// The unit of ttl is second.
-func (c *Cache) GetWithLoad(key string, onMissed func() (data interface{}, ttl int64, err error)) (interface{}, error) {
-	v, ok := c.Get(key)
-	if ok {
-		return v, nil
-	}
-
-	// missed in cache
-	data, ttl, err := onMissed()
-	if err != nil {
-		return nil, err
-	}
-
-	c.SetWithTTL(key, data, ttl)
-	return data, nil
+	return c.segments[c.indexOf(key)&(c.segmentSize-1)]
 }
 
 // Set sets key and value to Cache.
 // The key will not expire.
-func (c *Cache) Set(key string, value interface{}) {
-	c.SetWithTTL(key, value, NeverDie)
+func (c *Cache) Set(key string, value interface{}, opts ...SetOption) {
+	conf := applySetOptions(config.NewDefaultSetConfig(), opts...)
+	c.segmentOf(key).set(key, value, conf.TTL)
 }
 
 // AutoSet starts a goroutine to execute Set() at fixed duration.
 // It returns a channel which can be used to stop this goroutine.
-func (c *Cache) AutoSet(key string, duration time.Duration, loadFunc func() (interface{}, error)) chan<- struct{} {
-	quitChan := make(chan struct{})
+func (c *Cache) AutoSet(key string, loadFunc func(ctx context.Context) (interface{}, error), opts ...AutoSetOption) chan<- struct{} {
+	conf := applyAutoSetOptions(config.NewDefaultAutoSetConfig(), opts...)
+
+	quitChan := make(chan struct{}, 1)
 
 	go func() {
-		ticker := time.NewTicker(duration)
+		ticker := time.NewTicker(conf.Gap)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ticker.C:
-				if data, err := loadFunc(); err == nil {
-					c.Set(key, data)
+				if data, err := loadFunc(conf.Ctx); err == nil {
+					c.Set(key, data, WithSetTTL(conf.TTL))
 				}
 			case <-quitChan:
-				ticker.Stop()
 				return
 			}
 		}
@@ -143,23 +121,40 @@ func (c *Cache) AutoSet(key string, duration time.Duration, loadFunc func() (int
 	return quitChan
 }
 
-// SetWithTTL sets key and value to Cache with a ttl.
-// The unit of ttl is second.
-func (c *Cache) SetWithTTL(key string, value interface{}, ttl int64) {
-	c.segmentOf(key).set(key, value, ttl)
+// Get fetches value of key from c first, and returns it if ok.
+func (c *Cache) Get(key string, opts ...GetOption) (interface{}, error) {
+	v, ok := c.segmentOf(key).get(key)
+	if ok {
+		return v, nil
+	}
+
+	conf := applyGetOptions(config.NewDefaultGetConfig(), opts...)
+	if conf.OnMissed != nil {
+		data, err := conf.OnMissed(conf.Ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		if conf.OnMissedSet {
+			c.Set(key, data, WithSetTTL(conf.OnMissedSetTTL))
+		}
+		return data, nil
+	}
+
+	return nil, newNotFoundErr(key)
 }
 
-// Remove removes the value of key.
+// Delete removes the value of key.
 // If this key is not existed, nothing will happen.
-func (c *Cache) Remove(key string) {
-	c.segmentOf(key).remove(key)
+func (c *Cache) Delete(key string) {
+	c.segmentOf(key).delete(key)
 }
 
-// RemoveAll removes all keys in Cache.
+// DeleteAll removes all keys in Cache.
 // Notice that this method is weak-consistency.
-func (c *Cache) RemoveAll() {
+func (c *Cache) DeleteAll() {
 	for _, segment := range c.segments {
-		segment.removeAll()
+		segment.deleteAll()
 	}
 }
 
