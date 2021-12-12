@@ -31,16 +31,16 @@ func main() {
 	cache.Set("key", "value", cachego.WithSetTTL(3*time.Second))
 
 	// Check if the key is alive.
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // Output: value true
+	value, err := cache.Get("key")
+	fmt.Println(value, err) // Output: value <nil>
 
 	// Wait for 5 seconds and check again.
 	// Now the key is gone.
 	time.Sleep(5 * time.Second)
-	value, ok = cache.Get("key")
-	fmt.Println(value, ok) // Output: <nil> false
+	value, err = cache.Get("key")
+	fmt.Println(value, err) // Output: <nil> cachego: key not found
 
-	// However, the key is still in cache and you should remove it by Delete() or DeleteAll().
+	// However, the key is still in cache, and you should remove it by Delete() or DeleteAll().
 	// So, we provide an automatic way to remove those who are dead. See more information in example of gc.
 	cache.AutoGC(10 * time.Minute)
 }

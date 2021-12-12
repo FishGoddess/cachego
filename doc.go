@@ -27,78 +27,86 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
+	// Both of them are set a key-value with no TTL.
+	//cache.Set("key", 666, cachego.WithSetNoTTL())
 	cache.Set("key", 666)
 
 	// Get returns the value of this key.
-	v, ok := cache.Get("key")
-	fmt.Println(v, ok) // Output: 666 true
+	v, err := cache.Get("key")
+	fmt.Println(v, err) // Output: 666 <nil>
 
 	// If you pass a not existed key to of method, nil and false will be returned.
-	v, ok = cache.Get("not existed key")
-	fmt.Println(v, ok) // Output: <nil> false
+	v, err = cache.Get("not existed key")
+	fmt.Println(v, err) // Output: <nil> cachego: key not found
 
 	// SetWithTTL sets an entry with expired time.
-	// The unit of expired time is second.
 	// See more information in example of ttl.
-	cache.SetWithTTL("ttlKey", 123, 10)
+	cache.Set("ttlKey", 123, cachego.WithSetTTL(10*time.Second))
 
 	// Also, you can get value from cache first, then load it to cache if missed.
-	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
-	cache.GetWithLoad("newKey", func() (data interface{}, ttl int64, err error) {
-		return "newValue", 3, nil
-	})
+	// OnMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	// Notice ctx in onMissed is passed by Get option.
+	onMissed := func(ctx context.Context) (data interface{}, err error) {
+		return "newValue", nil
+	}
+
+	v, err = cache.Get("newKey", cachego.WithGetOnMissed(onMissed), cachego.WithGetTTL(3*time.Second))
+	fmt.Println(v, err) // Output: newValue <nil>
 
 	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
-	stopAutoSet := cache.AutoSet("autoKey", 1*time.Second, func() (interface{}, error) {
+	loadFunc := func(ctx context.Context) (interface{}, error) {
 		fmt.Println("AutoSet invoking...")
 		return nil, nil
-	})
+	}
 
-	// Keep main running in order to see what AutoSet did
+	stopCh := cache.AutoSet("autoKey", loadFunc, cachego.WithAutoSetGap(1*time.Second))
+
+	// Keep main running in order to see what AutoSet did.
 	time.Sleep(5 * time.Second)
-	stopAutoSet <- struct{}{}
+	stopCh <- struct{}{} // Stop AutoSet task
 
 2. the ttl usage:
 
 	// Create a cache and set an entry to cache.
-	// The ttl is 3 seconds.
 	cache := cachego.NewCache()
-	cache.SetWithTTL("key", "value", 3)
+	cache.Set("key", "value", cachego.WithSetTTL(3*time.Second))
 
 	// Check if the key is alive.
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // Output: value true
+	value, err := cache.Get("key")
+	fmt.Println(value, err) // Output: value <nil>
 
 	// Wait for 5 seconds and check again.
 	// Now the key is gone.
 	time.Sleep(5 * time.Second)
-	value, ok = cache.Get("key")
-	fmt.Println(value, ok) // Output: <nil> false
+	value, err = cache.Get("key")
+	fmt.Println(value, err) // Output: <nil> cachego: key not found
 
-	// However, the key is still in cache and you should delete it by Delete() or DeleteAll().
-	// So, we provide an automatic way to delete those who are dead. See more information in example of gc.
+	// However, the key is still in cache, and you should remove it by Delete() or DeleteAll().
+	// So, we provide an automatic way to remove those who are dead. See more information in example of gc.
 	cache.AutoGC(10 * time.Minute)
 
 3. the gc usage:
 
 	// Create a cache and set an entry to cache.
-	// The ttl is 1 second.
 	cache := cachego.NewCache()
-	cache.SetWithTTL("key", "value", 1)
+	cache.Set("key", "value", cachego.WithSetTTL(1*time.Second))
+
+	value, err := cache.Get("key")
+	fmt.Println(value, err) // Output: value <nil>
 
 	// Wait for 2 seconds and check the key.
 	time.Sleep(2 * time.Second)
 
-	// We can see this key is gone and we can't get it anymore.
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // Output: <nil> false
+	// We can see this key is gone, and we can't get it anymore.
+	value, err = cache.Get("key")
+	fmt.Println(value, err) // Output: <nil> cachego: key not found
 
 	// However, the key still stores in cache and occupies the space.
 	size := cache.Size()
 	fmt.Println(size) // Output: 1
 
 	// We should call GC() to clean up these dead entries.
-	// Notice that this method will takes some CPU time to finish this task.
+	// Notice that this method will take some CPU time to finish this task.
 	cache.GC()
 	size = cache.Size()
 	fmt.Println(size) // Output: 0
@@ -112,7 +120,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 4. the option usage:
 
 	// We use option function to customize the creation of cache.
-	// You can just new it without options.
+	// You can just new one without options.
 	cache := cachego.NewCache()
 	cache.Set("key", "value")
 
@@ -122,11 +130,6 @@ Package cachego provides an easy way to use foundation for your caching operatio
 
 	// Also, you can add more than one option to cache.
 	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
-
-	// Every option has its function, and you should use them for some purposes.
-	// WithDebugPoint runs a http server and registers some handlers for debug.
-	cachego.WithDebugPoint(":8888") // try to visit :8888
-	time.Sleep(time.Minute)
 
 */
 package cachego // import "github.com/FishGoddess/cachego"

@@ -15,7 +15,7 @@
 * [x] Set 引入 option 机制
 * [x] Get 引入 option 机制
 * [ ] Delete 引入 option 机制
-* [ ] GC 引入 option 机制
+* [ ] GC 引入 option 机制，并可以限制 GC 数量
 
 ### v0.2.x
 

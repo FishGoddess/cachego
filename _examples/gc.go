@@ -30,19 +30,22 @@ func main() {
 	cache := cachego.NewCache()
 	cache.Set("key", "value", cachego.WithSetTTL(1*time.Second))
 
+	value, err := cache.Get("key")
+	fmt.Println(value, err) // Output: value <nil>
+
 	// Wait for 2 seconds and check the key.
 	time.Sleep(2 * time.Second)
 
-	// We can see this key is gone and we can't get it anymore.
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // Output: <nil> false
+	// We can see this key is gone, and we can't get it anymore.
+	value, err = cache.Get("key")
+	fmt.Println(value, err) // Output: <nil> cachego: key not found
 
 	// However, the key still stores in cache and occupies the space.
 	size := cache.Size()
 	fmt.Println(size) // Output: 1
 
 	// We should call GC() to clean up these dead entries.
-	// Notice that this method will takes some CPU time to finish this task.
+	// Notice that this method will take some CPU time to finish this task.
 	cache.GC()
 	size = cache.Size()
 	fmt.Println(size) // Output: 0

@@ -16,15 +16,15 @@
 ### 🕹 功能特性
 
 * 以键值对形式缓存数据，极简的 API 设计风格
-* 引入 option function 模式，可定制化创建缓存的过程
-* 加入 debug 调试点，可以在开发的时候验证缓存的命中情况
+* 引入 option function 模式，可定制化各种操作的过程
 * 使用粒度更细的分段锁机制进行设计，具有非常高的并发性能
 * 支持懒清理机制，每一次访问的时候判断是否过期
 * 支持哨兵清理机制，每隔一定的时间间隔进行清理
+* ....
+
+_更多功能请参考 [_examples](_examples)。架构设计请参考 [arch.md](_examples/docs/arch.md) 文档。_
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
-
-具体设计可以参考 [架构设计介绍](_docs/架构介绍.md) 文档。
 
 ### 🚀 安装方式
 
@@ -38,6 +38,7 @@ $ go get -u github.com/FishGoddess/cachego
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -51,26 +52,43 @@ func main() {
 	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
+	// Both of them are set a key-value with no TTL.
+	//cache.Set("key", 666, cachego.WithSetNoTTL())
 	cache.Set("key", 666)
 
 	// Get returns the value of this key.
-	v, ok := cache.Get("key")
-	fmt.Println(v, ok) // Output: 666 true
+	v, err := cache.Get("key")
+	fmt.Println(v, err) // Output: 666 <nil>
 
 	// If you pass a not existed key to of method, nil and false will be returned.
-	v, ok = cache.Get("not existed key")
-	fmt.Println(v, ok) // Output: <nil> false
+	v, err = cache.Get("not existed key")
+	fmt.Println(v, err) // Output: <nil> cachego: key not found
 
 	// SetWithTTL sets an entry with expired time.
-	// The unit of expired time is second.
 	// See more information in example of ttl.
-	cache.SetWithTTL("ttlKey", 123, 10)
+	cache.Set("ttlKey", 123, cachego.WithSetTTL(10*time.Second))
 
 	// Also, you can get value from cache first, then load it to cache if missed.
-	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
-	cache.GetWithLoad("newKey", func() (data interface{}, ttl time.Duration, err error) {
-		return "newValue", 3, nil
-	})
+	// OnMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	// Notice ctx in onMissed is passed by Get option.
+	onMissed := func(ctx context.Context) (data interface{}, err error) {
+		return "newValue", nil
+	}
+
+	v, err = cache.Get("newKey", cachego.WithGetOnMissed(onMissed), cachego.WithGetTTL(3*time.Second))
+	fmt.Println(v, err) // Output: newValue <nil>
+
+	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
+	loadFunc := func(ctx context.Context) (interface{}, error) {
+		fmt.Println("AutoSet invoking...")
+		return nil, nil
+	}
+
+	stopCh := cache.AutoSet("autoKey", loadFunc, cachego.WithAutoSetGap(1*time.Second))
+
+	// Keep main running in order to see what AutoSet did.
+	time.Sleep(5 * time.Second)
+	stopCh <- struct{}{} // Stop AutoSet task
 }
 ```
 
