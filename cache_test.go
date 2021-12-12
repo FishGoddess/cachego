@@ -54,7 +54,7 @@ func TestCache(t *testing.T) {
 // go test -cover -run=^TestCacheTTL$
 func TestCacheTTL(t *testing.T) {
 	cache := NewCache()
-	cache.AutoGc(3 * time.Second)
+	cache.AutoGC(3 * time.Second)
 
 	key := "key"
 	value := 123
@@ -78,24 +78,6 @@ func TestCacheTTL(t *testing.T) {
 	}
 }
 
-// go test -cover -run=^TestCacheAutoGc$
-func TestCacheAutoGc(t *testing.T) {
-	cache := NewCache()
-	cache.AutoGc(2 * time.Second) <- struct{}{}
-
-	key := "key"
-	value := 123
-	cache.Set(key, value, WithSetTTL(1*time.Second))
-	if v, err := cache.Get(key); IsNotFound(err) || cache.Size() != 1 || v != value {
-		t.Error("Before gc, returns wrong err or size or value!")
-	}
-
-	time.Sleep(3 * time.Second)
-	if _, err := cache.Get(key); !IsNotFound(err) || cache.Size() != 1 {
-		t.Error("After gc, key should be dead!")
-	}
-}
-
 // go test -cover -run=^TestGetWithLoad$
 func TestGetWithLoad(t *testing.T) {
 	cache := NewCache()
@@ -107,12 +89,30 @@ func TestGetWithLoad(t *testing.T) {
 	key := "key"
 	value := "get"
 	cache.Set(key, value, WithSetTTL(1*time.Second))
-	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetOnMissedSetTTL(time.Second)); err != nil || v.(string) != value {
+	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetTTL(time.Second)); err != nil || v.(string) != value {
 		t.Errorf("Before Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 
 	time.Sleep(2 * time.Second)
-	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetOnMissedSetTTL(time.Second)); err != nil || v.(string) != "loadFunc" {
+	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetTTL(time.Second)); err != nil || v.(string) != "loadFunc" {
 		t.Errorf("After Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
+	}
+}
+
+// go test -cover -run=^TestCacheAutoGC$
+func TestCacheAutoGC(t *testing.T) {
+	cache := NewCache()
+	cache.AutoGC(2 * time.Second) <- struct{}{}
+
+	key := "key"
+	value := 123
+	cache.Set(key, value, WithSetTTL(1*time.Second))
+	if v, err := cache.Get(key); IsNotFound(err) || cache.Size() != 1 || v != value {
+		t.Error("Before gc, returns wrong err or size or value!")
+	}
+
+	time.Sleep(3 * time.Second)
+	if _, err := cache.Get(key); !IsNotFound(err) || cache.Size() != 1 {
+		t.Error("After gc, key should be dead!")
 	}
 }

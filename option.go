@@ -26,20 +26,21 @@ import (
 	"github.com/FishGoddess/cachego/internal/config"
 )
 
-// Option is a function which initializes cache.
-type Option func(cache *Cache)
+// Option is a function which initializes Config.
+type Option func(conf *config.Config)
 
-func applyOptions(cache *Cache, opts ...Option) *Cache {
+// applyOptions applies opts to conf.
+func applyOptions(conf *config.Config, opts ...Option) *config.Config {
 	for _, applyOption := range opts {
-		applyOption(cache)
+		applyOption(conf)
 	}
-	return cache
+	return conf
 }
 
 // WithMapSize is an option setting initializing map size of cache.
 func WithMapSize(mapSize uint) Option {
-	return func(cache *Cache) {
-		cache.mapSize = int(mapSize)
+	return func(conf *config.Config) {
+		conf.MapSize = int(mapSize)
 	}
 }
 
@@ -50,21 +51,63 @@ func WithSegmentSize(segmentSize uint) Option {
 		panic("segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
 	}
 
-	return func(cache *Cache) {
-		cache.segmentSize = int(segmentSize)
+	return func(conf *config.Config) {
+		conf.SegmentSize = int(segmentSize)
 	}
 }
 
 // WithAutoGC is an option turning on automatically gc.
-func WithAutoGC(gcDuration time.Duration) Option {
-	return func(cache *Cache) {
-		cache.AutoGc(gcDuration)
+func WithAutoGC(d time.Duration) Option {
+	return func(conf *config.Config) {
+		if d > 0 {
+			conf.GCDuration = d
+		}
+	}
+}
+
+// GetOption is a function which initializes GetConfig.
+type GetOption func(conf *config.GetConfig)
+
+// applyGetOptions applies opts to conf.
+func applyGetOptions(conf *config.GetConfig, opts ...GetOption) *config.GetConfig {
+	for _, applyOption := range opts {
+		applyOption(conf)
+	}
+	return conf
+}
+
+// WithGetContext sets context to ctx.
+func WithGetContext(ctx context.Context) GetOption {
+	return func(conf *config.GetConfig) {
+		conf.Ctx = ctx
+	}
+}
+
+// WithGetTTL sets the ttl of missed key if loaded to ttl.
+func WithGetTTL(ttl time.Duration) GetOption {
+	return func(conf *config.GetConfig) {
+		conf.TTL = ttl
+	}
+}
+
+// WithGetNoTTL sets the ttl of missed key to no ttl.
+func WithGetNoTTL() GetOption {
+	return func(conf *config.GetConfig) {
+		conf.TTL = config.NoTTL
+	}
+}
+
+// WithGetOnMissed sets onMissed to Get operation.
+func WithGetOnMissed(onMissed func(ctx context.Context) (data interface{}, err error)) GetOption {
+	return func(conf *config.GetConfig) {
+		conf.OnMissed = onMissed
 	}
 }
 
 // SetOption is a function which initializes SetConfig.
 type SetOption func(conf *config.SetConfig)
 
+// applySetOptions applies opts to conf.
 func applySetOptions(conf *config.SetConfig, opts ...SetOption) *config.SetConfig {
 	for _, applyOption := range opts {
 		applyOption(conf)
@@ -72,6 +115,7 @@ func applySetOptions(conf *config.SetConfig, opts ...SetOption) *config.SetConfi
 	return conf
 }
 
+// WithSetTTL sets the ttl of key to ttl.
 func WithSetTTL(ttl time.Duration) SetOption {
 	return func(conf *config.SetConfig) {
 		if ttl > 0 {
@@ -80,6 +124,7 @@ func WithSetTTL(ttl time.Duration) SetOption {
 	}
 }
 
+// WithSetNoTTL sets the ttl of key to no ttl.
 func WithSetNoTTL() SetOption {
 	return func(conf *config.SetConfig) {
 		conf.TTL = config.NoTTL
@@ -89,6 +134,7 @@ func WithSetNoTTL() SetOption {
 // AutoSetOption is a function which initializes AutoSetConfig.
 type AutoSetOption func(conf *config.AutoSetConfig)
 
+// applyAutoSetOptions applies opts to conf.
 func applyAutoSetOptions(conf *config.AutoSetConfig, opts ...AutoSetOption) *config.AutoSetConfig {
 	for _, applyOption := range opts {
 		applyOption(conf)
@@ -96,20 +142,14 @@ func applyAutoSetOptions(conf *config.AutoSetConfig, opts ...AutoSetOption) *con
 	return conf
 }
 
+// WithAutoSetContext sets context to ctx.
 func WithAutoSetContext(ctx context.Context) AutoSetOption {
 	return func(conf *config.AutoSetConfig) {
 		conf.Ctx = ctx
 	}
 }
 
-func WithAutoSetGap(gap time.Duration) AutoSetOption {
-	return func(conf *config.AutoSetConfig) {
-		if gap > 0 {
-			conf.Gap = gap
-		}
-	}
-}
-
+// WithAutoSetTTL sets the ttl of key to ttl.
 func WithAutoSetTTL(ttl time.Duration) AutoSetOption {
 	return func(conf *config.AutoSetConfig) {
 		if ttl > 0 {
@@ -118,48 +158,18 @@ func WithAutoSetTTL(ttl time.Duration) AutoSetOption {
 	}
 }
 
+// WithAutoSetNoTTL sets the ttl of key to no ttl.
 func WithAutoSetNoTTL() AutoSetOption {
 	return func(conf *config.AutoSetConfig) {
 		conf.TTL = config.NoTTL
 	}
 }
 
-// GetOption is a function which initializes GetConfig.
-type GetOption func(conf *config.GetConfig)
-
-func applyGetOptions(conf *config.GetConfig, opts ...GetOption) *config.GetConfig {
-	for _, applyOption := range opts {
-		applyOption(conf)
-	}
-	return conf
-}
-
-func WithGetContext(ctx context.Context) GetOption {
-	return func(conf *config.GetConfig) {
-		conf.Ctx = ctx
-	}
-}
-
-func WithGetOnMissed(onMissed func(ctx context.Context) (data interface{}, err error)) GetOption {
-	return func(conf *config.GetConfig) {
-		conf.OnMissed = onMissed
-	}
-}
-
-func WithGetOnMissedSet(need bool) GetOption {
-	return func(conf *config.GetConfig) {
-		conf.OnMissedSet = need
-	}
-}
-
-func WithGetOnMissedSetTTL(ttl time.Duration) GetOption {
-	return func(conf *config.GetConfig) {
-		conf.OnMissedSetTTL = ttl
-	}
-}
-
-func WithGetOnMissedSetNoTTL() GetOption {
-	return func(conf *config.GetConfig) {
-		conf.OnMissedSetTTL = config.NoTTL
+// WithAutoSetGap sets the gap between two set operations to gap.
+func WithAutoSetGap(gap time.Duration) AutoSetOption {
+	return func(conf *config.AutoSetConfig) {
+		if gap > 0 {
+			conf.Gap = gap
+		}
 	}
 }

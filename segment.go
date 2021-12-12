@@ -44,6 +44,18 @@ func newSegment(mapSize int) *segment {
 	}
 }
 
+// get returns the value of key and a false if not found.
+func (s *segment) get(key string) (interface{}, bool) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	if value, ok := s.data[key]; ok && value.alive() {
+		return value.data, true
+	}
+
+	return nil, false
+}
+
 // set puts a value of key with a ttl.
 // If you want this key to be alive forever, just give it a noTTL.
 func (s *segment) set(key string, value interface{}, ttl time.Duration) {
@@ -56,18 +68,6 @@ func (s *segment) set(key string, value interface{}, ttl time.Duration) {
 	}
 
 	s.data[key] = newValue(value, ttl)
-}
-
-// get returns the value of key and a false if not found.
-func (s *segment) get(key string) (interface{}, bool) {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-
-	if value, ok := s.data[key]; ok && value.alive() {
-		return value.data, true
-	}
-
-	return nil, false
 }
 
 // delete will delete the key in segment.

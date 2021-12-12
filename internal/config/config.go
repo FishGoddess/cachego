@@ -24,54 +24,84 @@ import (
 )
 
 const (
-	// NoTTL means value lives forever.
+	// NoTTL means entry lives forever.
 	NoTTL = 0
 )
 
-var (
-	defaultSetConfig = &SetConfig{
-		TTL: NoTTL,
+// Config is the config of cache.
+type Config struct {
+	// MapSize is the size of map inside.
+	MapSize int
+
+	// SegmentSize is the size of segments.
+	// This value will affect the performance of concurrency.
+	// It should be the pow of 2 (such as 64) or the segments may be uneven.
+	SegmentSize int
+
+	// GCDuration is the duration of gc.
+	GCDuration time.Duration
+}
+
+// NewDefaultConfig returns the default config of cache.
+func NewDefaultConfig() *Config {
+	return &Config{
+		MapSize:     256,
+		SegmentSize: 256,
+		GCDuration:  0,
 	}
-
-	defaultAutoSetConfig = &AutoSetConfig{
-		Ctx: context.Background(),
-		Gap: time.Minute,
-		TTL: NoTTL,
-	}
-
-	defaultGetConfig = &GetConfig{
-		Ctx:            context.Background(),
-		OnMissed:       nil,
-		OnMissedSet:    true,
-		OnMissedSetTTL: 10 * time.Second,
-	}
-)
-
-type SetConfig struct {
-	TTL time.Duration
 }
 
-func NewDefaultSetConfig() *SetConfig {
-	return defaultSetConfig
-}
-
-type AutoSetConfig struct {
-	Ctx context.Context
-	Gap time.Duration
-	TTL time.Duration
-}
-
-func NewDefaultAutoSetConfig() *AutoSetConfig {
-	return defaultAutoSetConfig
-}
-
+// GetConfig is the config of Get operations.
 type GetConfig struct {
-	Ctx            context.Context
-	OnMissed       func(ctx context.Context) (data interface{}, err error)
-	OnMissedSet    bool
-	OnMissedSetTTL time.Duration
+	// Ctx is the context of AutoSet.
+	Ctx context.Context
+
+	// TTL is the ttl of entry set to the cache.
+	TTL time.Duration
+
+	// OnMissed is the function which will be called if not nil.
+	OnMissed func(ctx context.Context) (data interface{}, err error)
 }
 
+// NewDefaultGetConfig returns the default config of Get operations.
 func NewDefaultGetConfig() *GetConfig {
-	return defaultGetConfig
+	return &GetConfig{
+		Ctx:      context.Background(),
+		TTL:      10 * time.Second,
+		OnMissed: nil,
+	}
+}
+
+// SetConfig is the config of Set operations.
+type SetConfig struct {
+	// TTL is the ttl of entry set to the cache.
+	TTL time.Duration
+}
+
+// NewDefaultSetConfig returns the default config of Set operations.
+func NewDefaultSetConfig() *SetConfig {
+	return &SetConfig{
+		TTL: NoTTL,
+	}
+}
+
+// AutoSetConfig is the config of AutoSet operations.
+type AutoSetConfig struct {
+	// Ctx is the context of AutoSet.
+	Ctx context.Context
+
+	// TTL is the ttl of entry set to the cache.
+	TTL time.Duration
+
+	// Gap is the duration between two AutoSet operations.
+	Gap time.Duration
+}
+
+// NewDefaultAutoSetConfig returns the default config of AutoSet operations.
+func NewDefaultAutoSetConfig() *AutoSetConfig {
+	return &AutoSetConfig{
+		Ctx: context.Background(),
+		TTL: NoTTL,
+		Gap: time.Minute,
+	}
 }

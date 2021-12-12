@@ -41,15 +41,15 @@ func main() {
 	size := cache.Size()
 	fmt.Println(size) // Output: 1
 
-	// We should call Gc() to clean up these dead entries.
+	// We should call GC() to clean up these dead entries.
 	// Notice that this method will takes some CPU time to finish this task.
-	cache.Gc()
+	cache.GC()
 	size = cache.Size()
 	fmt.Println(size) // Output: 0
 
 	// Also, we provide an automatic way to do this job at fixed duration.
 	// It returns a channel which can be used to stop this automatic job.
 	// If you want to stop it, just send an true or false to the chan!
-	stopAutoGc := cache.AutoGc(10 * time.Minute)
+	stopAutoGc := cache.AutoGC(10 * time.Minute)
 	stopAutoGc <- struct{}{}
 }

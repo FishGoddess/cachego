@@ -76,7 +76,7 @@ func timeTask(task func()) int64 {
 // go test -v -run=^TestCacheGoWrite$
 func TestCacheGoWrite(t *testing.T) {
 	c := cachego.NewCache()
-	c.AutoGc(30 * time.Minute)
+	c.AutoGC(30 * time.Minute)
 
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
@@ -98,7 +98,7 @@ func TestCacheGoWrite(t *testing.T) {
 // go test -v -run=^TestCacheGoRead$
 func TestCacheGoRead(t *testing.T) {
 	c := cachego.NewCache()
-	c.AutoGc(30 * time.Minute)
+	c.AutoGC(30 * time.Minute)
 
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)

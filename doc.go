@@ -77,7 +77,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 
 	// However, the key is still in cache and you should delete it by Delete() or DeleteAll().
 	// So, we provide an automatic way to delete those who are dead. See more information in example of gc.
-	cache.AutoGc(10 * time.Minute)
+	cache.AutoGC(10 * time.Minute)
 
 3. the gc usage:
 
@@ -97,16 +97,16 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	size := cache.Size()
 	fmt.Println(size) // Output: 1
 
-	// We should call Gc() to clean up these dead entries.
+	// We should call GC() to clean up these dead entries.
 	// Notice that this method will takes some CPU time to finish this task.
-	cache.Gc()
+	cache.GC()
 	size = cache.Size()
 	fmt.Println(size) // Output: 0
 
 	// Also, we provide an automatic way to do this job at fixed duration.
 	// It returns a channel which can be used to stop this automatic job.
 	// If you want to stop it, just send an true or false to the chan!
-	stopAutoGc := cache.AutoGc(10 * time.Minute)
+	stopAutoGc := cache.AutoGC(10 * time.Minute)
 	stopAutoGc <- struct{}{}
 
 4. the option usage:
@@ -132,4 +132,4 @@ Package cachego provides an easy way to use foundation for your caching operatio
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.2.5"
+const Version = "v0.3.0-alpha"
