@@ -48,7 +48,7 @@ func WithMapSize(mapSize uint) Option {
 // segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.
 func WithSegmentSize(segmentSize uint) Option {
 	if bits.OnesCount(segmentSize) > 1 {
-		panic("segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
+		panic("Cachego: segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
 	}
 
 	return func(conf *config.Config) {
@@ -101,6 +101,13 @@ func WithGetNoTTL() GetOption {
 func WithGetOnMissed(onMissed func(ctx context.Context) (data interface{}, err error)) GetOption {
 	return func(conf *config.GetConfig) {
 		conf.OnMissed = onMissed
+	}
+}
+
+// WithGetNoSingleflight sets the single-flight mode to false.
+func WithGetNoSingleflight() GetOption {
+	return func(conf *config.GetConfig) {
+		conf.Singleflight = false
 	}
 }
 

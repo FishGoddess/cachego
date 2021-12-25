@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/FishGoddess/cachego/internal/config"
+	"github.com/FishGoddess/cachego/pkg/singleflight"
 )
 
 var (
@@ -43,6 +44,9 @@ type Cache struct {
 
 	// segments is a slice stores the real data.
 	segments []*segment
+
+	// groups is a slice stores the singleflight keys.
+	groups []*singleflight.Group
 }
 
 // NewCache returns a new Cache holder for use.
@@ -52,6 +56,7 @@ func NewCache(opts ...Option) *Cache {
 	}
 
 	c.segments = newSegments(c.conf.MapSize, c.conf.SegmentSize)
+	c.groups = newGroups(c.conf.MapSize, c.conf.SegmentSize)
 	if c.conf.GCDuration > 0 {
 		c.AutoGC(c.conf.GCDuration)
 	}
@@ -70,7 +75,18 @@ func newSegments(mapSize int, segmentSize int) []*segment {
 	return segments
 }
 
-// indexOf returns a position in segments of this key.
+// newGroups returns a slice of initialized singleflight groups.
+func newGroups(mapSize int, groupSize int) []*singleflight.Group {
+	groups := make([]*singleflight.Group, groupSize)
+
+	for i := 0; i < groupSize; i++ {
+		groups[i] = singleflight.NewGroup(mapSize)
+	}
+
+	return groups
+}
+
+// indexOf returns a position of this key.
 func (c *Cache) indexOf(key string) int {
 	index := 1469598103934665603
 	keyBytes := []byte(key)
@@ -88,6 +104,11 @@ func (c *Cache) segmentOf(key string) *segment {
 	return c.segments[c.indexOf(key)&(len(c.segments)-1)]
 }
 
+// groupOf returns the singleflight group of this key.
+func (c *Cache) groupOf(key string) *singleflight.Group {
+	return c.groups[c.indexOf(key)&(len(c.groups)-1)]
+}
+
 // Get fetches value of key from cache first, and returns it if ok.
 // Returns an NotFoundErr if this key is not found, and you can use IsNotFound to judge if this error is not found.
 // Also, you can specify a function which will be called if missed, so you can load this entry to cache again.
@@ -100,7 +121,15 @@ func (c *Cache) Get(key string, opts ...GetOption) (interface{}, error) {
 
 	conf := applyGetOptions(config.NewDefaultGetConfig(), opts...)
 	if conf.OnMissed != nil {
-		data, err := conf.OnMissed(conf.Ctx)
+		var data interface{}
+		var err error
+
+		if conf.Singleflight {
+			data, err = c.groupOf(key).Call(conf.Ctx, key, conf.OnMissed)
+		} else {
+			data, err = conf.OnMissed(conf.Ctx)
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -122,10 +151,10 @@ func (c *Cache) Set(key string, value interface{}, opts ...SetOption) {
 // AutoSet starts a goroutine to execute Set() at fixed duration.
 // It returns a channel which can be used to stop this goroutine.
 // See AutoSetOption.
-func (c *Cache) AutoSet(key string, loadFunc func(ctx context.Context) (interface{}, error), opts ...AutoSetOption) chan<- struct{} {
+func (c *Cache) AutoSet(key string, fn func(ctx context.Context) (interface{}, error), opts ...AutoSetOption) chan<- struct{} {
 	conf := applyAutoSetOptions(config.NewDefaultAutoSetConfig(), opts...)
 
-	quitChan := make(chan struct{}, 1)
+	quitChan := make(chan struct{})
 	go func() {
 		ticker := time.NewTicker(conf.Gap)
 		defer ticker.Stop()
@@ -133,7 +162,7 @@ func (c *Cache) AutoSet(key string, loadFunc func(ctx context.Context) (interfac
 		for {
 			select {
 			case <-ticker.C:
-				if data, err := loadFunc(conf.Ctx); err == nil {
+				if data, err := fn(conf.Ctx); err == nil {
 					c.Set(key, data, WithSetTTL(conf.TTL))
 				}
 			case <-quitChan:
@@ -149,6 +178,7 @@ func (c *Cache) AutoSet(key string, loadFunc func(ctx context.Context) (interfac
 // If this key is not existed, nothing will happen.
 func (c *Cache) Delete(key string) {
 	c.segmentOf(key).delete(key)
+	c.groupOf(key).Delete(key)
 }
 
 // DeleteAll removes all keys in cache.
@@ -157,17 +187,19 @@ func (c *Cache) DeleteAll() {
 	for _, segment := range c.segments {
 		segment.deleteAll()
 	}
+
+	for _, group := range c.groups {
+		group.DeleteAll()
+	}
 }
 
 // Size returns the size of cache.
 // Notice that this method is weak-consistency.
 func (c *Cache) Size() int {
 	size := 0
-
 	for _, segment := range c.segments {
 		size += segment.size()
 	}
-
 	return size
 }
 
@@ -193,7 +225,6 @@ func (c *Cache) AutoGC(duration time.Duration) chan<- struct{} {
 			case <-ticker.C:
 				c.GC()
 			case <-quitChan:
-				ticker.Stop()
 				return
 			}
 		}

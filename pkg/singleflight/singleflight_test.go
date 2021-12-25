@@ -19,24 +19,26 @@
 package singleflight
 
 import (
+	"context"
+	"math/rand"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 )
 
-// go test -v -cover -run=^TestCallDo$
-func TestCallDo(t *testing.T) {
-	call := NewCall()
-
-	var rightResult int64
+func testGroupCall(ctx context.Context, t *testing.T, group *Group, concurrency int) {
 	var wg sync.WaitGroup
-	for i := 0; i < 100000; i++ {
+
+	key := strconv.Itoa(rand.Int())
+	rightResult := int64(0)
+	for i := 0; i < concurrency; i++ {
 		wg.Add(1)
 		go func(index int64) {
 			defer wg.Done()
 
-			result, err := call.Do(func() (interface{}, error) {
+			result, err := group.Call(ctx, key, func(ctx context.Context) (interface{}, error) {
 				time.Sleep(time.Second)
 				atomic.StoreInt64(&rightResult, index)
 				return index, nil
@@ -51,6 +53,30 @@ func TestCallDo(t *testing.T) {
 				t.Errorf("result %d != rightResult %d", result, r)
 			}
 		}(int64(i))
+	}
+
+	wg.Wait()
+}
+
+// go test -v -cover -run=^TestGroupCall$
+func TestGroupCall(t *testing.T) {
+	ctx := context.Background()
+	group := NewGroup(128)
+	testGroupCall(ctx, t, group, 100000)
+}
+
+// go test -v -cover -run=^TestGroupCallMultiKey$
+func TestGroupCallMultiKey(t *testing.T) {
+	ctx := context.Background()
+	group := NewGroup(128)
+
+	var wg sync.WaitGroup
+	for i := 0; i <= 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			testGroupCall(ctx, t, group, 1000)
+		}()
 	}
 
 	wg.Wait()

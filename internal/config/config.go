@@ -61,14 +61,20 @@ type GetConfig struct {
 
 	// OnMissed is the function which will be called if not nil.
 	OnMissed func(ctx context.Context) (data interface{}, err error)
+
+	// Singleflight means the call of OnMissed is single-flight mode.
+	// This is a recommended way to load data from storages to cache, however,
+	// it may decrease the success rate of loading data.
+	Singleflight bool
 }
 
 // NewDefaultGetConfig returns the default config of Get operations.
 func NewDefaultGetConfig() *GetConfig {
 	return &GetConfig{
-		Ctx:      context.Background(),
-		TTL:      10 * time.Second,
-		OnMissed: nil,
+		Ctx:          context.Background(),
+		TTL:          10 * time.Second,
+		OnMissed:     nil,
+		Singleflight: true,
 	}
 }
 
