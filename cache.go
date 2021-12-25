@@ -67,22 +67,18 @@ func NewCache(opts ...Option) *Cache {
 // newSegments returns a slice of initialized segments.
 func newSegments(mapSize int, segmentSize int) []*segment {
 	segments := make([]*segment, segmentSize)
-
 	for i := 0; i < segmentSize; i++ {
 		segments[i] = newSegment(mapSize)
 	}
-
 	return segments
 }
 
 // newGroups returns a slice of initialized singleflight groups.
 func newGroups(mapSize int, groupSize int) []*singleflight.Group {
 	groups := make([]*singleflight.Group, groupSize)
-
 	for i := 0; i < groupSize; i++ {
 		groups[i] = singleflight.NewGroup(mapSize)
 	}
-
 	return groups
 }
 
@@ -95,7 +91,6 @@ func (c *Cache) indexOf(key string) int {
 		index = (index << 5) - index + int(b&0xff)
 		index *= 1099511628211
 	}
-
 	return index
 }
 

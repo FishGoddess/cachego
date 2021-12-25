@@ -35,9 +35,11 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	v, err := cache.Get("key")
 	fmt.Println(v, err) // Output: 666 <nil>
 
-	// If you pass a not existed key to of method, nil and false will be returned.
+	// If you pass a not existed key to of method, nil and errNotFound will be returned.
 	v, err = cache.Get("not existed key")
-	fmt.Println(v, err) // Output: <nil> cachego: key not found
+	if cachego.IsNotFound(err) {
+		fmt.Println(v, err) // Output: <nil> cachego: key not found
+	}
 
 	// SetWithTTL sets an entry with expired time.
 	// See more information in example of ttl.

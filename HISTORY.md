@@ -1,5 +1,18 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.3.0-alpha
+
+> 此版本发布于 2021-12-25
+
+* 祝大家圣诞节快乐！！！
+* 去除 GetWithTTL 方法
+* 重新设计 AutoSet 方法，引入 option 机制
+* 加入 singleflight 机制
+* 优化 value 使用，复用内存、代码可读性
+* Set 引入 option 机制
+* Get 引入 option 机制
+* 优化 Set 性能，实行 value 复用
+
 ### v0.2.5
 
 > 此版本发布于 2021-10-10

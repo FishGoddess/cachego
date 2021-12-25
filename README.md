@@ -20,6 +20,7 @@
 * 使用粒度更细的分段锁机制进行设计，具有非常高的并发性能
 * 支持懒清理机制，每一次访问的时候判断是否过期
 * 支持哨兵清理机制，每隔一定的时间间隔进行清理
+* 自带 singleflight 机制，减少缓存穿透的伤害
 * ....
 
 _更多功能请参考 [_examples](_examples)。架构设计请参考 [arch.md](_examples/docs/arch.md) 文档。_
@@ -60,9 +61,11 @@ func main() {
 	v, err := cache.Get("key")
 	fmt.Println(v, err) // Output: 666 <nil>
 
-	// If you pass a not existed key to of method, nil and false will be returned.
+	// If you pass a not existed key to of method, nil and errNotFound will be returned.
 	v, err = cache.Get("not existed key")
-	fmt.Println(v, err) // Output: <nil> cachego: key not found
+	if cachego.IsNotFound(err) {
+		fmt.Println(v, err) // Output: <nil> cachego: key not found
+	}
 
 	// SetWithTTL sets an entry with expired time.
 	// See more information in example of ttl.

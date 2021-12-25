@@ -48,7 +48,7 @@ func WithMapSize(mapSize uint) Option {
 // segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.
 func WithSegmentSize(segmentSize uint) Option {
 	if bits.OnesCount(segmentSize) > 1 {
-		panic("Cachego: segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
+		panic("cachego: segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
 	}
 
 	return func(conf *config.Config) {

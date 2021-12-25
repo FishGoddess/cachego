@@ -20,6 +20,8 @@
 * Use fine-grained and segmented lock mechanism to provide a high performance in concurrency
 * Lazy cleanup supports, expired before accessing
 * Sentinel cleanup supports, cleaning up at fixed duration
+* Singleflight supports, which can decrease the times of cache penetration
+* ....
 
 _More features in [_examples](_examples) and designing detail in [arch.md](_examples/docs/arch.md)._
 
