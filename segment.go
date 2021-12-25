@@ -52,7 +52,6 @@ func (s *segment) get(key string) (interface{}, bool) {
 	if value, ok := s.data[key]; ok && value.alive() {
 		return value.data, true
 	}
-
 	return nil, false
 }
 
@@ -66,7 +65,6 @@ func (s *segment) set(key string, value interface{}, ttl time.Duration) {
 		v.renew(value, ttl) // Reuse value memory
 		return
 	}
-
 	s.data[key] = newValue(value, ttl)
 }
 
