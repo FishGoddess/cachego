@@ -20,11 +20,8 @@ package cachego
 
 import (
 	"time"
-)
 
-const (
-	// NeverDie means value.alive() returns true forever.
-	NeverDie = 0
+	"github.com/FishGoddess/cachego/internal/config"
 )
 
 // value is a box of data.
@@ -33,24 +30,38 @@ type value struct {
 	data interface{}
 
 	// ttl is the life of value.
-	// The unit is second.
-	ttl int64
+	ttl time.Duration
 
-	// ctime is the created time of value.
-	ctime time.Time
+	// createTime is the created time of value.
+	createTime time.Time
 }
 
 // newValue returns a new value with data and ttl.
-// The unit is second.
-func newValue(data interface{}, ttl int64) *value {
+func newValue(data interface{}, ttl time.Duration) *value {
+	if ttl < 0 {
+		ttl = config.NoTTL // Should panic if ttl < 0?
+	}
+
 	return &value{
-		data:  data,
-		ttl:   ttl,
-		ctime: time.Now(),
+		data:       data,
+		ttl:        ttl,
+		createTime: time.Now(),
 	}
 }
 
 // alive returns if this value is alive or not.
 func (v *value) alive() bool {
-	return v.ttl == NeverDie || time.Now().Unix() <= v.ctime.Unix() + v.ttl
+	return v != nil && (v.ttl == config.NoTTL || time.Since(v.createTime) <= v.ttl)
+}
+
+// renew sets v to a new one.
+func (v *value) renew(data interface{}, ttl time.Duration) *value {
+	if v == nil {
+		return nil
+	}
+
+	v.data = data
+	v.ttl = ttl
+	v.createTime = time.Now()
+	return v
 }

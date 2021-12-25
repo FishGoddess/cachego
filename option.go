@@ -19,20 +19,28 @@
 package cachego
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
 	"math/bits"
-	"net/http"
 	"time"
+
+	"github.com/FishGoddess/cachego/internal/config"
 )
 
-// Option is a function which initializes cache.
-type Option func(cache *Cache)
+// Option is a function which initializes Config.
+type Option func(conf *config.Config)
+
+// applyOptions applies opts to conf.
+func applyOptions(conf *config.Config, opts ...Option) *config.Config {
+	for _, applyOption := range opts {
+		applyOption(conf)
+	}
+	return conf
+}
 
 // WithMapSize is an option setting initializing map size of cache.
 func WithMapSize(mapSize uint) Option {
-	return func(cache *Cache) {
-		cache.mapSize = int(mapSize)
+	return func(conf *config.Config) {
+		conf.MapSize = int(mapSize)
 	}
 }
 
@@ -40,125 +48,135 @@ func WithMapSize(mapSize uint) Option {
 // segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.
 func WithSegmentSize(segmentSize uint) Option {
 	if bits.OnesCount(segmentSize) > 1 {
-		panic("segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
+		panic("cachego: segmentSize must be the pow of 2 (such as 64) or the segments may be uneven.")
 	}
 
-	return func(cache *Cache) {
-		cache.segmentSize = int(segmentSize)
+	return func(conf *config.Config) {
+		conf.SegmentSize = int(segmentSize)
 	}
 }
 
 // WithAutoGC is an option turning on automatically gc.
-func WithAutoGC(gcDuration time.Duration) Option {
-	return func(cache *Cache) {
-		cache.AutoGc(gcDuration)
+func WithAutoGC(d time.Duration) Option {
+	return func(conf *config.Config) {
+		if d > 0 {
+			conf.GCDuration = d
+		}
 	}
 }
 
-// debugPointHandler returns debug http handler.
-func debugPointHandler(cache *Cache) http.Handler {
-	writeAsJson := func(writer http.ResponseWriter, data map[string]interface{}) {
-		dataBytes, err := json.Marshal(data)
+// GetOption is a function which initializes GetConfig.
+type GetOption func(conf *config.GetConfig)
 
-		if err != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			writer.Write([]byte(fmt.Sprintf("err: %+v\ndata: %+v", err, data)))
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		writer.Write(dataBytes)
+// applyGetOptions applies opts to conf.
+func applyGetOptions(conf *config.GetConfig, opts ...GetOption) *config.GetConfig {
+	for _, applyOption := range opts {
+		applyOption(conf)
 	}
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		writeAsJson(writer, map[string]interface{}{
-			"info": "Welcome to cachego debug point!",
-			"cache": map[string]interface{}{
-				"mapSize":     cache.mapSize,
-				"segmentSize": cache.segmentSize,
-			},
-			"version": Version,
-			"time":    time.Now().Format("2006-01-02 15:04:05"),
-			"points": map[string]string{
-				"/get": "Get a value from cache, ex: /get?key=test",
-				"/remove": "Remove a value from cache, ex: /remove?key=test",
-				"/size": "Get size of cache",
-				"/gc": "Do gc task",
-				"/detail": "List all segments' detail",
-			},
-		})
-	})
-
-	mux.HandleFunc("/get", func(writer http.ResponseWriter, request *http.Request) {
-		key := request.URL.Query().Get("key")
-		data, ok := cache.Get(key)
-
-		writeAsJson(writer, map[string]interface{}{
-			"data": data,
-			"ok":   ok,
-		})
-	})
-
-	mux.HandleFunc("/remove", func(writer http.ResponseWriter, request *http.Request) {
-		key := request.URL.Query().Get("key")
-		cache.Remove(key)
-
-		writeAsJson(writer, map[string]interface{}{
-			"ok": true,
-		})
-	})
-
-	mux.HandleFunc("/size", func(writer http.ResponseWriter, request *http.Request) {
-		writeAsJson(writer, map[string]interface{}{
-			"size": cache.Size(),
-		})
-	})
-
-	mux.HandleFunc("/gc", func(writer http.ResponseWriter, request *http.Request) {
-		cache.Gc()
-
-		writeAsJson(writer, map[string]interface{}{
-			"ok": true,
-		})
-	})
-
-	mux.HandleFunc("/detail", func(writer http.ResponseWriter, request *http.Request) {
-		data := make(map[string]interface{}, cache.segmentSize)
-
-		for i, segment := range cache.segments {
-			values := make(map[string]interface{}, len(segment.data))
-
-			for k, v := range segment.data {
-				values[k] = map[string]interface{}{
-					"data":  v.data,
-					"ttl":   v.ttl,
-					"ctime": v.ctime.Format("2006-01-02 15:04:05"),
-					"alive": v.alive(),
-				}
-			}
-
-			data[fmt.Sprintf("segment.%d", i)] = map[string]interface{}{
-				"size": segment.aliveSize,
-				"values":    values,
-			}
-		}
-
-		writeAsJson(writer, data)
-	})
-
-	return mux
+	return conf
 }
 
-// WithDebugPoint runs a http server and registers some handlers for debug.
-// Don't use it in production!
-func WithDebugPoint(address string) Option {
-	return func(cache *Cache) {
-		go func() {
-			err := http.ListenAndServe(address, debugPointHandler(cache))
-			if err != nil {
-				panic(fmt.Errorf("WithDebugPoint() failed to listen on address [%s] due to %s", address, err.Error()))
-			}
-		}()
+// WithGetContext sets context to ctx.
+func WithGetContext(ctx context.Context) GetOption {
+	return func(conf *config.GetConfig) {
+		conf.Ctx = ctx
+	}
+}
+
+// WithGetTTL sets the ttl of missed key if loaded to ttl.
+func WithGetTTL(ttl time.Duration) GetOption {
+	return func(conf *config.GetConfig) {
+		conf.TTL = ttl
+	}
+}
+
+// WithGetNoTTL sets the ttl of missed key to no ttl.
+func WithGetNoTTL() GetOption {
+	return func(conf *config.GetConfig) {
+		conf.TTL = config.NoTTL
+	}
+}
+
+// WithGetOnMissed sets onMissed to Get operation.
+func WithGetOnMissed(onMissed func(ctx context.Context) (data interface{}, err error)) GetOption {
+	return func(conf *config.GetConfig) {
+		conf.OnMissed = onMissed
+	}
+}
+
+// WithGetNoSingleflight sets the single-flight mode to false.
+func WithGetNoSingleflight() GetOption {
+	return func(conf *config.GetConfig) {
+		conf.Singleflight = false
+	}
+}
+
+// SetOption is a function which initializes SetConfig.
+type SetOption func(conf *config.SetConfig)
+
+// applySetOptions applies opts to conf.
+func applySetOptions(conf *config.SetConfig, opts ...SetOption) *config.SetConfig {
+	for _, applyOption := range opts {
+		applyOption(conf)
+	}
+	return conf
+}
+
+// WithSetTTL sets the ttl of key to ttl.
+func WithSetTTL(ttl time.Duration) SetOption {
+	return func(conf *config.SetConfig) {
+		if ttl > 0 {
+			conf.TTL = ttl
+		}
+	}
+}
+
+// WithSetNoTTL sets the ttl of key to no ttl.
+func WithSetNoTTL() SetOption {
+	return func(conf *config.SetConfig) {
+		conf.TTL = config.NoTTL
+	}
+}
+
+// AutoSetOption is a function which initializes AutoSetConfig.
+type AutoSetOption func(conf *config.AutoSetConfig)
+
+// applyAutoSetOptions applies opts to conf.
+func applyAutoSetOptions(conf *config.AutoSetConfig, opts ...AutoSetOption) *config.AutoSetConfig {
+	for _, applyOption := range opts {
+		applyOption(conf)
+	}
+	return conf
+}
+
+// WithAutoSetContext sets context to ctx.
+func WithAutoSetContext(ctx context.Context) AutoSetOption {
+	return func(conf *config.AutoSetConfig) {
+		conf.Ctx = ctx
+	}
+}
+
+// WithAutoSetTTL sets the ttl of key to ttl.
+func WithAutoSetTTL(ttl time.Duration) AutoSetOption {
+	return func(conf *config.AutoSetConfig) {
+		if ttl > 0 {
+			conf.TTL = ttl
+		}
+	}
+}
+
+// WithAutoSetNoTTL sets the ttl of key to no ttl.
+func WithAutoSetNoTTL() AutoSetOption {
+	return func(conf *config.AutoSetConfig) {
+		conf.TTL = config.NoTTL
+	}
+}
+
+// WithAutoSetGap sets the gap between two set operations to gap.
+func WithAutoSetGap(gap time.Duration) AutoSetOption {
+	return func(conf *config.AutoSetConfig) {
+		if gap > 0 {
+			conf.Gap = gap
+		}
 	}
 }

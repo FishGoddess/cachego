@@ -20,18 +20,16 @@ package cachego
 
 import (
 	"sync"
+	"time"
 )
 
 // segment is the struct storing the real data.
 type segment struct {
-	// mapSize is the initialized size of map inside.
-	mapSize int
-
-	// aliveSize is the size of alive values in data.
-	aliveSize int
-
 	// data stores all entries.
 	data map[string]*value
+
+	// mapSize is the initialized size of map inside.
+	mapSize int
 
 	// lock is for concurrency.
 	lock sync.RWMutex
@@ -40,10 +38,9 @@ type segment struct {
 // newSegment returns a segment holder with mapSize.
 func newSegment(mapSize int) *segment {
 	return &segment{
-		mapSize:   mapSize,
-		aliveSize: 0,
-		data:      make(map[string]*value, mapSize),
-		lock:      sync.RWMutex{},
+		data:    make(map[string]*value, mapSize),
+		mapSize: mapSize,
+		lock:    sync.RWMutex{},
 	}
 }
 
@@ -59,38 +56,31 @@ func (s *segment) get(key string) (interface{}, bool) {
 	return nil, false
 }
 
-// set sets key and value with a ttl.
-// If you want this key to be alive forever, just give it a NeverDie ttl.
-// See value.
-// The unit of ttl is second.
-func (s *segment) set(key string, value interface{}, ttl int64) {
+// set puts a value of key with a ttl.
+// If you want this key to be alive forever, just give it a noTTL.
+func (s *segment) set(key string, value interface{}, ttl time.Duration) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	if _, ok := s.data[key]; !ok {
-		s.aliveSize++
+	if v, ok := s.data[key]; ok {
+		v.renew(value, ttl) // Reuse value memory
+		return
 	}
 
 	s.data[key] = newValue(value, ttl)
 }
 
-// remove will remove the key in segment.
-func (s *segment) remove(key string) {
+// delete will delete the key in segment.
+func (s *segment) delete(key string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-
-	if _, ok := s.data[key]; ok {
-		s.aliveSize--
-	}
-
 	delete(s.data, key)
 }
 
-// removeAll removes all keys in segment.
-func (s *segment) removeAll() {
+// deleteAll removes all keys in segment.
+func (s *segment) deleteAll() {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	s.aliveSize = 0
 	s.data = make(map[string]*value, s.mapSize)
 }
 
@@ -98,7 +88,7 @@ func (s *segment) removeAll() {
 func (s *segment) size() int {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
-	return s.aliveSize
+	return len(s.data)
 }
 
 // gc removes all dead entries in segment.
@@ -108,7 +98,6 @@ func (s *segment) gc() {
 
 	for key, value := range s.data {
 		if !value.alive() {
-			s.aliveSize--
 			delete(s.data, key)
 		}
 	}

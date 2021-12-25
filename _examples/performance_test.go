@@ -68,15 +68,15 @@ func testTask(task func()) {
 // timeTask is for recording time of task.
 // unit is ms.
 func timeTask(task func()) int64 {
-	begin := time.Now().UnixNano()
+	begin := time.Now()
 	task()
-	return (time.Now().UnixNano() - begin) / 1000_000
+	return time.Since(begin).Milliseconds()
 }
 
 // go test -v -run=^TestCacheGoWrite$
 func TestCacheGoWrite(t *testing.T) {
 	c := cachego.NewCache()
-	c.AutoGc(30 * time.Minute)
+	c.AutoGC(30 * time.Minute)
 
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
@@ -98,7 +98,7 @@ func TestCacheGoWrite(t *testing.T) {
 // go test -v -run=^TestCacheGoRead$
 func TestCacheGoRead(t *testing.T) {
 	c := cachego.NewCache()
-	c.AutoGc(30 * time.Minute)
+	c.AutoGC(30 * time.Minute)
 
 	for i := 0; i < dataSize; i++ {
 		key := strconv.Itoa(i)
@@ -137,6 +137,19 @@ func TestCacheGo(t *testing.T) {
 	})
 
 	fmt.Printf("%s spent %dms\n", t.Name(), spent)
+}
+
+// go test -v ./_examples/performance_test.go -bench=^BenchmarkCacheGo$ -run=^$
+// BenchmarkCacheGo-16     11647861               100 ns/op              20 B/op          1 allocs/op
+func BenchmarkCacheGo(b *testing.B) {
+	c := cachego.NewCache()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		key := strconv.Itoa(rand.Intn(10000))
+		c.Set(key, key)
+	}
 }
 
 //// go test -v -run=^TestGoCacheWrite$

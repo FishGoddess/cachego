@@ -27,30 +27,32 @@ import (
 
 func main() {
 	// Create a cache and set an entry to cache.
-	// The ttl is 1 second.
 	cache := cachego.NewCache()
-	cache.SetWithTTL("key", "value", 1)
+	cache.Set("key", "value", cachego.WithSetTTL(1*time.Second))
+
+	value, err := cache.Get("key")
+	fmt.Println(value, err) // Output: value <nil>
 
 	// Wait for 2 seconds and check the key.
 	time.Sleep(2 * time.Second)
 
-	// We can see this key is gone and we can't get it anymore.
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // Output: <nil> false
+	// We can see this key is gone, and we can't get it anymore.
+	value, err = cache.Get("key")
+	fmt.Println(value, err) // Output: <nil> cachego: key not found
 
 	// However, the key still stores in cache and occupies the space.
 	size := cache.Size()
 	fmt.Println(size) // Output: 1
 
-	// We should call Gc() to clean up these dead entries.
-	// Notice that this method will takes some CPU time to finish this task.
-	cache.Gc()
+	// We should call GC() to clean up these dead entries.
+	// Notice that this method will take some CPU time to finish this task.
+	cache.GC()
 	size = cache.Size()
 	fmt.Println(size) // Output: 0
 
 	// Also, we provide an automatic way to do this job at fixed duration.
 	// It returns a channel which can be used to stop this automatic job.
 	// If you want to stop it, just send an true or false to the chan!
-	stopAutoGc := cache.AutoGc(10 * time.Minute)
+	stopAutoGc := cache.AutoGC(10 * time.Minute)
 	stopAutoGc <- struct{}{}
 }

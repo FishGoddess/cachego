@@ -1,11 +1,21 @@
 ## ✒ 未来版本的新特性 (Features in future versions)
 
-### maybe...
+### v0.3.x
 
 * [ ] 支持内存大小限制，防止无上限的使用内存
 * [ ] 支持用户自定义达到内存限制时的处理策略
 * [ ] 支持缓存个数限制，防止数据量太多导致哈希性能下降
 * [ ] 支持用户自定义达到个数限制时的处理策略
+* [x] 去除 GetWithTTL 方法
+* [x] 重新设计 AutoSet 方法，引入 option 机制
+* [x] 加入 singleflight 机制
+* [ ] 加入 monitor 监控机制，接口形式
+* [x] 优化 value 使用，复用内存、代码可读性
+* [ ] GC 加入数量限制或时间限制
+* [x] Set 引入 option 机制
+* [x] Get 引入 option 机制
+* [ ] Delete 引入 option 机制，并可以限制删除数量
+* [ ] GC 引入 option 机制，并可以限制 GC 数量
 
 ### v0.2.x
 

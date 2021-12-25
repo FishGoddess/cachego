@@ -21,6 +21,7 @@ package cachego
 import (
 	"strconv"
 	"testing"
+	"unsafe"
 )
 
 // go test -cover -run=^TestSegmentSize$
@@ -47,15 +48,48 @@ func TestSegmentSize(t *testing.T) {
 
 	checkSize(t, 3, s, 110)
 	for i := int64(0); i < 50; i++ {
-		s.remove(strconv.FormatInt(i, 10))
+		s.delete(strconv.FormatInt(i, 10))
 	}
 
 	checkSize(t, 4, s, 60)
 	for i := int64(0); i < 50; i++ {
-		s.remove(strconv.FormatInt(999999999 + i, 10))
+		s.delete(strconv.FormatInt(999999999+i, 10))
 	}
 
 	checkSize(t, 5, s, 60)
-	s.removeAll()
+	s.deleteAll()
 	checkSize(t, 6, s, 0)
+}
+
+// go test -cover -run=^TestSegmentSet$
+func TestSegmentSet(t *testing.T) {
+	s := newSegment(16)
+
+	key := "key"
+	value := 123
+	s.set(key, value, 0)
+
+	val, ok := s.data[key]
+	if !ok {
+		t.Errorf("s.data[%s] not found", key)
+	}
+
+	valPointer := unsafe.Pointer(val)
+	for i := 0; i < 100; i++ {
+		s.set(key, 666, 0)
+	}
+
+	renewVal, ok := s.data[key]
+	if !ok {
+		t.Errorf("s.data[%s] not found", key)
+	}
+
+	renewValPointer := unsafe.Pointer(renewVal)
+	if valPointer != renewValPointer {
+		t.Errorf("valPointer %p != renewValPointer %p", valPointer, renewValPointer)
+	}
+
+	if val != renewVal || val.data != renewVal.data {
+		t.Errorf("val %p != renewVal %p || val.data %+v != renewVal.data %+v", valPointer, renewValPointer, val.data, renewVal.data)
+	}
 }

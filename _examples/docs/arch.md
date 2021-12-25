@@ -1,11 +1,26 @@
-# 架构介绍
+## ✒ Cachego 架构介绍
 
 cachego 是一个拥有高性能分段锁机制的轻量级内存缓存，拥有懒清理和哨兵清理两种清理机制，可以应用于所有的 GoLang 应用程序中。
 
-## 分段加锁
+### 🎈 分段加锁
 
 Cachego的架构如下图：
-![](pictures/arch.png)
+
+ ```mermaid
+graph TB
+A[Cache]---B1[Segment-1]
+A---B2[Segment-2]
+A---B3[Segment-3]
+A---B4[Segment-...]
+
+B1---D1[data:map]
+B1---D2[lock:*sync.Mutex]
+
+D1---k1
+k1---v1
+D1---k2
+k2---v2
+```
 
 Cachego的存储结构分为两层。第一层是缓存容器（Cache）。缓存容器下属多个段（Segment）,使用自定义的哈希算法，将键值对分配到各个段中。段采用内建的map数据结构进行二次哈希，并保存到map数据结构中。
 
@@ -13,7 +28,7 @@ Cachego的存储结构分为两层。第一层是缓存容器（Cache）。缓�
 
 以下将Segment称为“段”，将Cache称为“缓存容器”。
 
-## 数据生存时间与垃圾回收
+### 🔬 数据生存时间与垃圾回收
 
 数据生存时间（Time To Live, TTL）是指缓存数据进入缓存容器后的存储时间，在超过这段时间后，数据就会过期。
 
