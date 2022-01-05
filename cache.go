@@ -56,11 +56,13 @@ func NewCache(opts ...Option) *Cache {
 	}
 
 	c.segments = newSegments(c.conf.MapSize, c.conf.SegmentSize)
-	c.groups = newGroups(c.conf.MapSize, c.conf.SegmentSize)
+	if c.conf.EnableSingleflight {
+		c.groups = newGroups(c.conf.MapSize, c.conf.SegmentSize)
+	}
+
 	if c.conf.GCDuration > 0 {
 		c.AutoGC(c.conf.GCDuration)
 	}
-
 	return c
 }
 
@@ -114,26 +116,29 @@ func (c *Cache) Get(key string, opts ...GetOption) (interface{}, error) {
 		return v, nil
 	}
 
-	conf := applyGetOptions(config.NewDefaultGetConfig(), opts...)
-	if conf.OnMissed != nil {
-		var data interface{}
-		var err error
-
-		if conf.Singleflight {
-			data, err = c.groupOf(key).Call(conf.Ctx, key, conf.OnMissed)
-		} else {
-			data, err = conf.OnMissed(conf.Ctx)
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		c.Set(key, data, WithSetTTL(conf.TTL))
-		return data, nil
+	if len(opts) <= 0 {
+		return nil, errNotFound
 	}
 
-	return nil, errNotFound
+	conf := applyGetOptions(config.NewDefaultGetConfig(), opts...)
+	if conf.OnMissed == nil {
+		return nil, errNotFound
+	}
+
+	var data interface{}
+	var err error
+	if c.conf.EnableSingleflight && conf.Singleflight {
+		data, err = c.groupOf(key).Call(conf.Ctx, key, conf.OnMissed)
+	} else {
+		data, err = conf.OnMissed(conf.Ctx)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	c.Set(key, data, WithSetTTL(conf.TTL))
+	return data, nil
 }
 
 // Set sets key and value to cache.

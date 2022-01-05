@@ -131,10 +131,71 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Also, you can add more than one option to cache.
-	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
+	cache = cachego.NewCache(cachego.WithAutoGC(10*time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
+
+	// Remember, some operations have their options, here is one example:
+	cache.Get("key", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+		return "value", nil
+	}))
+
+5. the singleflight usage:
+
+	// In default, cachego enables single-flight mode in get operations.
+	// Just use WithGetOnMissed option to enjoy the flight of data.
+	cache := cachego.NewCache()
+
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			cache.Get("key1", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+				time.Sleep(30*time.Millisecond) // Assume I/O costs 30ms
+				fmt.Println("key1: single-flight")
+				return 123, nil
+			}))
+		}()
+	}
+	wg.Wait()
+
+	// If you want to disable single-flight mode in some Get operations, try this:
+	wg = sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			cache.Get("key2", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
+				fmt.Println("key2: multi-flight")
+				return 456, nil
+			}), cachego.WithGetDisableSingleflight())
+		}()
+	}
+	wg.Wait()
+
+	// Of course, we all know single-flight mode will decrease the success rate of loading data.
+	// So you can disable it globally if you need.
+	cache = cachego.NewCache(cachego.WithDisableSingleflight())
+
+	wg = sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			cache.Get("key3", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
+				fmt.Println("key3: multi-flight")
+				return 666, nil
+			}))
+		}()
+	}
+	wg.Wait()
 
 */
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.3.0-alpha"
+const Version = "v0.3.1-alpha"

@@ -14,8 +14,8 @@
 * [ ] GC 加入数量限制或时间限制
 * [x] Set 引入 option 机制
 * [x] Get 引入 option 机制
-* [ ] Delete 引入 option 机制，并可以限制删除数量
-* [ ] GC 引入 option 机制，并可以限制 GC 数量
+* [ ] Delete 引入 option 机制，并可以限制删除数量、key 匹配模式
+* [ ] GC 引入 option 机制，并可以限制 GC 数量或时间、key 匹配模式
 
 ### v0.2.x
 

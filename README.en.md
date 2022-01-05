@@ -9,7 +9,7 @@
 
 > It has been used by many services in production, and even 8w/s qps is ok for it, so just use it if you want!
 
-> I am thinking about v0.3.x which will be better in APIs and features, so issue me if you have something fun!!!
+> I am developing v0.3.x which will be better at APIs and features, so issue me if you have something fun!!!
 
 [阅读中文版的 Read me](./README.md).
 
@@ -110,11 +110,11 @@ $ go test -v ./_examples/performance_test.go
 
 > Environment：R7-5800X CPU @ 3.8GHZ GHZ, 32 GB RAM
 
-| tests | write time (less is better) | read time (less is better) | mixed-operation time (less is better) |
-|-----------|-------------|-------------|-------------|
-| **cachego** | **965ms** | **949ms** | **991ms** |
-| go-cache | 3216ms | 980ms | 4508ms |
-| freeCache | 954ms | 968ms | 987ms |
+| tests       | write time (less is better) | read time (less is better) | mixed-operation time (less is better) |
+|-------------|-----------------------------|----------------------------|---------------------------------------|
+| **cachego** | **965ms**                   | **949ms**                  | **991ms**                             |
+| go-cache    | 3216ms                      | 980ms                      | 4508ms                                |
+| freeCache   | 954ms                       | 968ms                      | 987ms                                 |
 
 As you can see, cachego has a high performance in concurrent, but segmented lock mechanism has one-more-time positioning
 operation, so if the price of locking is less than the cost of positioning, this mechanism is dragging. The reading

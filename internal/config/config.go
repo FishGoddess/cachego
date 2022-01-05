@@ -40,14 +40,18 @@ type Config struct {
 
 	// GCDuration is the duration of gc.
 	GCDuration time.Duration
+
+	// EnableSingleflight means cache will enable single-flight mode.
+	EnableSingleflight bool
 }
 
 // NewDefaultConfig returns the default config of cache.
 func NewDefaultConfig() *Config {
 	return &Config{
-		MapSize:     256,
-		SegmentSize: 256,
-		GCDuration:  0,
+		MapSize:            256,
+		SegmentSize:        256,
+		GCDuration:         0,
+		EnableSingleflight: true,
 	}
 }
 

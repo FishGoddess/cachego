@@ -65,6 +65,13 @@ func WithAutoGC(d time.Duration) Option {
 	}
 }
 
+// WithDisableSingleflight is an option disabling single-flight mode of cache.
+func WithDisableSingleflight() Option {
+	return func(conf *config.Config) {
+		conf.EnableSingleflight = false
+	}
+}
+
 // GetOption is a function which initializes GetConfig.
 type GetOption func(conf *config.GetConfig)
 
@@ -104,8 +111,8 @@ func WithGetOnMissed(onMissed func(ctx context.Context) (data interface{}, err e
 	}
 }
 
-// WithGetNoSingleflight sets the single-flight mode to false.
-func WithGetNoSingleflight() GetOption {
+// WithGetDisableSingleflight sets the single-flight mode to false.
+func WithGetDisableSingleflight() GetOption {
 	return func(conf *config.GetConfig) {
 		conf.Singleflight = false
 	}
