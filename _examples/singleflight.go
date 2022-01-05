@@ -39,7 +39,7 @@ func main() {
 			defer wg.Done()
 
 			cache.Get("key1", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
-				time.Sleep(30*time.Millisecond) // Assume I/O costs 30ms
+				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
 				fmt.Println("key1: single-flight")
 				return 123, nil
 			}))

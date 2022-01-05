@@ -96,6 +96,7 @@ func (g *Group) Call(ctx context.Context, key string, fn func(ctx context.Contex
 	return c.result, c.err
 }
 
+// Delete removes the flight of key so a new flight will start.
 func (g *Group) Delete(key string) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
@@ -106,6 +107,7 @@ func (g *Group) Delete(key string) {
 	}
 }
 
+// DeleteAll removes all flights.
 func (g *Group) DeleteAll() {
 	g.lock.Lock()
 	defer g.lock.Unlock()

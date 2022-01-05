@@ -131,7 +131,12 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Also, you can add more than one option to cache.
-	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
+	cache = cachego.NewCache(cachego.WithAutoGC(10*time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
+
+	// Remember, some operations have their options, here is one example:
+	cache.Get("key", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+		return "value", nil
+	}))
 
 5. the singleflight usage:
 
