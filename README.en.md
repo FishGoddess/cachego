@@ -110,11 +110,12 @@ $ go test -v ./_examples/performance_test.go
 
 > Environment：R7-5800X CPU @ 3.8GHZ GHZ, 32 GB RAM
 
-| tests       | write time (less is better) | read time (less is better) | mixed-operation time (less is better) |
-|-------------|-----------------------------|----------------------------|---------------------------------------|
-| **cachego** | **965ms**                   | **949ms**                  | **991ms**                             |
-| go-cache    | 3216ms                      | 980ms                      | 4508ms                                |
-| freeCache   | 954ms                       | 968ms                      | 987ms                                 |
+| tests       | read time (less is better) | write time (less is better) | mixed-operation time (less is better) |
+|-------------|----------------------------|-----------------------------|---------------------------------------|
+| **cachego** | **945ms**                  | **942ms**                   | **941ms**                             |
+| go-cache    | 965ms                      | 3251ms                      | 4390ms                                |
+| freeCache   | 935ms                      | 994ms                       | 1012ms                                |
+| ECache      | 931ms                      | 1068ms                      | 1071ms                                |
 
 As you can see, cachego has a high performance in concurrent, but segmented lock mechanism has one-more-time positioning
 operation, so if the price of locking is less than the cost of positioning, this mechanism is dragging. The reading
