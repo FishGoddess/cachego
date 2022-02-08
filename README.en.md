@@ -128,3 +128,8 @@ performance will be optimized in the future version!
 * [chen661](https://gitee.com/chen661): Provide the limit thought of argument in WithSegmentSize Option
 
 Please open an _**issue**_ if you find something is not working as expected.
+
+At last, I want to thank JetBrains for **free JetBrains Open Source license(s)**, because `cachego` is developed with
+Idea / GoLand under it.
+
+<a href="https://www.jetbrains.com/?from=cachego" target="_blank"><img src="./_icons/jetbrains.png" width="250"/></a>
