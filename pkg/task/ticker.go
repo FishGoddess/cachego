@@ -1,4 +1,4 @@
-// Copyright 2022 Ye Zi Jie. All Rights Reserved.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
 package task
 
@@ -20,33 +19,40 @@ import (
 	"time"
 )
 
+// TickerTask runs a task at fixed duration which will call fn().
 type TickerTask struct {
-	beforeFn func(ctx context.Context)
-	fn       func(ctx context.Context)
-	afterFn  func(ctx context.Context)
+	// Before will be called before running this task.
+	Before func(ctx context.Context)
+
+	// Task is main function which will called in loop.
+	Task func(ctx context.Context)
+
+	// After will be called after the task loop.
+	After func(ctx context.Context)
 }
 
-func NewTickerTask(beforeFn, fn, afterFn func(ctx context.Context)) *TickerTask {
-	return &TickerTask{
-		beforeFn: beforeFn,
-		fn:       fn,
-		afterFn:  afterFn,
+func (tt *TickerTask) Run(ctx context.Context, d time.Duration) {
+	if tt.Task == nil {
+		return
 	}
-}
 
-func (tt *TickerTask) Run(ctx context.Context, d time.Duration) error {
+	if tt.Before != nil {
+		tt.Before(ctx)
+	}
+
+	if tt.After != nil {
+		defer tt.After(ctx)
+	}
+
 	ticker := time.NewTicker(d)
 	defer ticker.Stop()
-
-	tt.beforeFn(ctx)
-	defer tt.afterFn(ctx)
 
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return
 		case <-ticker.C:
-			tt.fn(ctx)
+			tt.Task(ctx)
 		}
 	}
 }
