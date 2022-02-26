@@ -35,7 +35,7 @@ func TestTickerTaskRun(t *testing.T) {
 
 	var loop int64
 	var result strings.Builder
-	task := TickerTask{
+	task := Task{
 		Before: func(ctx context.Context) {
 			value, ok := ctx.Value(before.key).(string)
 			if !ok {
@@ -48,7 +48,7 @@ func TestTickerTaskRun(t *testing.T) {
 
 			result.WriteString(value)
 		},
-		Task: func(ctx context.Context) {
+		Fn: func(ctx context.Context) {
 			value, ok := ctx.Value(fn.key).(string)
 			if !ok {
 				t.Errorf("ctx.Value(fn.key).(string) %+v failed", ctx.Value(fn.key))

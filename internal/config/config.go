@@ -96,6 +96,7 @@ func NewDefaultSetConfig() *SetConfig {
 }
 
 // AutoSetConfig is the config of AutoSet operations.
+// Deprecated: Use pkg/task/Task instead.
 type AutoSetConfig struct {
 	// Ctx is the context of AutoSet.
 	Ctx context.Context
@@ -108,6 +109,7 @@ type AutoSetConfig struct {
 }
 
 // NewDefaultAutoSetConfig returns the default config of AutoSet operations.
+// Deprecated: Use pkg/task/Task instead.
 func NewDefaultAutoSetConfig() *AutoSetConfig {
 	return &AutoSetConfig{
 		Ctx: context.Background(),

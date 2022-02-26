@@ -146,9 +146,11 @@ func WithSetNoTTL() SetOption {
 }
 
 // AutoSetOption is a function which initializes AutoSetConfig.
+// Deprecated: Use pkg/task/Task instead.
 type AutoSetOption func(conf *config.AutoSetConfig)
 
 // applyAutoSetOptions applies opts to conf.
+// Deprecated: Use pkg/task/Task instead.
 func applyAutoSetOptions(conf *config.AutoSetConfig, opts ...AutoSetOption) *config.AutoSetConfig {
 	for _, applyOption := range opts {
 		applyOption(conf)
@@ -157,6 +159,7 @@ func applyAutoSetOptions(conf *config.AutoSetConfig, opts ...AutoSetOption) *con
 }
 
 // WithAutoSetContext sets context to ctx.
+// Deprecated: Use pkg/task/Task instead.
 func WithAutoSetContext(ctx context.Context) AutoSetOption {
 	return func(conf *config.AutoSetConfig) {
 		conf.Ctx = ctx
@@ -164,6 +167,7 @@ func WithAutoSetContext(ctx context.Context) AutoSetOption {
 }
 
 // WithAutoSetTTL sets the ttl of key to ttl.
+// Deprecated: Use pkg/task/Task instead.
 func WithAutoSetTTL(ttl time.Duration) AutoSetOption {
 	return func(conf *config.AutoSetConfig) {
 		if ttl > 0 {
@@ -173,6 +177,7 @@ func WithAutoSetTTL(ttl time.Duration) AutoSetOption {
 }
 
 // WithAutoSetNoTTL sets the ttl of key to no ttl.
+// Deprecated: Use pkg/task/Task instead.
 func WithAutoSetNoTTL() AutoSetOption {
 	return func(conf *config.AutoSetConfig) {
 		conf.TTL = config.NoTTL
@@ -180,6 +185,7 @@ func WithAutoSetNoTTL() AutoSetOption {
 }
 
 // WithAutoSetGap sets the gap between two set operations to gap.
+// Deprecated: Use pkg/task/Task instead.
 func WithAutoSetGap(gap time.Duration) AutoSetOption {
 	return func(conf *config.AutoSetConfig) {
 		if gap > 0 {

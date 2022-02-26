@@ -19,7 +19,7 @@
 /*
 Package cachego provides an easy way to use foundation for your caching operations.
 
-1. the basic usage:
+1. The basic usage:
 
 	// Create a cache for use.
 	// We use option function to customize the creation of cache.
@@ -67,7 +67,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	time.Sleep(5 * time.Second)
 	stopCh <- struct{}{} // Stop AutoSet task
 
-2. the ttl usage:
+2. The ttl usage:
 
 	// Create a cache and set an entry to cache.
 	cache := cachego.NewCache()
@@ -87,7 +87,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	// So, we provide an automatic way to remove those who are dead. See more information in example of gc.
 	cache.AutoGC(10 * time.Minute)
 
-3. the gc usage:
+3. The gc usage:
 
 	// Create a cache and set an entry to cache.
 	cache := cachego.NewCache()
@@ -119,7 +119,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	stopAutoGc := cache.AutoGC(10 * time.Minute)
 	stopAutoGc <- struct{}{}
 
-4. the option usage:
+4. The option usage:
 
 	// We use option function to customize the creation of cache.
 	// You can just new one without options.
@@ -138,7 +138,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 		return "value", nil
 	}))
 
-5. the singleflight usage:
+5. The singleflight usage:
 
 	// In default, cachego enables single-flight mode in get operations.
 	// Just use WithGetOnMissed option to enjoy the flight of data.
@@ -194,8 +194,55 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	}
 	wg.Wait()
 
+6. The task usage:
+
+	// We provide a task for you to do some loops.
+	t := task.Task{
+		Before: func(ctx context.Context) {
+			fmt.Println("Before...")
+		},
+		Fn: func(ctx context.Context) {
+			fmt.Println("Fn...")
+		},
+		After: func(ctx context.Context) {
+			fmt.Println("After...")
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Run runs a task which is usually called in a new goroutine.
+	// go t.Run(ctx, time.Second)
+	t.Run(ctx, time.Second)
+
+	// You can use it to update your cache. Try this:
+	cache := cachego.NewCache()
+
+	t = task.Task{
+		Before: func(ctx context.Context) {
+			cache.Set("key", "before")
+		},
+		Fn: func(ctx context.Context) {
+			cache.Set("key", strconv.FormatInt(rand.Int63n(100), 10))
+		},
+		After: func(ctx context.Context) {
+			cache.Set("key", "after")
+		},
+	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	go t.Run(ctx, time.Second)
+
+	// Simulate user requests
+	for i := 0; i < 22; i++ {
+		fmt.Println(cache.Get("key"))
+		time.Sleep(500 * time.Millisecond)
+	}
 */
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.3.2"
+const Version = "v0.3.3"

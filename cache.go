@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/03/14 16:28:56
 
 package cachego
 
@@ -151,6 +147,7 @@ func (c *Cache) Set(key string, value interface{}, opts ...SetOption) {
 // AutoSet starts a goroutine to execute Set() at fixed duration.
 // It returns a channel which can be used to stop this goroutine.
 // See AutoSetOption.
+// Deprecated: Use pkg/task/Task instead.
 func (c *Cache) AutoSet(key string, fn func(ctx context.Context) (interface{}, error), opts ...AutoSetOption) chan<- struct{} {
 	conf := applyAutoSetOptions(config.NewDefaultAutoSetConfig(), opts...)
 

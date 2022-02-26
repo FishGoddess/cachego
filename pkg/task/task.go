@@ -19,20 +19,21 @@ import (
 	"time"
 )
 
-// TickerTask runs a task at fixed duration which will call fn().
-type TickerTask struct {
+// Task runs a task at fixed duration which will call fn().
+type Task struct {
 	// Before will be called before running this task.
 	Before func(ctx context.Context)
 
-	// Task is main function which will called in loop.
-	Task func(ctx context.Context)
+	// Fn is main function which will called in loop.
+	Fn func(ctx context.Context)
 
 	// After will be called after the task loop.
 	After func(ctx context.Context)
 }
 
-func (tt *TickerTask) Run(ctx context.Context, d time.Duration) {
-	if tt.Task == nil {
+// Run runs this task at fixed duration d.
+func (tt *Task) Run(ctx context.Context, d time.Duration) {
+	if tt.Fn == nil {
 		return
 	}
 
@@ -52,7 +53,7 @@ func (tt *TickerTask) Run(ctx context.Context, d time.Duration) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			tt.Task(ctx)
+			tt.Fn(ctx)
 		}
 	}
 }
