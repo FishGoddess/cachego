@@ -11,17 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/03/14 14:43:24
 
 package cachego
 
 import (
 	"time"
-
-	"github.com/FishGoddess/cachego/internal/config"
 )
 
 // value is a box of data.
@@ -39,7 +33,7 @@ type value struct {
 // newValue returns a new value with data and ttl.
 func newValue(data interface{}, ttl time.Duration) *value {
 	if ttl < 0 {
-		ttl = config.NoTTL // Should panic if ttl < 0?
+		ttl = noTTL // Should panic if ttl < 0?
 	}
 
 	return &value{
@@ -51,7 +45,7 @@ func newValue(data interface{}, ttl time.Duration) *value {
 
 // alive returns if this value is alive or not.
 func (v *value) alive() bool {
-	return v != nil && (v.ttl == config.NoTTL || time.Since(v.createTime) <= v.ttl)
+	return v != nil && (v.ttl == noTTL || time.Since(v.createTime) <= v.ttl)
 }
 
 // renew sets v to a new one.

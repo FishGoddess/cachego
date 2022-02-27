@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/03/14 15:51:02
 
 package cachego
 
@@ -25,7 +21,7 @@ import (
 
 // go test -cover -run=^TestValue$
 func TestValue(t *testing.T) {
-	v := newValue(nil, 1)
+	v := newValue(nil, time.Second)
 
 	if !v.alive() {
 		t.Error("V should be alive!")

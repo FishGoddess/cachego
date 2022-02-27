@@ -47,6 +47,7 @@ import (
 	"time"
 
 	"github.com/FishGoddess/cachego"
+	"github.com/FishGoddess/cachego/pkg/task"
 )
 
 func main() {
@@ -56,7 +57,7 @@ func main() {
 	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
-	// Both of them are set a key-value with no TTL.
+	// Both of them are set a key-value with no ttl.
 	//cache.Set("key", 666, cachego.WithSetNoTTL())
 	cache.Set("key", 666)
 
@@ -64,35 +65,43 @@ func main() {
 	v, err := cache.Get("key")
 	fmt.Println(v, err) // Output: 666 <nil>
 
-	// If you pass a not existed key to of method, nil and false will be returned.
+	// If you pass a not existed key to of method, nil and errNotFound will be returned.
 	v, err = cache.Get("not existed key")
-	fmt.Println(v, err) // Output: <nil> cachego: key not found
+	if cachego.IsNotFound(err) {
+		fmt.Println(v, err) // Output: <nil> cachego: key not found
+	}
 
 	// SetWithTTL sets an entry with expired time.
 	// See more information in example of ttl.
-	cache.Set("ttlKey", 123, cachego.WithSetTTL(10*time.Second))
+	cache.Set("ttlKey", 123, cachego.WithOpTTL(10*time.Second))
 
 	// Also, you can get value from cache first, then load it to cache if missed.
-	// OnMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
 	// Notice ctx in onMissed is passed by Get option.
 	onMissed := func(ctx context.Context) (data interface{}, err error) {
 		return "newValue", nil
 	}
 
-	v, err = cache.Get("newKey", cachego.WithGetOnMissed(onMissed), cachego.WithGetTTL(3*time.Second))
+	v, err = cache.Get("newKey", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(3*time.Second))
 	fmt.Println(v, err) // Output: newValue <nil>
 
 	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
-	loadFunc := func(ctx context.Context) (interface{}, error) {
-		fmt.Println("AutoSet invoking...")
-		return nil, nil
+	// See pkg/task/Task.
+	t := task.Task{
+		Before: func(ctx context.Context) {
+			cache.Set("before", "value")
+		},
+		Fn: func(ctx context.Context) {
+			cache.Set("fn", "value")
+		},
+		After: func(ctx context.Context) {
+			cache.Set("after", "value")
+		},
 	}
 
-	stopCh := cache.AutoSet("autoKey", loadFunc, cachego.WithAutoSetGap(1*time.Second))
-
-	// Keep main running in order to see what AutoSet did.
+	// Run this task automatically every second.
+	go t.Run(context.Background(), time.Second)
 	time.Sleep(5 * time.Second)
-	stopCh <- struct{}{} // Stop AutoSet task
 }
 ```
 

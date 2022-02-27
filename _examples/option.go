@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/04/05 17:31:18
 
 package main
 
@@ -39,7 +35,7 @@ func main() {
 	cache = cachego.NewCache(cachego.WithAutoGC(10*time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
 
 	// Remember, some operations have their options, here is one example:
-	cache.Get("key", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+	cache.Get("key", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
 		return "value", nil
 	}))
 }
