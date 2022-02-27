@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2020 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,15 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/03/13 16:15:56
 
 /*
 Package cachego provides an easy way to use foundation for your caching operations.
 
-1. the basic usage:
+1. The basic usage:
 
 	// Create a cache for use.
 	// We use option function to customize the creation of cache.
@@ -27,7 +23,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
-	// Both of them are set a key-value with no TTL.
+	// Both of them are set a key-value with no ttl.
 	//cache.Set("key", 666, cachego.WithSetNoTTL())
 	cache.Set("key", 666)
 
@@ -43,35 +39,41 @@ Package cachego provides an easy way to use foundation for your caching operatio
 
 	// SetWithTTL sets an entry with expired time.
 	// See more information in example of ttl.
-	cache.Set("ttlKey", 123, cachego.WithSetTTL(10*time.Second))
+	cache.Set("ttlKey", 123, cachego.WithOpTTL(10*time.Second))
 
 	// Also, you can get value from cache first, then load it to cache if missed.
-	// OnMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
 	// Notice ctx in onMissed is passed by Get option.
 	onMissed := func(ctx context.Context) (data interface{}, err error) {
 		return "newValue", nil
 	}
 
-	v, err = cache.Get("newKey", cachego.WithGetOnMissed(onMissed), cachego.WithGetTTL(3*time.Second))
+	v, err = cache.Get("newKey", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(3*time.Second))
 	fmt.Println(v, err) // Output: newValue <nil>
 
 	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
-	loadFunc := func(ctx context.Context) (interface{}, error) {
-		fmt.Println("AutoSet invoking...")
-		return nil, nil
+	// See pkg/task/Task.
+	t := task.Task{
+		Before: func(ctx context.Context) {
+			cache.Set("before", "value")
+		},
+		Fn: func(ctx context.Context) {
+			cache.Set("fn", "value")
+		},
+		After: func(ctx context.Context) {
+			cache.Set("after", "value")
+		},
 	}
 
-	stopCh := cache.AutoSet("autoKey", loadFunc, cachego.WithAutoSetGap(1*time.Second))
-
-	// Keep main running in order to see what AutoSet did.
+	// Run this task automatically every second.
+	go t.Run(context.Background(), time.Second)
 	time.Sleep(5 * time.Second)
-	stopCh <- struct{}{} // Stop AutoSet task
 
-2. the ttl usage:
+2. The ttl usage:
 
 	// Create a cache and set an entry to cache.
 	cache := cachego.NewCache()
-	cache.Set("key", "value", cachego.WithSetTTL(3*time.Second))
+	cache.Set("key", "value", cachego.WithOpTTL(3*time.Second))
 
 	// Check if the key is alive.
 	value, err := cache.Get("key")
@@ -87,11 +89,11 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	// So, we provide an automatic way to remove those who are dead. See more information in example of gc.
 	cache.AutoGC(10 * time.Minute)
 
-3. the gc usage:
+3. The gc usage:
 
 	// Create a cache and set an entry to cache.
 	cache := cachego.NewCache()
-	cache.Set("key", "value", cachego.WithSetTTL(1*time.Second))
+	cache.Set("key", "value", cachego.WithOpTTL(1*time.Second))
 
 	value, err := cache.Get("key")
 	fmt.Println(value, err) // Output: value <nil>
@@ -119,7 +121,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	stopAutoGc := cache.AutoGC(10 * time.Minute)
 	stopAutoGc <- struct{}{}
 
-4. the option usage:
+4. The option usage:
 
 	// We use option function to customize the creation of cache.
 	// You can just new one without options.
@@ -134,14 +136,14 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	cache = cachego.NewCache(cachego.WithAutoGC(10*time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
 
 	// Remember, some operations have their options, here is one example:
-	cache.Get("key", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+	cache.Get("key", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
 		return "value", nil
 	}))
 
-5. the singleflight usage:
+5. The singleflight usage:
 
 	// In default, cachego enables single-flight mode in get operations.
-	// Just use WithGetOnMissed option to enjoy the flight of data.
+	// Just use WithOpOnMissed option to enjoy the flight of data.
 	cache := cachego.NewCache()
 
 	var wg sync.WaitGroup
@@ -150,8 +152,8 @@ Package cachego provides an easy way to use foundation for your caching operatio
 		go func() {
 			defer wg.Done()
 
-			cache.Get("key1", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
-				time.Sleep(30*time.Millisecond) // Assume I/O costs 30ms
+			cache.Get("key1", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
+				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
 				fmt.Println("key1: single-flight")
 				return 123, nil
 			}))
@@ -166,11 +168,11 @@ Package cachego provides an easy way to use foundation for your caching operatio
 		go func() {
 			defer wg.Done()
 
-			cache.Get("key2", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+			cache.Get("key2", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
 				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
 				fmt.Println("key2: multi-flight")
 				return 456, nil
-			}), cachego.WithGetDisableSingleflight())
+			}), cachego.WithOpDisableSingleflight())
 		}()
 	}
 	wg.Wait()
@@ -185,7 +187,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 		go func() {
 			defer wg.Done()
 
-			cache.Get("key3", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+			cache.Get("key3", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
 				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
 				fmt.Println("key3: multi-flight")
 				return 666, nil
@@ -194,8 +196,55 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	}
 	wg.Wait()
 
+6. The task usage:
+
+	// We provide a task for you to do some loops.
+	t := task.Task{
+		Before: func(ctx context.Context) {
+			fmt.Println("Before...")
+		},
+		Fn: func(ctx context.Context) {
+			fmt.Println("Fn...")
+		},
+		After: func(ctx context.Context) {
+			fmt.Println("After...")
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Run runs a task which is usually called in a new goroutine.
+	// go t.Run(ctx, time.Second)
+	t.Run(ctx, time.Second)
+
+	// You can use it to update your cache. Try this:
+	cache := cachego.NewCache()
+
+	t = task.Task{
+		Before: func(ctx context.Context) {
+			cache.Set("key", "before")
+		},
+		Fn: func(ctx context.Context) {
+			cache.Set("key", strconv.FormatInt(rand.Int63n(100), 10))
+		},
+		After: func(ctx context.Context) {
+			cache.Set("key", "after")
+		},
+	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	go t.Run(ctx, time.Second)
+
+	// Simulate user requests
+	for i := 0; i < 22; i++ {
+		fmt.Println(cache.Get("key"))
+		time.Sleep(500 * time.Millisecond)
+	}
 */
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.3.2"
+const Version = "v0.3.3-alpha"

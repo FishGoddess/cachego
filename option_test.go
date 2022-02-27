@@ -1,37 +1,41 @@
-// Copyright 2021 Ye Zi Jie.  All rights reserved.
-// Use of this source code is governed by a MIT style
-// license that can be found in the LICENSE file.
+// Copyright 2022 FishGoddess. All Rights Reserved.
 //
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/10/07 20:49:20
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package cachego
 
 import (
 	"testing"
 	"time"
-
-	"github.com/FishGoddess/cachego/internal/config"
 )
 
 // go test -v -cover -run=^TestWithMapSize$
 func TestWithMapSize(t *testing.T) {
-	conf := &config.Config{MapSize: 0}
+	conf := &config{mapSize: 0}
 
 	WithMapSize(16)(conf)
-	if conf.MapSize != 16 {
-		t.Errorf("conf.MapSize %d should be 16", conf.MapSize)
+	if conf.mapSize != 16 {
+		t.Errorf("conf.mapSize %d should be 16", conf.mapSize)
 	}
 }
 
 // go test -v -cover -run=^TestWithSegmentSize$
 func TestWithSegmentSize(t *testing.T) {
-	conf := &config.Config{SegmentSize: 0}
+	conf := &config{segmentSize: 0}
 
 	WithSegmentSize(16)(conf)
-	if conf.SegmentSize != 16 {
-		t.Errorf("conf.SegmentSize %d should be 16", conf.SegmentSize)
+	if conf.segmentSize != 16 {
+		t.Errorf("conf.segmentSize %d should be 16", conf.segmentSize)
 	}
 
 	for i := uint(1); i < 100000; i *= 2 {
@@ -50,11 +54,11 @@ func TestWithSegmentSize(t *testing.T) {
 
 // go test -v -cover -run=^TestWithAutoGC$
 func TestWithAutoGC(t *testing.T) {
-	conf := &config.Config{GCDuration: 0}
+	conf := &config{gcDuration: 0}
 
 	d := 10 * time.Minute
 	WithAutoGC(d)(conf)
-	if conf.GCDuration != d {
-		t.Errorf("conf.GCDuration %d should be %s", conf.GCDuration, d)
+	if conf.gcDuration != d {
+		t.Errorf("conf.gcDuration %d should be %s", conf.gcDuration, d)
 	}
 }

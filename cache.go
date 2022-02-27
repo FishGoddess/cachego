@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2020 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,19 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/03/14 16:28:56
 
 package cachego
 
 import (
-	"context"
 	"errors"
 	"time"
 
-	"github.com/FishGoddess/cachego/internal/config"
 	"github.com/FishGoddess/cachego/pkg/singleflight"
 )
 
@@ -40,7 +34,7 @@ func IsNotFound(err error) bool {
 // Cache is a struct of cache.
 type Cache struct {
 	// conf is the config of cache.
-	conf config.Config
+	conf config
 
 	// segments is a slice stores the real data.
 	segments []*segment
@@ -52,16 +46,16 @@ type Cache struct {
 // NewCache returns a new Cache holder for use.
 func NewCache(opts ...Option) *Cache {
 	c := &Cache{
-		conf: *applyOptions(config.NewDefaultConfig(), opts...),
+		conf: *applyOptions(newDefaultConfig(), opts),
 	}
 
-	c.segments = newSegments(c.conf.MapSize, c.conf.SegmentSize)
-	if c.conf.EnableSingleflight {
-		c.groups = newGroups(c.conf.MapSize, c.conf.SegmentSize)
+	c.segments = newSegments(c.conf.mapSize, c.conf.segmentSize)
+	if c.conf.singleflight {
+		c.groups = newGroups(c.conf.mapSize, c.conf.segmentSize)
 	}
 
-	if c.conf.GCDuration > 0 {
-		c.AutoGC(c.conf.GCDuration)
+	if c.conf.gcDuration > 0 {
+		c.AutoGC(c.conf.gcDuration)
 	}
 	return c
 }
@@ -109,8 +103,8 @@ func (c *Cache) groupOf(key string) *singleflight.Group {
 // Get fetches value of key from cache first, and returns it if ok.
 // Returns an NotFoundErr if this key is not found, and you can use IsNotFound to judge if this error is not found.
 // Also, you can specify a function which will be called if missed, so you can load this entry to cache again.
-// See GetOption.
-func (c *Cache) Get(key string, opts ...GetOption) (interface{}, error) {
+// See OpOption.
+func (c *Cache) Get(key string, opts ...OpOption) (interface{}, error) {
 	v, ok := c.segmentOf(key).get(key)
 	if ok {
 		return v, nil
@@ -120,58 +114,40 @@ func (c *Cache) Get(key string, opts ...GetOption) (interface{}, error) {
 		return nil, errNotFound
 	}
 
-	conf := applyGetOptions(config.NewDefaultGetConfig(), opts...)
-	if conf.OnMissed == nil {
+	conf := applyOpOptions(newDefaultGetConfig(), opts)
+	if conf.onMissed == nil {
 		return nil, errNotFound
 	}
 
 	var data interface{}
 	var err error
-	if c.conf.EnableSingleflight && conf.Singleflight {
-		data, err = c.groupOf(key).Call(conf.Ctx, key, conf.OnMissed)
+	if c.conf.singleflight && conf.singleflight {
+		data, err = c.groupOf(key).Call(conf.ctx, key, conf.onMissed)
 	} else {
-		data, err = conf.OnMissed(conf.Ctx)
+		data, err = conf.onMissed(conf.ctx)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	c.Set(key, data, WithSetTTL(conf.TTL))
+	c.Set(key, data, WithOpTTL(conf.ttl))
 	return data, nil
 }
 
 // Set sets key and value to cache.
 // In default, this entry will not expire, so if you want it to expire, see SetOption.
-func (c *Cache) Set(key string, value interface{}, opts ...SetOption) {
-	conf := applySetOptions(config.NewDefaultSetConfig(), opts...)
-	c.segmentOf(key).set(key, value, conf.TTL)
+func (c *Cache) Set(key string, value interface{}, opts ...OpOption) {
+	conf := applyOpOptions(newDefaultSetConfig(), opts)
+	c.segmentOf(key).set(key, value, conf.ttl)
 }
 
 // AutoSet starts a goroutine to execute Set() at fixed duration.
 // It returns a channel which can be used to stop this goroutine.
 // See AutoSetOption.
-func (c *Cache) AutoSet(key string, fn func(ctx context.Context) (interface{}, error), opts ...AutoSetOption) chan<- struct{} {
-	conf := applyAutoSetOptions(config.NewDefaultAutoSetConfig(), opts...)
-
-	quitChan := make(chan struct{})
-	go func() {
-		ticker := time.NewTicker(conf.Gap)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				if data, err := fn(conf.Ctx); err == nil {
-					c.Set(key, data, WithSetTTL(conf.TTL))
-				}
-			case <-quitChan:
-				return
-			}
-		}
-	}()
-
-	return quitChan
+// Deprecated: Use pkg/task/Task instead.
+func (c *Cache) AutoSet() {
+	// Left and change this method, so you can find this method has been changed.
 }
 
 // Delete removes the value of key.

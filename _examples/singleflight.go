@@ -1,4 +1,4 @@
-// Copyright 2021 Ye Zi Jie. All Rights Reserved.
+// Copyright 2021 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2021/12/25 23:30:29
 
 package main
 
@@ -29,7 +25,7 @@ import (
 
 func main() {
 	// In default, cachego enables single-flight mode in get operations.
-	// Just use WithGetOnMissed option to enjoy the flight of data.
+	// Just use WithOpOnMissed option to enjoy the flight of data.
 	cache := cachego.NewCache()
 
 	var wg sync.WaitGroup
@@ -38,7 +34,7 @@ func main() {
 		go func() {
 			defer wg.Done()
 
-			cache.Get("key1", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+			cache.Get("key1", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
 				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
 				fmt.Println("key1: single-flight")
 				return 123, nil
@@ -54,11 +50,11 @@ func main() {
 		go func() {
 			defer wg.Done()
 
-			cache.Get("key2", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+			cache.Get("key2", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
 				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
 				fmt.Println("key2: multi-flight")
 				return 456, nil
-			}), cachego.WithGetDisableSingleflight())
+			}), cachego.WithOpDisableSingleflight())
 		}()
 	}
 	wg.Wait()
@@ -73,7 +69,7 @@ func main() {
 		go func() {
 			defer wg.Done()
 
-			cache.Get("key3", cachego.WithGetOnMissed(func(ctx context.Context) (data interface{}, err error) {
+			cache.Get("key3", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
 				time.Sleep(30 * time.Millisecond) // Assume I/O costs 30ms
 				fmt.Println("key3: multi-flight")
 				return 666, nil

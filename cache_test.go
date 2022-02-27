@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2020 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/03/14 22:58:02
 
 package cachego
 
@@ -58,7 +54,7 @@ func TestCacheTTL(t *testing.T) {
 
 	key := "key"
 	value := 123
-	cache.Set(key, value, WithSetTTL(1*time.Second))
+	cache.Set(key, value, WithOpTTL(1*time.Second))
 	if v, err := cache.Get(key); IsNotFound(err) || cache.Size() != 1 || v != value {
 		t.Error("Before ttl, returns wrong err or size or value!")
 	}
@@ -88,13 +84,13 @@ func TestGetWithLoad(t *testing.T) {
 
 	key := "key"
 	value := "get"
-	cache.Set(key, value, WithSetTTL(1*time.Second))
-	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetTTL(time.Second)); err != nil || v.(string) != value {
+	cache.Set(key, value, WithOpTTL(1*time.Second))
+	if v, err := cache.Get(key, WithOpOnMissed(loadFunc), WithOpTTL(time.Second)); err != nil || v.(string) != value {
 		t.Errorf("Before Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 
 	time.Sleep(2 * time.Second)
-	if v, err := cache.Get(key, WithGetOnMissed(loadFunc), WithGetTTL(time.Second)); err != nil || v.(string) != "loadFunc" {
+	if v, err := cache.Get(key, WithOpOnMissed(loadFunc), WithOpTTL(time.Second)); err != nil || v.(string) != "loadFunc" {
 		t.Errorf("After Sleep, cache.Of(key) returns err %+v or wrong value %s!", err, v.(string))
 	}
 }
@@ -106,7 +102,7 @@ func TestCacheAutoGC(t *testing.T) {
 
 	key := "key"
 	value := 123
-	cache.Set(key, value, WithSetTTL(1*time.Second))
+	cache.Set(key, value, WithOpTTL(1*time.Second))
 	if v, err := cache.Get(key); IsNotFound(err) || cache.Size() != 1 || v != value {
 		t.Error("Before gc, returns wrong err or size or value!")
 	}

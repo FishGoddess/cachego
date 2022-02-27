@@ -1,4 +1,4 @@
-// Copyright 2020 Ye Zi Jie. All Rights Reserved.
+// Copyright 2020 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: FishGoddess
-// Email: fishgoddess@qq.com
-// Created at 2020/09/13 19:13:33
 
 package main
 
@@ -28,7 +24,7 @@ import (
 func main() {
 	// Create a cache and set an entry to cache.
 	cache := cachego.NewCache()
-	cache.Set("key", "value", cachego.WithSetTTL(3*time.Second))
+	cache.Set("key", "value", cachego.WithOpTTL(3*time.Second))
 
 	// Check if the key is alive.
 	value, err := cache.Get("key")

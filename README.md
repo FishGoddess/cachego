@@ -44,6 +44,7 @@ import (
 	"time"
 
 	"github.com/FishGoddess/cachego"
+	"github.com/FishGoddess/cachego/pkg/task"
 )
 
 func main() {
@@ -53,7 +54,7 @@ func main() {
 	cache := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
 
 	// Set a new entry to cache.
-	// Both of them are set a key-value with no TTL.
+	// Both of them are set a key-value with no ttl.
 	//cache.Set("key", 666, cachego.WithSetNoTTL())
 	cache.Set("key", 666)
 
@@ -69,29 +70,35 @@ func main() {
 
 	// SetWithTTL sets an entry with expired time.
 	// See more information in example of ttl.
-	cache.Set("ttlKey", 123, cachego.WithSetTTL(10*time.Second))
+	cache.Set("ttlKey", 123, cachego.WithOpTTL(10*time.Second))
 
 	// Also, you can get value from cache first, then load it to cache if missed.
-	// OnMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
+	// onMissed is usually used to get data from db or somewhere, so you can refresh the value in cache.
 	// Notice ctx in onMissed is passed by Get option.
 	onMissed := func(ctx context.Context) (data interface{}, err error) {
 		return "newValue", nil
 	}
 
-	v, err = cache.Get("newKey", cachego.WithGetOnMissed(onMissed), cachego.WithGetTTL(3*time.Second))
+	v, err = cache.Get("newKey", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(3*time.Second))
 	fmt.Println(v, err) // Output: newValue <nil>
 
 	// We provide a way to set data to cache automatically, so you can access some hottest data extremely fast.
-	loadFunc := func(ctx context.Context) (interface{}, error) {
-		fmt.Println("AutoSet invoking...")
-		return nil, nil
+	// See pkg/task/Task.
+	t := task.Task{
+		Before: func(ctx context.Context) {
+			cache.Set("before", "value")
+		},
+		Fn: func(ctx context.Context) {
+			cache.Set("fn", "value")
+		},
+		After: func(ctx context.Context) {
+			cache.Set("after", "value")
+		},
 	}
 
-	stopCh := cache.AutoSet("autoKey", loadFunc, cachego.WithAutoSetGap(1*time.Second))
-
-	// Keep main running in order to see what AutoSet did.
+	// Run this task automatically every second.
+	go t.Run(context.Background(), time.Second)
 	time.Sleep(5 * time.Second)
-	stopCh <- struct{}{} // Stop AutoSet task
 }
 ```
 
@@ -126,3 +133,7 @@ $ go test -v ./_examples/performance_test.go
 * [chen661](https://gitee.com/chen661)：提供 segmentSize 设置选项的参数限制想法
 
 如果您觉得 cachego 缺少您需要的功能，请不要犹豫，马上参与进来，发起一个 _**issue**_。
+
+最后，我想感谢 JetBrains 公司的 **free JetBrains Open Source license(s)**，因为 `cachego` 是用该计划下的 Idea / GoLand 完成开发的。
+
+<a href="https://www.jetbrains.com/?from=cachego" target="_blank"><img src="./_icons/jetbrains.png" width="250"/></a>
