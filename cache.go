@@ -142,14 +142,6 @@ func (c *Cache) Set(key string, value interface{}, opts ...OpOption) {
 	c.segmentOf(key).set(key, value, conf.ttl)
 }
 
-// AutoSet starts a goroutine to execute Set() at fixed duration.
-// It returns a channel which can be used to stop this goroutine.
-// See AutoSetOption.
-// Deprecated: Use pkg/task/Task instead.
-func (c *Cache) AutoSet() {
-	// Left and change this method, so you can find this method has been changed.
-}
-
 // Delete removes the value of key.
 // If this key is not existed, nothing will happen.
 func (c *Cache) Delete(key string) {
