@@ -111,3 +111,10 @@ func WithOpDisableSingleflight() OpOption {
 		conf.singleflight = false
 	}
 }
+
+// WithOpDisableReload sets the reloading flag to false.
+func WithOpDisableReload() OpOption {
+	return func(conf *opConfig) {
+		conf.reload = false
+	}
+}

@@ -131,7 +131,9 @@ func (c *Cache) Get(key string, opts ...OpOption) (interface{}, error) {
 		return nil, err
 	}
 
-	c.Set(key, data, WithOpTTL(conf.ttl))
+	if conf.reload {
+		c.Set(key, data, WithOpTTL(conf.ttl))
+	}
 	return data, nil
 }
 
