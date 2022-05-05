@@ -66,6 +66,9 @@ type opConfig struct {
 	// This is a recommended way to load data from storages to cache, however,
 	// it may decrease the success rate of loading data.
 	singleflight bool
+
+	// reload means this operation will reload data from onMissed to cache.
+	reload bool
 }
 
 // newDefaultGetConfig returns the default config of Get operations.
@@ -75,6 +78,7 @@ func newDefaultGetConfig() *opConfig {
 		ttl:          10 * time.Second,
 		onMissed:     nil,
 		singleflight: true,
+		reload:       true,
 	}
 }
 
