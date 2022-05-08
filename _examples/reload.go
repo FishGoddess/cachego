@@ -29,6 +29,14 @@ func main() {
 	fmt.Println("=============================")
 
 	for i := 0; i < 10; i++ {
+		value, err := cache.Get("key-reload-sleep", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(time.Second))
+		fmt.Println(value, err)
+		time.Sleep(428 * time.Millisecond)
+	}
+
+	fmt.Println("=============================")
+
+	for i := 0; i < 10; i++ {
 		value, err := cache.Get("key-not-reload", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(time.Second), cachego.WithOpDisableReload())
 		fmt.Println(value, err)
 	}
