@@ -243,6 +243,39 @@ Package cachego provides an easy way to use foundation for your caching operatio
 		fmt.Println(cache.Get("key"))
 		time.Sleep(500 * time.Millisecond)
 	}
+
+7. The reload usage:
+
+	var (
+		counter int64 = 0
+	)
+
+	func onMissed(ctx context.Context) (data interface{}, err error) {
+		time.Sleep(time.Second) // Simulate blocking operations.
+		return atomic.AddInt64(&counter, 1), nil
+	}
+
+	cache := cachego.NewCache()
+
+	for i := 0; i < 10; i++ {
+		value, err := cache.Get("key-reload", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(time.Second))
+		fmt.Println(value, err)
+	}
+
+	fmt.Println("=============================")
+
+	for i := 0; i < 10; i++ {
+		value, err := cache.Get("key-reload-sleep", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(time.Second))
+		fmt.Println(value, err)
+		time.Sleep(428 * time.Millisecond)
+	}
+
+	fmt.Println("=============================")
+
+	for i := 0; i < 10; i++ {
+		value, err := cache.Get("key-not-reload", cachego.WithOpOnMissed(onMissed), cachego.WithOpTTL(time.Second), cachego.WithOpDisableReload())
+		fmt.Println(value, err)
+	}
 */
 package cachego // import "github.com/FishGoddess/cachego"
 
