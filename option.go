@@ -28,6 +28,7 @@ func applyOptions(conf *config, opts []Option) *config {
 	for _, opt := range opts {
 		opt(conf)
 	}
+
 	return conf
 }
 
@@ -74,6 +75,7 @@ func applyOpOptions(conf *opConfig, opts []OpOption) *opConfig {
 	for _, opt := range opts {
 		opt(conf)
 	}
+
 	return conf
 }
 

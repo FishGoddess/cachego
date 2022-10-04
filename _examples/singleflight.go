@@ -31,6 +31,7 @@ func main() {
 	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 
@@ -41,12 +42,14 @@ func main() {
 			}))
 		}()
 	}
+
 	wg.Wait()
 
 	// If you want to disable single-flight mode in some Get operations, try this:
 	wg = sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 
@@ -57,6 +60,7 @@ func main() {
 			}), cachego.WithOpDisableSingleflight())
 		}()
 	}
+
 	wg.Wait()
 
 	// Of course, we all know single-flight mode will decrease the success rate of loading data.
@@ -66,6 +70,7 @@ func main() {
 	wg = sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 
@@ -76,5 +81,6 @@ func main() {
 			}))
 		}()
 	}
+
 	wg.Wait()
 }

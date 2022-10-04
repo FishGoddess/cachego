@@ -24,6 +24,7 @@ func TestWithMapSize(t *testing.T) {
 	conf := &config{mapSize: 0}
 
 	WithMapSize(16)(conf)
+
 	if conf.mapSize != 16 {
 		t.Errorf("conf.mapSize %d should be 16", conf.mapSize)
 	}
@@ -34,6 +35,7 @@ func TestWithSegmentSize(t *testing.T) {
 	conf := &config{segmentSize: 0}
 
 	WithSegmentSize(16)(conf)
+
 	if conf.segmentSize != 16 {
 		t.Errorf("conf.segmentSize %d should be 16", conf.segmentSize)
 	}
@@ -43,8 +45,7 @@ func TestWithSegmentSize(t *testing.T) {
 	}
 
 	defer func() {
-		err := recover()
-		if err == nil {
+		if recover() == nil {
 			t.Error("WithSegmentSize(13) should panic")
 		}
 	}()
@@ -58,6 +59,7 @@ func TestWithAutoGC(t *testing.T) {
 
 	d := 10 * time.Minute
 	WithAutoGC(d)(conf)
+
 	if conf.gcDuration != d {
 		t.Errorf("conf.gcDuration %d should be %s", conf.gcDuration, d)
 	}

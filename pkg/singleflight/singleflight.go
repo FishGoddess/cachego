@@ -80,14 +80,15 @@ func (g *Group) Call(ctx context.Context, key string, fn func(ctx context.Contex
 	c := newCall(fn)
 	c.wg.Add(1)
 	g.calls[key] = c
+
 	g.lock.Unlock()
-
 	c.do(ctx) // Call fn to get result...
-
 	g.lock.Lock()
+
 	if !c.deleted {
 		delete(g.calls, key)
 	}
+
 	g.lock.Unlock()
 	return c.result, c.err
 }

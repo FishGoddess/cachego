@@ -48,6 +48,7 @@ func (s *segment) get(key string) (interface{}, bool) {
 	if value, ok := s.data[key]; ok && value.alive() {
 		return value.data, true
 	}
+
 	return nil, false
 }
 
@@ -61,6 +62,7 @@ func (s *segment) set(key string, value interface{}, ttl time.Duration) {
 		v.renew(value, ttl) // Reuse value memory
 		return
 	}
+
 	s.data[key] = newValue(value, ttl)
 }
 
@@ -68,6 +70,7 @@ func (s *segment) set(key string, value interface{}, ttl time.Duration) {
 func (s *segment) delete(key string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+
 	delete(s.data, key)
 }
 
@@ -75,6 +78,7 @@ func (s *segment) delete(key string) {
 func (s *segment) deleteAll() {
 	s.lock.Lock()
 	defer s.lock.Unlock()
+
 	s.data = make(map[string]*value, s.mapSize)
 }
 
@@ -82,6 +86,7 @@ func (s *segment) deleteAll() {
 func (s *segment) size() int {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+
 	return len(s.data)
 }
 
