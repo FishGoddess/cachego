@@ -149,6 +149,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 
@@ -159,12 +160,14 @@ Package cachego provides an easy way to use foundation for your caching operatio
 			}))
 		}()
 	}
+
 	wg.Wait()
 
 	// If you want to disable single-flight mode in some Get operations, try this:
 	wg = sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 
@@ -175,6 +178,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 			}), cachego.WithOpDisableSingleflight())
 		}()
 	}
+
 	wg.Wait()
 
 	// Of course, we all know single-flight mode will decrease the success rate of loading data.
@@ -184,6 +188,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	wg = sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 
@@ -194,6 +199,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 			}))
 		}()
 	}
+
 	wg.Wait()
 
 6. The task usage:
@@ -280,4 +286,4 @@ Package cachego provides an easy way to use foundation for your caching operatio
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.3.6"
+const Version = "v0.3.7"

@@ -35,6 +35,7 @@ func TestTickerTaskRun(t *testing.T) {
 
 	var loop int64
 	var result strings.Builder
+
 	task := Task{
 		Before: func(ctx context.Context) {
 			value, ok := ctx.Value(before.key).(string)
@@ -58,8 +59,8 @@ func TestTickerTaskRun(t *testing.T) {
 				t.Errorf("value %s != fn.value %s", value, fn.value)
 			}
 
-			result.WriteString(value)
 			atomic.AddInt64(&loop, 1)
+			result.WriteString(value)
 		},
 		After: func(ctx context.Context) {
 			value, ok := ctx.Value(after.key).(string)
@@ -87,11 +88,13 @@ func TestTickerTaskRun(t *testing.T) {
 
 	var expect strings.Builder
 	expect.WriteString(before.value)
+
 	for i := int64(0); i < atomic.LoadInt64(&loop); i++ {
 		expect.WriteString(fn.value)
 	}
 
 	expect.WriteString(after.value)
+
 	if result.String() != expect.String() {
 		t.Errorf("result %s != expect %s", result.String(), expect.String())
 	}

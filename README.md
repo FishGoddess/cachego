@@ -2,14 +2,12 @@
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/cachego)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icons/build.svg)](_icons/build.svg)
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
+![Test](https://github.com/FishGoddess/cachego/actions/workflows/test.yml/badge.svg)
 
 **cachego** 是一个拥有高性能分段锁机制的轻量级内存缓存，拥有懒清理和哨兵清理两种清理机制，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
 > 目前已经在多个线上服务中运行良好，也抵御过最高 17w/s qps 的冲击，可以稳定使用！
-
-> 我正在开发 v0.3.x 版本，这将在 API 以及功能上达到全新的使用体验，敬请期待，也期待大家的建议！！！
 
 [Read me in English](./README.en.md).
 
@@ -23,7 +21,7 @@
 * 自带 singleflight 机制，减少缓存穿透的伤害
 * ....
 
-_更多功能请参考 [_examples](_examples)。架构设计请参考 [arch.md](_examples/docs/arch.md) 文档。_
+_更多功能请参考 [_examples](_examples)。设计信息请参考 [introduction.md](_examples/docs/introduction.md) 文档。_
 
 _历史版本的特性请查看 [HISTORY.md](./HISTORY.md)。未来版本的新特性和计划请查看 [FUTURE.md](./FUTURE.md)。_
 

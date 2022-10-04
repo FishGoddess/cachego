@@ -2,14 +2,12 @@
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/cachego)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icons/build.svg)](_icons/build.svg)
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
+![Test](https://github.com/FishGoddess/cachego/actions/workflows/test.yml/badge.svg)
 
 **cachego** is a high-performance and memory-based cache for [GoLang](https://golang.org) applications.
 
 > It has been used by many services in production, and even 17w/s qps is ok for it, so just use it if you want!
-
-> I am developing v0.3.x which will be better at APIs and features, so issue me if you have something fun!!!
 
 [阅读中文版的 Read me](./README.md).
 
@@ -23,7 +21,7 @@
 * Singleflight supports, which can decrease the times of cache penetration
 * ....
 
-_More features in [_examples](_examples) and designing detail in [arch.md](_examples/docs/arch.md)._
+_More features in [_examples](_examples) and designing detail in [introduction.md](_examples/docs/introduction.md)._
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 

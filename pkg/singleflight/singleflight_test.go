@@ -31,6 +31,7 @@ func testGroupCall(ctx context.Context, t *testing.T, group *Group, concurrency 
 	rightResult := int64(0)
 	for i := 0; i < concurrency; i++ {
 		wg.Add(1)
+
 		go func(index int64) {
 			defer wg.Done()
 
@@ -58,6 +59,7 @@ func testGroupCall(ctx context.Context, t *testing.T, group *Group, concurrency 
 func TestGroupCall(t *testing.T) {
 	ctx := context.Background()
 	group := NewGroup(128)
+
 	testGroupCall(ctx, t, group, 100000)
 }
 
@@ -69,6 +71,7 @@ func TestGroupCallMultiKey(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := 0; i <= 100; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 			testGroupCall(ctx, t, group, 1000)

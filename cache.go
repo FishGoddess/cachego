@@ -50,6 +50,7 @@ func NewCache(opts ...Option) *Cache {
 	}
 
 	c.segments = newSegments(c.conf.mapSize, c.conf.segmentSize)
+
 	if c.conf.singleflight {
 		c.groups = newGroups(c.conf.mapSize, c.conf.segmentSize)
 	}
@@ -57,6 +58,7 @@ func NewCache(opts ...Option) *Cache {
 	if c.conf.gcDuration > 0 {
 		c.AutoGC(c.conf.gcDuration)
 	}
+
 	return c
 }
 
@@ -66,6 +68,7 @@ func newSegments(mapSize int, segmentSize int) []*segment {
 	for i := 0; i < segmentSize; i++ {
 		segments[i] = newSegment(mapSize)
 	}
+
 	return segments
 }
 
@@ -75,29 +78,18 @@ func newGroups(mapSize int, groupSize int) []*singleflight.Group {
 	for i := 0; i < groupSize; i++ {
 		groups[i] = singleflight.NewGroup(mapSize)
 	}
+
 	return groups
-}
-
-// indexOf returns a position of this key.
-func (c *Cache) indexOf(key string) int {
-	index := 1469598103934665603
-	keyBytes := []byte(key)
-
-	for _, b := range keyBytes {
-		index = (index << 5) - index + int(b&0xff)
-		index *= 1099511628211
-	}
-	return index
 }
 
 // segmentOf returns the segment of this key.
 func (c *Cache) segmentOf(key string) *segment {
-	return c.segments[c.indexOf(key)&(len(c.segments)-1)]
+	return c.segments[Index(key)&(len(c.segments)-1)]
 }
 
 // groupOf returns the singleflight group of this key.
 func (c *Cache) groupOf(key string) *singleflight.Group {
-	return c.groups[c.indexOf(key)&(len(c.groups)-1)]
+	return c.groups[Index(key)&(len(c.groups)-1)]
 }
 
 // Get fetches value of key from cache first, and returns it if ok.
@@ -105,8 +97,7 @@ func (c *Cache) groupOf(key string) *singleflight.Group {
 // Also, you can specify a function which will be called if missed, so you can load this entry to cache again.
 // See OpOption.
 func (c *Cache) Get(key string, opts ...OpOption) (interface{}, error) {
-	v, ok := c.segmentOf(key).get(key)
-	if ok {
+	if v, ok := c.segmentOf(key).get(key); ok {
 		return v, nil
 	}
 
@@ -134,6 +125,7 @@ func (c *Cache) Get(key string, opts ...OpOption) (interface{}, error) {
 	if conf.reload {
 		c.Set(key, data, WithOpTTL(conf.ttl))
 	}
+
 	return data, nil
 }
 
@@ -170,6 +162,7 @@ func (c *Cache) Size() int {
 	for _, segment := range c.segments {
 		size += segment.size()
 	}
+
 	return size
 }
 
