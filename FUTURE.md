@@ -1,21 +1,36 @@
 ## ✒ 未来版本的新特性 (Features in future versions)
 
+### v0.4.x
+
+* [ ] 设计 Cache 接口，Get 方法用 bool 判断，单个锁结构
+* [ ] 提供 SegmentCache 实现，实现 Cache 接口，细化锁粒度
+* [ ] 提供多种接口实现，包括 simple，lru，lfu，arc 等，尝试将缓存基础功能封装到通用结构
+* [ ] 提供 load 方法，集成 singleflight 进行数据加载
+* [ ] 提供 Hook 接口，默认提供 status 计数实现，包括 hit，miss，evict 等
+* [ ] 操作提供 option 机制，ttl 使用 option 设置，默认值使用 option 设置，最大遍历次数使用 option 设置
+* [ ] Delete 方法改 Remove 并返回被删除的 value
+* [ ] DeleteAll 方法改 Clear
+* [ ] GC 方法保留，去除 AutoGC 方法
+* [ ] 增加对不存在的数据做防穿透的机制
+* [ ] 清理废话注释，完善 examples，完善单测，检查 pkg 代码设计
+* [ ] 提供一个清空并设置全量值的方法，方便定时数据的全量替换
+
 ### v0.3.x
 
-* [ ] 支持内存大小限制，防止无上限的使用内存
-* [ ] 支持用户自定义达到内存限制时的处理策略
-* [ ] 支持缓存个数限制，防止数据量太多导致哈希性能下降
-* [ ] 支持用户自定义达到个数限制时的处理策略
+* [ ] ~~支持内存大小限制，防止无上限的使用内存~~
+* [ ] ~~支持用户自定义达到内存限制时的处理策略~~
+* [ ] ~~支持缓存个数限制，防止数据量太多导致哈希性能下降~~
+* [ ] ~~支持用户自定义达到个数限制时的处理策略~~
 * [x] 去除 GetWithTTL 方法
 * [x] 重新设计 AutoSet 方法，引入 option 机制
 * [x] 加入 singleflight 机制
-* [ ] 加入 monitor 监控机制，接口形式
+* [ ] ~~加入 monitor 监控机制，接口形式~~
 * [x] 优化 value 使用，复用内存、代码可读性
-* [ ] GC 加入数量限制或时间限制
+* [ ] ~~GC 加入数量限制或时间限制~~
 * [x] Set 引入 option 机制
 * [x] Get 引入 option 机制
-* [ ] Delete 引入 option 机制，并可以限制删除数量、key 匹配模式
-* [ ] GC 引入 option 机制，并可以限制 GC 数量或时间、key 匹配模式
+* [ ] ~~Delete 引入 option 机制，并可以限制删除数量、key 匹配模式~~
+* [ ] ~~GC 引入 option 机制，并可以限制 GC 数量或时间、key 匹配模式~~
 
 ### v0.2.x
 

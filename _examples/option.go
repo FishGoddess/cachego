@@ -1,4 +1,4 @@
-// Copyright 2020 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,28 +14,9 @@
 
 package main
 
-import (
-	"context"
-	"time"
-
-	"github.com/FishGoddess/cachego"
-)
+import "github.com/FishGoddess/cachego/options"
 
 func main() {
-	// We use option function to customize the creation of cache.
-	// You can just new one without options.
-	cache := cachego.NewCache()
-	cache.Set("key", "value")
-
-	// You can set it to a cache with automatic gc if you want
-	//  Try WithAutoGC.
-	cache = cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
-
-	// Also, you can add more than one option to cache.
-	cache = cachego.NewCache(cachego.WithAutoGC(10*time.Minute), cachego.WithMapSize(64), cachego.WithSegmentSize(4096))
-
-	// Remember, some operations have their options, here is one example:
-	cache.Get("key", cachego.WithOpOnMissed(func(ctx context.Context) (data interface{}, err error) {
-		return "value", nil
-	}))
+	opts := options.Get().Default("default_value")
+	opts.Config()
 }

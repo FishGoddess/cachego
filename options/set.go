@@ -12,4 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cachego
+package options
+
+import "time"
+
+type SetConfig struct {
+	TTL time.Duration
+}
+
+func newDefaultSetConfig() *SetConfig {
+	return &SetConfig{
+		TTL: 0,
+	}
+}
+
+type SetOption func(conf *SetConfig)
+
+func (o SetOption) ApplyTo(conf *SetConfig) {
+	o(conf)
+}
+
+type SetOptions []SetOption
+
+func Set() SetOptions {
+	return nil
+}
+
+func (opts SetOptions) TTL(ttl time.Duration) SetOptions {
+	opt := func(conf *SetConfig) {
+		conf.TTL = ttl
+	}
+
+	return append(opts, opt)
+}
+
+func (opts SetOptions) Config() *SetConfig {
+	conf := newDefaultSetConfig()
+
+	for _, opt := range opts {
+		opt.ApplyTo(conf)
+	}
+
+	return conf
+}

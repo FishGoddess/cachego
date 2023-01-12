@@ -1,4 +1,4 @@
-// Copyright 2022 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cachego
+package options
 
-var (
-	// Index returns an index of this key.
-	Index = index
-)
+type RemoveConfig struct{}
 
-// index returns an index of this key.
-func index(key string) int {
-	index := 1469598103934665603
+func newDefaultRemoveConfig() *RemoveConfig {
+	return &RemoveConfig{}
+}
 
-	keyBytes := []byte(key)
-	for _, b := range keyBytes {
-		index = (index << 5) - index + int(b&0xff)
-		index *= 1099511628211
+type RemoveOption func(conf *RemoveConfig)
+
+func (o RemoveOption) ApplyTo(conf *RemoveConfig) {
+	o(conf)
+}
+
+type RemoveOptions []RemoveOption
+
+func Remove() RemoveOptions {
+	return nil
+}
+
+func (opts RemoveOptions) Config() *RemoveConfig {
+	conf := newDefaultRemoveConfig()
+
+	for _, opt := range opts {
+		opt.ApplyTo(conf)
 	}
 
-	return index
+	return conf
 }

@@ -15,15 +15,8 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
-	//"runtime/debug"
-	"strconv"
 	"sync"
-	"testing"
 	"time"
-
-	"github.com/FishGoddess/cachego"
 	//"github.com/coocood/freecache"
 	//"github.com/orca-zhang/ecache"
 	//gocache "github.com/patrickmn/go-cache"
@@ -74,69 +67,69 @@ func timeTask(task func()) int64 {
 }
 
 // go test -v -run=^TestCacheGoRead$
-func TestCacheGoRead(t *testing.T) {
-	c := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
-
-	for i := 0; i < dataSize; i++ {
-		key := strconv.Itoa(i)
-		c.Set(key, key)
-	}
-
-	spent := timeTask(func() {
-		for i := 0; i < loop; i++ {
-			testTask(func() {
-				key := strconv.Itoa(rand.Intn(dataSize))
-				c.Get(key)
-			})
-		}
-	})
-
-	fmt.Printf("%s spent %dms\n", t.Name(), spent)
-}
-
-// go test -v -run=^TestCacheGoWrite$
-func TestCacheGoWrite(t *testing.T) {
-	c := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
-
-	for i := 0; i < dataSize; i++ {
-		key := strconv.Itoa(i)
-		c.Set(key, key)
-	}
-
-	spent := timeTask(func() {
-		for i := 0; i < loop; i++ {
-			testTask(func() {
-				key := strconv.Itoa(rand.Intn(dataSize))
-				c.Set(key, key)
-			})
-		}
-	})
-
-	fmt.Printf("%s spent %dms\n", t.Name(), spent)
-}
-
-// go test -v -run=^TestCacheGo$
-func TestCacheGo(t *testing.T) {
-	c := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
-
-	for i := 0; i < dataSize; i++ {
-		key := strconv.Itoa(i)
-		c.Set(key, key)
-	}
-
-	spent := timeTask(func() {
-		for i := 0; i < loop; i++ {
-			testTask(func() {
-				key := strconv.Itoa(rand.Intn(dataSize))
-				c.Set(key, key)
-				c.Get(key)
-			})
-		}
-	})
-
-	fmt.Printf("%s spent %dms\n", t.Name(), spent)
-}
-
+//func TestCacheGoRead(t *testing.T) {
+//	c := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
+//
+//	for i := 0; i < dataSize; i++ {
+//		key := strconv.Itoa(i)
+//		c.Set(key, key)
+//	}
+//
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				c.Get(key)
+//			})
+//		}
+//	})
+//
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
+//}
+//
+//// go test -v -run=^TestCacheGoWrite$
+//func TestCacheGoWrite(t *testing.T) {
+//	c := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
+//
+//	for i := 0; i < dataSize; i++ {
+//		key := strconv.Itoa(i)
+//		c.Set(key, key)
+//	}
+//
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				c.Set(key, key)
+//			})
+//		}
+//	})
+//
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
+//}
+//
+//// go test -v -run=^TestCacheGo$
+//func TestCacheGo(t *testing.T) {
+//	c := cachego.NewCache(cachego.WithAutoGC(10 * time.Minute))
+//
+//	for i := 0; i < dataSize; i++ {
+//		key := strconv.Itoa(i)
+//		c.Set(key, key)
+//	}
+//
+//	spent := timeTask(func() {
+//		for i := 0; i < loop; i++ {
+//			testTask(func() {
+//				key := strconv.Itoa(rand.Intn(dataSize))
+//				c.Set(key, key)
+//				c.Get(key)
+//			})
+//		}
+//	})
+//
+//	fmt.Printf("%s spent %dms\n", t.Name(), spent)
+//}
+//
 //// go test -v -run=^TestGoCacheRead$
 //func TestGoCacheRead(t *testing.T) {
 //	c := gocache.New(gocache.NoExpiration, 10*time.Minute)
