@@ -12,46 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package options
+package cachego
 
 import "time"
 
-type SetConfig struct {
-	TTL time.Duration
+var (
+	now = time.Now
+)
+
+type entry struct {
+	key        string
+	value      interface{}
+	expiration *time.Time
 }
 
-func newDefaultSetConfig() *SetConfig {
-	return &SetConfig{
-		TTL: 0,
+func newEntry(key string, value interface{}, ttl time.Duration) *entry {
+	e := new(entry)
+	e.setup(key, value, ttl)
+
+	return e
+}
+
+func (e *entry) setup(key string, value interface{}, ttl time.Duration) {
+	e.key = key
+	e.value = value
+	e.expiration = nil
+
+	if ttl > 0 {
+		expiration := now().Add(ttl)
+		e.expiration = &expiration
 	}
 }
 
-type SetOption func(conf *SetConfig)
-
-func (o SetOption) ApplyTo(conf *SetConfig) {
-	o(conf)
-}
-
-type SetOptions []SetOption
-
-func Set() SetOptions {
-	return nil
-}
-
-func (opts SetOptions) TTL(ttl time.Duration) SetOptions {
-	opt := func(conf *SetConfig) {
-		conf.TTL = ttl
-	}
-
-	return append(opts, opt)
-}
-
-func (opts SetOptions) Config() *SetConfig {
-	conf := newDefaultSetConfig()
-
-	for _, opt := range opts {
-		opt.ApplyTo(conf)
-	}
-
-	return conf
+func (e *entry) expired() bool {
+	return e.expiration != nil && now().After(*e.expiration)
 }

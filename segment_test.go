@@ -12,44 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package options
-
-type GetConfig struct {
-	Default interface{}
-}
-
-func newDefaultGetConfig() *GetConfig {
-	return &GetConfig{
-		Default: nil,
-	}
-}
-
-type GetOption func(conf *GetConfig)
-
-func (o GetOption) ApplyTo(conf *GetConfig) {
-	o(conf)
-}
-
-type GetOptions []GetOption
-
-func Get() GetOptions {
-	return nil
-}
-
-func (opts GetOptions) Default(value interface{}) GetOptions {
-	opt := func(conf *GetConfig) {
-		conf.Default = value
-	}
-
-	return append(opts, opt)
-}
-
-func (opts GetOptions) Config() *GetConfig {
-	conf := newDefaultGetConfig()
-
-	for _, opt := range opts {
-		opt.ApplyTo(conf)
-	}
-
-	return conf
-}
+package cachego

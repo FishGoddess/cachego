@@ -12,32 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package options
-
-type SizeConfig struct{}
-
-func newDefaultSizeConfig() *SizeConfig {
-	return &SizeConfig{}
-}
-
-type SizeOption func(conf *SizeConfig)
-
-func (o SizeOption) ApplyTo(conf *SizeConfig) {
-	o(conf)
-}
-
-type SizeOptions []SizeOption
-
-func Size() SizeOptions {
-	return nil
-}
-
-func (opts SizeOptions) Config() *SizeConfig {
-	conf := newDefaultSizeConfig()
-
-	for _, opt := range opts {
-		opt.ApplyTo(conf)
-	}
-
-	return conf
-}
+package cachego

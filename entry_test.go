@@ -12,32 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package options
-
-type RemoveConfig struct{}
-
-func newDefaultRemoveConfig() *RemoveConfig {
-	return &RemoveConfig{}
-}
-
-type RemoveOption func(conf *RemoveConfig)
-
-func (o RemoveOption) ApplyTo(conf *RemoveConfig) {
-	o(conf)
-}
-
-type RemoveOptions []RemoveOption
-
-func Remove() RemoveOptions {
-	return nil
-}
-
-func (opts RemoveOptions) Config() *RemoveConfig {
-	conf := newDefaultRemoveConfig()
-
-	for _, opt := range opts {
-		opt.ApplyTo(conf)
-	}
-
-	return conf
-}
+package cachego

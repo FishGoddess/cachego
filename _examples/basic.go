@@ -1,4 +1,4 @@
-// Copyright 2020 FishGoddess. All Rights Reserved.
+// Copyright 2023 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-Package cachego provides an easy way to use foundation for your caching operations.
-*/
-package cachego // import "github.com/FishGoddess/cachego"
+package main
 
-// Version is the version string representation of cachego.
-const Version = "v0.4.0-alpha"
+import "github.com/FishGoddess/cachego"
+
+func main() {
+	cache := cachego.NewSimple()
+	cache.Count(false)
+}
