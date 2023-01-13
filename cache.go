@@ -33,7 +33,7 @@ type Cache interface {
 	// of expired key after getting it (so we can reuse the memory of entry).
 	Get(key string) (value interface{}, found bool)
 
-	// Set sets key and value to cache with ttl and returns evicted value if exists and non-expired.
+	// Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
 	// See NoTTL if you want your key is never expired.
 	Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{})
 
@@ -73,7 +73,10 @@ func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
 	return cache
 }
 
-func NewSimple(opts ...Option) Cache {
+// NewSimpleCache creates a simple cache with options.
+// By default, it will create a segment cache which is good for concurrency.
+// You can use WithSegments(0) to create a single-simple cache.
+func NewSimpleCache(opts ...Option) (cache Cache) {
 	conf := newDefaultConfig()
 	conf.segments = 64
 

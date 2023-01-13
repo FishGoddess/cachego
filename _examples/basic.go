@@ -14,9 +14,28 @@
 
 package main
 
-import "github.com/FishGoddess/cachego"
+import (
+	"fmt"
+	"time"
+
+	"github.com/FishGoddess/cachego"
+)
 
 func main() {
-	cache := cachego.NewSimple()
-	cache.Count(false)
+	cache := cachego.NewSimpleCache(cachego.WithSegments(0))
+	cache.Set("key", 123, 100*time.Millisecond)
+
+	value, ok := cache.Get("key")
+	fmt.Println(value, ok) // 123 true
+
+	count := cache.Count(false)
+	fmt.Println(count) // 1
+
+	time.Sleep(200 * time.Millisecond)
+
+	value, ok = cache.Get("key")
+	fmt.Println(value, ok) // <nil> false
+
+	count = cache.Count(false)
+	fmt.Println(count) // 0
 }

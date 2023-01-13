@@ -39,13 +39,31 @@ func newDefaultConfig() config {
 
 type Option func(conf *config)
 
-func (o Option) ApplyTo(conf *config) {
+func (o Option) applyTo(conf *config) {
 	o(conf)
 }
 
 func applyOptions(conf *config, opts []Option) {
 	for _, opt := range opts {
-		opt.ApplyTo(conf)
+		opt.applyTo(conf)
+	}
+}
+
+func WithMaps(maps int) Option {
+	return func(conf *config) {
+		conf.maps = maps
+	}
+}
+
+func WithSegments(segments int) Option {
+	return func(conf *config) {
+		conf.segments = segments
+	}
+}
+
+func WithGC(gcDuration time.Duration) Option {
+	return func(conf *config) {
+		conf.gcDuration = gcDuration
 	}
 }
 
@@ -58,11 +76,5 @@ func WithMaxEntries(maxEntries int) Option {
 func WithMaxScans(maxScans int) Option {
 	return func(conf *config) {
 		conf.maxScans = maxScans
-	}
-}
-
-func WithGC(gcDuration time.Duration) Option {
-	return func(conf *config) {
-		conf.gcDuration = gcDuration
 	}
 }

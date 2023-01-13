@@ -17,13 +17,16 @@ package cachego
 import "time"
 
 var (
-	now = time.Now
+	// now returns the current time in nanosecond.
+	now = func() int64 {
+		return time.Now().UnixNano()
+	}
 )
 
 type entry struct {
 	key        string
 	value      interface{}
-	expiration *time.Time
+	expiration int64 // Time in nanosecond, valid util 2262 year (enough, uh?)
 }
 
 func newEntry(key string, value interface{}, ttl time.Duration) *entry {
@@ -36,14 +39,13 @@ func newEntry(key string, value interface{}, ttl time.Duration) *entry {
 func (e *entry) setup(key string, value interface{}, ttl time.Duration) {
 	e.key = key
 	e.value = value
-	e.expiration = nil
+	e.expiration = 0
 
 	if ttl > 0 {
-		expiration := now().Add(ttl)
-		e.expiration = &expiration
+		e.expiration = now() + ttl.Nanoseconds()
 	}
 }
 
 func (e *entry) expired() bool {
-	return e.expiration != nil && now().After(*e.expiration)
+	return e.expiration > 0 && e.expiration < now()
 }

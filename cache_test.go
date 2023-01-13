@@ -13,3 +13,30 @@
 // limitations under the License.
 
 package cachego
+
+import "testing"
+
+// go test -v -cover=^TestNewSimple$
+func TestNewSimple(t *testing.T) {
+	cache := NewSimpleCache()
+
+	sc1, ok := cache.(*segmentCache)
+	if !ok {
+		t.Errorf("cache.(*segmentCache) %T not ok", cache)
+	}
+
+	if sc1 == nil {
+		t.Error("sc1 == nil")
+	}
+
+	cache = NewSimpleCache(WithSegments(0))
+
+	sc2, ok := cache.(*simpleCache)
+	if !ok {
+		t.Errorf("cache.(*segmentCache) %T not ok", cache)
+	}
+
+	if sc2 == nil {
+		t.Error("sc2 == nil")
+	}
+}

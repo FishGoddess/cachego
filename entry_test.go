@@ -13,3 +13,100 @@
 // limitations under the License.
 
 package cachego
+
+import (
+	"testing"
+	"time"
+)
+
+// go test -v -cover -run=^TestNewEntry$
+func TestNewEntry(t *testing.T) {
+	e := newEntry("key", "value", 0)
+
+	if e.key != "key" {
+		t.Errorf("e.key %s is wrong", e.key)
+	}
+
+	if e.value.(string) != "value" {
+		t.Errorf("e.value %+v is wrong", e.value)
+	}
+
+	if e.expiration != 0 {
+		t.Errorf("e.expiration %+v != 0", e.expiration)
+	}
+
+	e = newEntry("k", "v", time.Second)
+	expiration := time.Now().Add(time.Second).UnixNano()
+
+	if e.key != "k" {
+		t.Errorf("e.key %s is wrong", e.key)
+	}
+
+	if e.value.(string) != "v" {
+		t.Errorf("e.value %+v is wrong", e.value)
+	}
+
+	if e.expiration == 0 {
+		t.Error("e.expiration == 0")
+	}
+
+	if e.expiration != expiration {
+		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
+	}
+}
+
+// go test -v -cover -run=^TestEntrySetup$
+func TestEntrySetup(t *testing.T) {
+	e := newEntry("key", "value", 0)
+
+	if e.key != "key" {
+		t.Errorf("e.key %s is wrong", e.key)
+	}
+
+	if e.value.(string) != "value" {
+		t.Errorf("e.value %+v is wrong", e.value)
+	}
+
+	if e.expiration != 0 {
+		t.Errorf("e.expiration %+v != 0", e.expiration)
+	}
+
+	ee := e
+	e.setup("k", "v", time.Second)
+	expiration := time.Now().Add(time.Second).UnixNano()
+
+	if ee != e {
+		t.Errorf("ee %p != e %p", ee, e)
+	}
+
+	if e.key != "k" {
+		t.Errorf("e.key %s is wrong", e.key)
+	}
+
+	if e.value.(string) != "v" {
+		t.Errorf("e.value %+v is wrong", e.value)
+	}
+
+	if e.expiration == 0 {
+		t.Error("e.expiration == 0")
+	}
+
+	if e.expiration != expiration {
+		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
+	}
+}
+
+// go test -cover -run=^TestEntryExpired$
+func TestEntryExpired(t *testing.T) {
+	e := newEntry("", nil, time.Millisecond)
+
+	if e.expired() {
+		t.Error("e should be unexpired!")
+	}
+
+	time.Sleep(2 * time.Millisecond)
+
+	if !e.expired() {
+		t.Error("e should be expired!")
+	}
+}
