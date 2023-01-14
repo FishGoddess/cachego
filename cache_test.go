@@ -16,24 +16,24 @@ package cachego
 
 import "testing"
 
-// go test -v -cover=^TestNewSimple$
-func TestNewSimple(t *testing.T) {
-	cache := NewSimpleCache()
+// go test -v -cover=^TestNewStandard$
+func TestNewStandard(t *testing.T) {
+	cache := NewStandardCache()
 
-	sc1, ok := cache.(*segmentCache)
+	sc1, ok := cache.(*standardCache)
 	if !ok {
-		t.Errorf("cache.(*segmentCache) %T not ok", cache)
+		t.Errorf("cache.(*standardCache) %T not ok", cache)
 	}
 
 	if sc1 == nil {
 		t.Error("sc1 == nil")
 	}
 
-	cache = NewSimpleCache(WithSegments(0))
+	cache = NewStandardCache(WithShardings(64))
 
-	sc2, ok := cache.(*simpleCache)
+	sc2, ok := cache.(*shardingCache)
 	if !ok {
-		t.Errorf("cache.(*segmentCache) %T not ok", cache)
+		t.Errorf("cache.(*shardingCache) %T not ok", cache)
 	}
 
 	if sc2 == nil {

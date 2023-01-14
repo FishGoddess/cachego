@@ -22,7 +22,7 @@ import (
 )
 
 func main() {
-	cache := cachego.NewSimpleCache(cachego.WithSegments(0))
+	cache := cachego.NewStandardCache(cachego.WithShardings(0))
 	cache.Set("key", 123, 100*time.Millisecond)
 
 	value, ok := cache.Get("key")

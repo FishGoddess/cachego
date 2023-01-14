@@ -19,7 +19,7 @@ import "time"
 type config struct {
 	// These fields are for creating.
 	maps       int
-	segments   int
+	shardings  int
 	gcDuration time.Duration
 
 	// These fields are for operating.
@@ -30,7 +30,7 @@ type config struct {
 func newDefaultConfig() config {
 	return config{
 		maps:       128,
-		segments:   0,
+		shardings:  0,
 		gcDuration: 0,
 		maxEntries: 0,
 		maxScans:   100000,
@@ -55,9 +55,9 @@ func WithMaps(maps int) Option {
 	}
 }
 
-func WithSegments(segments int) Option {
+func WithShardings(shardings int) Option {
 	return func(conf *config) {
-		conf.segments = segments
+		conf.shardings = shardings
 	}
 }
 

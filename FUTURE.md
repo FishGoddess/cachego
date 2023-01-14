@@ -3,8 +3,8 @@
 ### v0.4.x
 
 * [ ] 设计 Cache 接口，Get 方法用 bool 判断，单个锁结构
-* [ ] 提供 SegmentCache 实现，实现 Cache 接口，细化锁粒度
-* [ ] 提供多种接口实现，包括 simple，lru，lfu，arc 等，尝试将缓存基础功能封装到通用结构
+* [ ] 提供 ShardingCache 实现，实现 Cache 接口，细化锁粒度
+* [ ] 提供多种接口实现，包括 standard，lru，lfu，arc 等，尝试将缓存基础功能封装到通用结构
 * [ ] 提供 load 方法，集成 singleflight 进行数据加载
 * [ ] 提供 Hook 接口，默认提供 status 计数实现，包括 hit，miss，evict 等
 * [ ] 操作提供 option 机制，ttl 使用 option 设置，默认值使用 option 设置，最大遍历次数使用 option 设置

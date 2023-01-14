@@ -19,21 +19,21 @@ import (
 	"time"
 )
 
-type simpleCache struct {
+type standardCache struct {
 	config
 
 	entries map[string]*entry
 	lock    sync.RWMutex
 }
 
-func newSimpleCache(conf config) Cache {
-	return &simpleCache{
+func newStandardCache(conf config) Cache {
+	return &standardCache{
 		config:  conf,
 		entries: make(map[string]*entry, conf.maps),
 	}
 }
 
-func (sc *simpleCache) get(key string) (value interface{}, found bool) {
+func (sc *standardCache) get(key string) (value interface{}, found bool) {
 	entry, ok := sc.entries[key]
 	if ok && !entry.expired() {
 		return entry.value, true
@@ -42,7 +42,7 @@ func (sc *simpleCache) get(key string) (value interface{}, found bool) {
 	return nil, false
 }
 
-func (sc *simpleCache) evict() (evictedValue interface{}) {
+func (sc *standardCache) evict() (evictedValue interface{}) {
 	for key := range sc.entries {
 		return sc.remove(key)
 	}
@@ -50,7 +50,7 @@ func (sc *simpleCache) evict() (evictedValue interface{}) {
 	return nil
 }
 
-func (sc *simpleCache) set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
+func (sc *standardCache) set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
 	entry, ok := sc.entries[key]
 	if ok {
 		entry.setup(key, value, ttl)
@@ -65,7 +65,7 @@ func (sc *simpleCache) set(key string, value interface{}, ttl time.Duration) (ev
 	return evictedValue
 }
 
-func (sc *simpleCache) remove(key string) (removedValue interface{}) {
+func (sc *standardCache) remove(key string) (removedValue interface{}) {
 	entry, ok := sc.entries[key]
 	if !ok {
 		return nil
@@ -79,7 +79,7 @@ func (sc *simpleCache) remove(key string) (removedValue interface{}) {
 	return removedValue
 }
 
-func (sc *simpleCache) clean(allKeys bool) (cleans int) {
+func (sc *standardCache) clean(allKeys bool) (cleans int) {
 	scans := 0
 	for _, entry := range sc.entries {
 		scans++
@@ -97,7 +97,7 @@ func (sc *simpleCache) clean(allKeys bool) (cleans int) {
 	return cleans
 }
 
-func (sc *simpleCache) count(allKeys bool) (count int) {
+func (sc *standardCache) count(allKeys bool) (count int) {
 	if allKeys {
 		return len(sc.entries)
 	}
@@ -111,35 +111,35 @@ func (sc *simpleCache) count(allKeys bool) (count int) {
 	return count
 }
 
-func (sc *simpleCache) Get(key string) (value interface{}, found bool) {
+func (sc *standardCache) Get(key string) (value interface{}, found bool) {
 	sc.lock.RLock()
 	defer sc.lock.RUnlock()
 
 	return sc.get(key)
 }
 
-func (sc *simpleCache) Set(key string, value interface{}, ttl time.Duration) (oldValue interface{}) {
+func (sc *standardCache) Set(key string, value interface{}, ttl time.Duration) (oldValue interface{}) {
 	sc.lock.Lock()
 	defer sc.lock.Unlock()
 
 	return sc.set(key, value, ttl)
 }
 
-func (sc *simpleCache) Remove(key string) (removedValue interface{}) {
+func (sc *standardCache) Remove(key string) (removedValue interface{}) {
 	sc.lock.Lock()
 	defer sc.lock.Unlock()
 
 	return sc.remove(key)
 }
 
-func (sc *simpleCache) Clean(allKeys bool) (cleans int) {
+func (sc *standardCache) Clean(allKeys bool) (cleans int) {
 	sc.lock.Lock()
 	defer sc.lock.Unlock()
 
 	return sc.clean(allKeys)
 }
 
-func (sc *simpleCache) Count(allKeys bool) (count int) {
+func (sc *standardCache) Count(allKeys bool) (count int) {
 	sc.lock.RLock()
 	defer sc.lock.RUnlock()
 

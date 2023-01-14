@@ -18,45 +18,45 @@ import (
 	"time"
 )
 
-type segmentCache struct {
+type shardingCache struct {
 	config
 
 	caches []Cache
 }
 
-func newSegmentCache(conf config, newCache func(conf config) Cache) Cache {
-	caches := make([]Cache, 0, conf.segments)
-	for i := 0; i < conf.segments; i++ {
+func newShardingCache(conf config, newCache func(conf config) Cache) Cache {
+	caches := make([]Cache, 0, conf.shardings)
+	for i := 0; i < conf.shardings; i++ {
 		caches = append(caches, newCache(conf))
 	}
 
-	return &segmentCache{
+	return &shardingCache{
 		config: conf,
 		caches: caches,
 	}
 }
 
-func (sc *segmentCache) Get(key string) (value interface{}, found bool) {
+func (sc *shardingCache) Get(key string) (value interface{}, found bool) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (sc *segmentCache) Set(key string, value interface{}, ttl time.Duration) (oldValue interface{}) {
+func (sc *shardingCache) Set(key string, value interface{}, ttl time.Duration) (oldValue interface{}) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (sc *segmentCache) Remove(key string) (removedValue interface{}) {
+func (sc *shardingCache) Remove(key string) (removedValue interface{}) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (sc *segmentCache) Clean(allKeys bool) (cleans int) {
+func (sc *shardingCache) Clean(allKeys bool) (cleans int) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (sc *segmentCache) Count(allKeys bool) (count int) {
+func (sc *shardingCache) Count(allKeys bool) (count int) {
 	//TODO implement me
 	panic("implement me")
 }

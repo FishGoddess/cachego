@@ -24,7 +24,7 @@ const (
 )
 
 // Cache is the core interface of cachego.
-// We provide some implements including standard cache and segment cache.
+// We provide some implements including standard cache and sharding cache.
 type Cache interface {
 	// Get gets the value of key from cache and returns value if found.
 	// A nil value will be returned if key doesn't exist in cache.
@@ -55,8 +55,8 @@ type Cache interface {
 }
 
 func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
-	if conf.segments > 0 {
-		cache = newSegmentCache(conf, newCache)
+	if conf.shardings > 0 {
+		cache = newShardingCache(conf, newCache)
 	} else {
 		cache = newCache(conf)
 	}
@@ -73,13 +73,12 @@ func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
 	return cache
 }
 
-// NewSimpleCache creates a simple cache with options.
-// By default, it will create a segment cache which is good for concurrency.
-// You can use WithSegments(0) to create a single-simple cache.
-func NewSimpleCache(opts ...Option) (cache Cache) {
+// NewStandardCache creates a standard cache with options.
+// By default, it will create a cache which uses one lock to solve data race.
+// It may cause a big performance problem in high concurrency.
+// You can use WithShardings to create a sharding standard cache which is good for concurrency.
+func NewStandardCache(opts ...Option) (cache Cache) {
 	conf := newDefaultConfig()
-	conf.segments = 64
-
 	applyOptions(&conf, opts)
-	return newCache(conf, newSimpleCache)
+	return newCache(conf, newStandardCache)
 }
