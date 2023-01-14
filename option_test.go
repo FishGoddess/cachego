@@ -13,3 +13,91 @@
 // limitations under the License.
 
 package cachego
+
+import "testing"
+
+// go test -v -cover -run=^TestApplyOptions$
+func TestApplyOptions(t *testing.T) {
+	got := config{
+		maps:       0,
+		shardings:  0,
+		gcDuration: 0,
+		maxScans:   0,
+		maxEntries: 0,
+	}
+
+	expect := config{
+		maps:       1,
+		shardings:  2,
+		gcDuration: 3,
+		maxScans:   4,
+		maxEntries: 5,
+	}
+
+	applyOptions(&got, []Option{
+		WithMaps(1),
+		WithShardings(2),
+		WithGC(3),
+		WithMaxScans(4),
+		WithMaxEntries(5),
+	})
+
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithMaps$
+func TestWithMaps(t *testing.T) {
+	got := config{maps: 0}
+	expect := config{maps: 1024}
+
+	WithMaps(1024).applyTo(&got)
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithShardings$
+func TestWithShardings(t *testing.T) {
+	got := config{shardings: 0}
+	expect := config{shardings: 1024}
+
+	WithShardings(1024).applyTo(&got)
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithGC$
+func TestWithGC(t *testing.T) {
+	got := config{gcDuration: 0}
+	expect := config{gcDuration: 1024}
+
+	WithGC(1024).applyTo(&got)
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithMaxScans$
+func TestWithMaxScans(t *testing.T) {
+	got := config{maxScans: 0}
+	expect := config{maxScans: 1024}
+
+	WithMaxScans(1024).applyTo(&got)
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithMaxEntries$
+func TestWithMaxEntries(t *testing.T) {
+	got := config{maxEntries: 0}
+	expect := config{maxEntries: 1024}
+
+	WithMaxEntries(1024).applyTo(&got)
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}

@@ -12,30 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cachego
 
-import (
-	"fmt"
-	"time"
+import "time"
 
-	"github.com/FishGoddess/cachego"
+var (
+	// Hash returns the hash code of one key.
+	Hash = hash
+
+	// Now returns the current time in nanosecond.
+	Now = now
 )
 
-func main() {
-	cache := cachego.NewStandardCache()
-	cache.Set("key", 123, 100*time.Millisecond)
+func hash(key string) int {
+	hash := 1469598103934665603
 
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // 123 true
+	keyBytes := []byte(key)
+	for _, b := range keyBytes {
+		hash = (hash << 5) - hash + int(b&0xff)
+		hash *= 1099511628211
+	}
 
-	count := cache.Count(false)
-	fmt.Println(count) // 1
+	return hash
+}
 
-	time.Sleep(200 * time.Millisecond)
-
-	value, ok = cache.Get("key")
-	fmt.Println(value, ok) // <nil> false
-
-	count = cache.Count(false)
-	fmt.Println(count) // 0
+func now() int64 {
+	return time.Now().UnixNano()
 }

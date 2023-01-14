@@ -92,7 +92,7 @@ func TestEntrySetup(t *testing.T) {
 	}
 
 	// Keep one us for code running.
-	if expiration < e.expiration || e.expiration < expiration-time.Microsecond.Microseconds() {
+	if expiration < e.expiration || e.expiration < expiration-time.Microsecond.Nanoseconds() {
 		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
 	}
 }

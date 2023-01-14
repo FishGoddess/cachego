@@ -12,30 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cachego
 
 import (
-	"fmt"
+	"testing"
 	"time"
-
-	"github.com/FishGoddess/cachego"
 )
 
-func main() {
-	cache := cachego.NewStandardCache()
-	cache.Set("key", 123, 100*time.Millisecond)
+// go test -v -cover -run=^TestHash$
+func TestHash(t *testing.T) {
+	hash := Hash("test")
+	if hash <= 0 {
+		t.Errorf("hash %d <= 0", hash)
+	}
+}
 
-	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // 123 true
+// go test -v -cover -run=^TestNow$
+func TestNow(t *testing.T) {
+	got := Now()
+	expect := time.Now().UnixNano()
 
-	count := cache.Count(false)
-	fmt.Println(count) // 1
-
-	time.Sleep(200 * time.Millisecond)
-
-	value, ok = cache.Get("key")
-	fmt.Println(value, ok) // <nil> false
-
-	count = cache.Count(false)
-	fmt.Println(count) // 0
+	if got > expect || got < expect-time.Microsecond.Nanoseconds() {
+		t.Errorf("got %d != expect %d", got, expect)
+	}
 }

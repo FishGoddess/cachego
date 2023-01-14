@@ -111,6 +111,8 @@ func (sc *standardCache) count(allKeys bool) (count int) {
 	return count
 }
 
+// Get gets the value of key from cache and returns value if found.
+// See Cache interface.
 func (sc *standardCache) Get(key string) (value interface{}, found bool) {
 	sc.lock.RLock()
 	defer sc.lock.RUnlock()
@@ -118,6 +120,8 @@ func (sc *standardCache) Get(key string) (value interface{}, found bool) {
 	return sc.get(key)
 }
 
+// Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
+// See Cache interface.
 func (sc *standardCache) Set(key string, value interface{}, ttl time.Duration) (oldValue interface{}) {
 	sc.lock.Lock()
 	defer sc.lock.Unlock()
@@ -125,6 +129,8 @@ func (sc *standardCache) Set(key string, value interface{}, ttl time.Duration) (
 	return sc.set(key, value, ttl)
 }
 
+// Remove removes key and returns the removed value of key.
+// See Cache interface.
 func (sc *standardCache) Remove(key string) (removedValue interface{}) {
 	sc.lock.Lock()
 	defer sc.lock.Unlock()
@@ -132,6 +138,8 @@ func (sc *standardCache) Remove(key string) (removedValue interface{}) {
 	return sc.remove(key)
 }
 
+// Clean cleans some keys in cache and returns the exact count cleaned by cache.
+// See Cache interface.
 func (sc *standardCache) Clean(allKeys bool) (cleans int) {
 	sc.lock.Lock()
 	defer sc.lock.Unlock()
@@ -139,6 +147,8 @@ func (sc *standardCache) Clean(allKeys bool) (cleans int) {
 	return sc.clean(allKeys)
 }
 
+// Count returns the count of keys in cache.
+// See Cache interface.
 func (sc *standardCache) Count(allKeys bool) (count int) {
 	sc.lock.RLock()
 	defer sc.lock.RUnlock()

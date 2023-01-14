@@ -15,6 +15,7 @@
 package cachego
 
 import (
+	"math/bits"
 	"time"
 )
 
@@ -25,6 +26,10 @@ type shardingCache struct {
 }
 
 func newShardingCache(conf config, newCache func(conf config) Cache) Cache {
+	if bits.OnesCount(uint(conf.shardings)) > 1 {
+		panic("cachego: shardings must be the pow of 2 (such as 64).")
+	}
+
 	caches := make([]Cache, 0, conf.shardings)
 	for i := 0; i < conf.shardings; i++ {
 		caches = append(caches, newCache(conf))
@@ -36,27 +41,45 @@ func newShardingCache(conf config, newCache func(conf config) Cache) Cache {
 	}
 }
 
+func (sc *shardingCache) cacheOf(key string) Cache {
+	hash := Hash(key)
+	mask := len(sc.caches) - 1
+	return sc.caches[hash&mask]
+}
+
+// Get gets the value of key from cache and returns value if found.
 func (sc *shardingCache) Get(key string) (value interface{}, found bool) {
-	//TODO implement me
-	panic("implement me")
+	return sc.cacheOf(key).Get(key)
 }
 
+// Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
+// See Cache interface.
 func (sc *shardingCache) Set(key string, value interface{}, ttl time.Duration) (oldValue interface{}) {
-	//TODO implement me
-	panic("implement me")
+	return sc.cacheOf(key).Set(key, value, ttl)
 }
 
+// Remove removes key and returns the removed value of key.
+// See Cache interface.
 func (sc *shardingCache) Remove(key string) (removedValue interface{}) {
-	//TODO implement me
-	panic("implement me")
+	return sc.cacheOf(key).Remove(key)
 }
 
+// Clean cleans some keys in cache and returns the exact count cleaned by cache.
+// See Cache interface.
 func (sc *shardingCache) Clean(allKeys bool) (cleans int) {
-	//TODO implement me
-	panic("implement me")
+	for _, cache := range sc.caches {
+		cleans += cache.Clean(allKeys)
+	}
+
+	return cleans
 }
 
+// Count returns the count of keys in cache.
+// See Cache interface.
 func (sc *shardingCache) Count(allKeys bool) (count int) {
-	//TODO implement me
-	panic("implement me")
+	for _, cache := range sc.caches {
+		count += cache.Count(allKeys)
+	}
+
+	return count
 }

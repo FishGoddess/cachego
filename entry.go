@@ -16,13 +16,6 @@ package cachego
 
 import "time"
 
-var (
-	// now returns the current time in nanosecond.
-	now = func() int64 {
-		return time.Now().UnixNano()
-	}
-)
-
 type entry struct {
 	key        string
 	value      interface{}
@@ -42,10 +35,10 @@ func (e *entry) setup(key string, value interface{}, ttl time.Duration) {
 	e.expiration = 0
 
 	if ttl > 0 {
-		e.expiration = now() + ttl.Nanoseconds()
+		e.expiration = Now() + ttl.Nanoseconds()
 	}
 }
 
 func (e *entry) expired() bool {
-	return e.expiration > 0 && e.expiration < now()
+	return e.expiration > 0 && e.expiration < Now()
 }
