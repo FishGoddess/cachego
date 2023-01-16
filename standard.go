@@ -23,14 +23,19 @@ type standardCache struct {
 	config
 
 	entries map[string]*entry
-	lock    sync.RWMutex
+	loader  *Loader
+
+	lock sync.RWMutex
 }
 
 func newStandardCache(conf config) Cache {
-	return &standardCache{
+	cache := &standardCache{
 		config:  conf,
-		entries: make(map[string]*entry, conf.maps),
+		entries: make(map[string]*entry, MapInitialCap),
 	}
+
+	cache.loader = NewLoader(cache, conf.singleflight)
+	return cache
 }
 
 func (sc *standardCache) get(key string) (value interface{}, found bool) {
@@ -154,4 +159,10 @@ func (sc *standardCache) Count(allKeys bool) (count int) {
 	defer sc.lock.RUnlock()
 
 	return sc.count(allKeys)
+}
+
+// Load loads a key with ttl to cache and returns an error if failed.
+// See Cache interface.
+func (sc *standardCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+	return sc.loader.Load(key, ttl, load)
 }

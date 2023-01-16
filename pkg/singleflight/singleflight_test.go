@@ -35,7 +35,7 @@ func testGroupCall(ctx context.Context, t *testing.T, group *Group, concurrency 
 		go func(index int64) {
 			defer wg.Done()
 
-			result, err := group.Call(ctx, key, func(ctx context.Context) (interface{}, error) {
+			result, err := group.Call(key, func() (interface{}, error) {
 				time.Sleep(time.Second)
 				atomic.StoreInt64(&rightResult, index)
 				return index, nil

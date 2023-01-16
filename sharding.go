@@ -83,3 +83,9 @@ func (sc *shardingCache) Count(allKeys bool) (count int) {
 
 	return count
 }
+
+// Load loads a key with ttl to cache and returns an error if failed.
+// See Cache interface.
+func (sc *shardingCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+	return sc.cacheOf(key).Load(key, ttl, load)
+}

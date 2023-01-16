@@ -18,9 +18,9 @@ import "time"
 
 type config struct {
 	// These fields are for creating.
-	maps       int
-	shardings  int
-	gcDuration time.Duration
+	shardings    int
+	singleflight bool
+	gcDuration   time.Duration
 
 	// These fields are for operating.
 	maxScans   int
@@ -29,11 +29,11 @@ type config struct {
 
 func newDefaultConfig() config {
 	return config{
-		maps:       128,
-		shardings:  0,
-		gcDuration: 0,
-		maxScans:   100000,
-		maxEntries: 0,
+		shardings:    0,
+		singleflight: true,
+		gcDuration:   0,
+		maxScans:     10000,
+		maxEntries:   0,
 	}
 }
 
@@ -50,18 +50,18 @@ func applyOptions(conf *config, opts []Option) {
 	}
 }
 
-// WithMaps returns an option setting the initial capacity of map in cache.
-func WithMaps(maps int) Option {
-	return func(conf *config) {
-		conf.maps = maps
-	}
-}
-
 // WithShardings returns an option setting the sharding count of cache.
 // Zero means no sharding.
 func WithShardings(shardings int) Option {
 	return func(conf *config) {
 		conf.shardings = shardings
+	}
+}
+
+// WithDisableSingleflight returns an option turning off singleflight mode of cache.
+func WithDisableSingleflight() Option {
+	return func(conf *config) {
+		conf.singleflight = false
 	}
 }
 

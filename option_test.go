@@ -19,7 +19,6 @@ import "testing"
 // go test -v -cover -run=^TestApplyOptions$
 func TestApplyOptions(t *testing.T) {
 	got := config{
-		maps:       0,
 		shardings:  0,
 		gcDuration: 0,
 		maxScans:   0,
@@ -27,32 +26,19 @@ func TestApplyOptions(t *testing.T) {
 	}
 
 	expect := config{
-		maps:       1,
-		shardings:  2,
-		gcDuration: 3,
-		maxScans:   4,
-		maxEntries: 5,
+		shardings:  1,
+		gcDuration: 2,
+		maxScans:   3,
+		maxEntries: 4,
 	}
 
 	applyOptions(&got, []Option{
-		WithMaps(1),
-		WithShardings(2),
-		WithGC(3),
-		WithMaxScans(4),
-		WithMaxEntries(5),
+		WithShardings(1),
+		WithGC(2),
+		WithMaxScans(3),
+		WithMaxEntries(4),
 	})
 
-	if got != expect {
-		t.Errorf("got %+v != expect %+v", got, expect)
-	}
-}
-
-// go test -v -cover -run=^TestWithMaps$
-func TestWithMaps(t *testing.T) {
-	got := config{maps: 0}
-	expect := config{maps: 1024}
-
-	WithMaps(1024).applyTo(&got)
 	if got != expect {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}
@@ -64,6 +50,17 @@ func TestWithShardings(t *testing.T) {
 	expect := config{shardings: 1024}
 
 	WithShardings(1024).applyTo(&got)
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithDisableSingleflight$
+func TestWithDisableSingleflight(t *testing.T) {
+	got := config{singleflight: true}
+	expect := config{singleflight: false}
+
+	WithDisableSingleflight().applyTo(&got)
 	if got != expect {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}

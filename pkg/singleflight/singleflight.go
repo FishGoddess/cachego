@@ -15,14 +15,13 @@
 package singleflight
 
 import (
-	"context"
 	"sync"
 )
 
 // call wraps fn and its results to a struct.
 type call struct {
 	// fn is the target function that will be called.
-	fn func(ctx context.Context) (interface{}, error)
+	fn func() (interface{}, error)
 
 	// result is the successful result of fn.
 	result interface{}
@@ -38,7 +37,7 @@ type call struct {
 }
 
 // newCall wraps fn to a call holder.
-func newCall(fn func(ctx context.Context) (interface{}, error)) *call {
+func newCall(fn func() (interface{}, error)) *call {
 	return &call{
 		fn: fn,
 	}
@@ -46,9 +45,9 @@ func newCall(fn func(ctx context.Context) (interface{}, error)) *call {
 
 // do will call fn and fill results to c.
 // Notice: Any panics or runtime.Goexit() will be ignored.
-func (c *call) do(ctx context.Context) {
+func (c *call) do() {
 	defer c.wg.Done()
-	c.result, c.err = c.fn(ctx)
+	c.result, c.err = c.fn()
 }
 
 // Group stores all calls in flight.
@@ -60,15 +59,15 @@ type Group struct {
 	lock sync.Mutex
 }
 
-// NewGroup returns a new Group holder with given mapSize.
-func NewGroup(mapSize int) *Group {
+// NewGroup returns a new Group holder with maps.
+func NewGroup(maps int) *Group {
 	return &Group{
-		calls: make(map[string]*call, mapSize),
+		calls: make(map[string]*call, maps),
 	}
 }
 
 // Call will call fn in single-flight mode.
-func (g *Group) Call(ctx context.Context, key string, fn func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+func (g *Group) Call(key string, fn func() (interface{}, error)) (interface{}, error) {
 	g.lock.Lock()
 
 	if c, ok := g.calls[key]; ok {
@@ -82,7 +81,7 @@ func (g *Group) Call(ctx context.Context, key string, fn func(ctx context.Contex
 	g.calls[key] = c
 
 	g.lock.Unlock()
-	c.do(ctx) // Call fn to get result...
+	c.do() // Call fn to get result...
 	g.lock.Lock()
 
 	if !c.deleted {
