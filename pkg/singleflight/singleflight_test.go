@@ -15,7 +15,6 @@
 package singleflight
 
 import (
-	"context"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -24,11 +23,12 @@ import (
 	"time"
 )
 
-func testGroupCall(ctx context.Context, t *testing.T, group *Group, concurrency int) {
+func testGroupCall(t *testing.T, group *Group, concurrency int) {
 	var wg sync.WaitGroup
 
 	key := strconv.Itoa(rand.Int())
 	rightResult := int64(0)
+
 	for i := 0; i < concurrency; i++ {
 		wg.Add(1)
 
@@ -57,15 +57,12 @@ func testGroupCall(ctx context.Context, t *testing.T, group *Group, concurrency 
 
 // go test -v -cover -run=^TestGroupCall$
 func TestGroupCall(t *testing.T) {
-	ctx := context.Background()
 	group := NewGroup(128)
-
-	testGroupCall(ctx, t, group, 100000)
+	testGroupCall(t, group, 100000)
 }
 
 // go test -v -cover -run=^TestGroupCallMultiKey$
 func TestGroupCallMultiKey(t *testing.T) {
-	ctx := context.Background()
 	group := NewGroup(128)
 
 	var wg sync.WaitGroup
@@ -74,7 +71,7 @@ func TestGroupCallMultiKey(t *testing.T) {
 
 		go func() {
 			defer wg.Done()
-			testGroupCall(ctx, t, group, 1000)
+			testGroupCall(t, group, 1000)
 		}()
 	}
 

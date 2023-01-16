@@ -22,16 +22,24 @@ import (
 )
 
 // Loader loads a value to cache.
+// All implements should store a cache inside in order to load value to cache.
+type Loader interface {
+	// Load loads a key with ttl to cache and returns an error if failed.
+	// We recommend you use this method to load missed keys to cache because it may use singleflight to reduce the times calling load function.
+	Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error)
+}
+
+// Loader loads a value to cache.
 // We recommend you set enableSingleflight=true in NewLoader for reducing the times calling load function.
-type Loader struct {
+type loader struct {
 	cache Cache
 	group *singleflight.Group
 }
 
 // NewLoader creates a loader with cache.
 // It also creates a singleflight group to call load if enableSingleflight is true.
-func NewLoader(cache Cache, enableSingleflight bool) *Loader {
-	loader := &Loader{
+func NewLoader(cache Cache, enableSingleflight bool) Loader {
+	loader := &loader{
 		cache: cache,
 	}
 
@@ -44,7 +52,7 @@ func NewLoader(cache Cache, enableSingleflight bool) *Loader {
 
 // Load loads a key with ttl to cache and returns an error if failed.
 // See Cache interface.
-func (l *Loader) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+func (l *loader) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
 	if load == nil {
 		return nil, errors.New("cachego: load function is nil in loader")
 	}

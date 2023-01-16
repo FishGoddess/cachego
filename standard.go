@@ -23,7 +23,7 @@ type standardCache struct {
 	config
 
 	entries map[string]*entry
-	loader  *Loader
+	loader  Loader
 
 	lock sync.RWMutex
 }

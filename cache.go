@@ -53,9 +53,9 @@ type Cache interface {
 	// By default, expired keys won't be counted, set allKeys=true if you want to count all keys.
 	Count(allKeys bool) (count int)
 
-	// Load loads a key with ttl to cache and returns an error if failed.
-	// We recommend you use this method to load missed keys to cache because it uses singleflight to reduce the times calling load function.
-	Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error)
+	// Loader loads a value to cache.
+	// See Loader interface.
+	Loader
 }
 
 func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
