@@ -16,8 +16,8 @@ package cachego
 
 import "testing"
 
-// go test -v -cover=^TestNewStandard$
-func TestNewStandard(t *testing.T) {
+// go test -v -cover=^TestNewStandardCache$
+func TestNewStandardCache(t *testing.T) {
 	cache := NewStandardCache()
 
 	sc1, ok := cache.(*standardCache)

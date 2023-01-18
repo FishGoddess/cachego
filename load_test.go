@@ -13,3 +13,30 @@
 // limitations under the License.
 
 package cachego
+
+import "testing"
+
+// go test -v -cover -run=^TestNewLoader$
+func TestNewLoader(t *testing.T) {
+	l := NewLoader(nil, false)
+
+	loader1, ok := l.(*loader)
+	if !ok {
+		t.Errorf("l.(*loader) %T not ok", l)
+	}
+
+	if loader1.group != nil {
+		t.Errorf("loader1.group %+v != nil", loader1.group)
+	}
+
+	l = NewLoader(nil, true)
+
+	loader2, ok := l.(*loader)
+	if !ok {
+		t.Errorf("l.(*loader) %T not ok", l)
+	}
+
+	if loader2.group == nil {
+		t.Error("loader2.group == nil")
+	}
+}
