@@ -127,6 +127,7 @@ func TestLoaderLoad(t *testing.T) {
 			str := strconv.FormatInt(i, 10)
 
 			_, err := cache.Load("key", time.Duration(i), func() (value interface{}, err error) {
+				time.Sleep(time.Second)
 				loadCount++
 				return str, nil
 			})
@@ -138,7 +139,7 @@ func TestLoaderLoad(t *testing.T) {
 	}
 
 	wg.Wait()
-	if loadCount >= 100 {
-		t.Errorf("loadCount %d >= 100", loadCount)
+	if loadCount != 1 {
+		t.Errorf("loadCount %d != 1", loadCount)
 	}
 }
