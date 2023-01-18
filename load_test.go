@@ -14,7 +14,54 @@
 
 package cachego
 
-import "testing"
+import (
+	"strconv"
+	"sync"
+	"testing"
+	"time"
+)
+
+type testLoadCache struct {
+	key   string
+	value interface{}
+	ttl   time.Duration
+
+	loader Loader
+}
+
+func newTestLoadCache(singleflight bool) Cache {
+	cache := new(testLoadCache)
+	loader := NewLoader(cache, singleflight)
+	cache.loader = loader
+	return cache
+}
+
+func (tlc *testLoadCache) Get(key string) (value interface{}, found bool) {
+	return tlc.value, key == tlc.key
+}
+
+func (tlc *testLoadCache) Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
+	tlc.key = key
+	tlc.value = value
+	tlc.ttl = ttl
+	return nil
+}
+
+func (tlc *testLoadCache) Remove(key string) (removedValue interface{}) {
+	return nil
+}
+
+func (tlc *testLoadCache) Clean(allKeys bool) (cleans int) {
+	return 0
+}
+
+func (tlc *testLoadCache) Count(allKeys bool) (count int) {
+	return 1
+}
+
+func (tlc *testLoadCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+	return tlc.loader.Load(key, ttl, load)
+}
 
 // go test -v -cover -run=^TestNewLoader$
 func TestNewLoader(t *testing.T) {
@@ -38,5 +85,60 @@ func TestNewLoader(t *testing.T) {
 
 	if loader2.group == nil {
 		t.Error("loader2.group == nil")
+	}
+}
+
+// go test -v -cover -run=^TestLoaderLoad$
+func TestLoaderLoad(t *testing.T) {
+	cache := newTestLoadCache(false)
+	loadCount := 0
+
+	for i := int64(0); i < 100; i++ {
+		str := strconv.FormatInt(i, 10)
+
+		value, err := cache.Load("key", time.Duration(i), func() (value interface{}, err error) {
+			loadCount++
+			return str, nil
+		})
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		if value.(string) != str {
+			t.Errorf("value.(string) %s != str %s", value.(string), str)
+		}
+	}
+
+	if loadCount != 100 {
+		t.Errorf("loadCount %d != 100", loadCount)
+	}
+
+	cache = newTestLoadCache(true)
+	loadCount = 0
+
+	var wg sync.WaitGroup
+	for i := int64(0); i < 100; i++ {
+		wg.Add(1)
+
+		go func(i int64) {
+			defer wg.Done()
+
+			str := strconv.FormatInt(i, 10)
+
+			_, err := cache.Load("key", time.Duration(i), func() (value interface{}, err error) {
+				loadCount++
+				return str, nil
+			})
+
+			if err != nil {
+				t.Error(err)
+			}
+		}(i)
+	}
+
+	wg.Wait()
+	if loadCount >= 100 {
+		t.Errorf("loadCount %d >= 100", loadCount)
 	}
 }
