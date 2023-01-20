@@ -13,3 +13,35 @@
 // limitations under the License.
 
 package cachego
+
+import "testing"
+
+// go test -v -cover -run=^TestStandardCacheGet$
+func TestStandardCacheGet(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestStandardCacheSet$
+func TestStandardCacheSet(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestStandardCacheRemove$
+func TestStandardCacheRemove(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestStandardCacheSize$
+func TestStandardCacheSize(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestStandardCacheGC$
+func TestStandardCacheGC(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestStandardCacheReset$
+func TestStandardCacheReset(t *testing.T) {
+
+}

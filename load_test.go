@@ -51,13 +51,15 @@ func (tlc *testLoadCache) Remove(key string) (removedValue interface{}) {
 	return nil
 }
 
-func (tlc *testLoadCache) Clean(allKeys bool) (cleans int) {
+func (tlc *testLoadCache) Size() (size int) {
+	return 1
+}
+
+func (tlc *testLoadCache) GC() (cleans int) {
 	return 0
 }
 
-func (tlc *testLoadCache) Count(allKeys bool) (count int) {
-	return 1
-}
+func (tlc *testLoadCache) Reset() {}
 
 func (tlc *testLoadCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
 	return tlc.loader.Load(key, ttl, load)

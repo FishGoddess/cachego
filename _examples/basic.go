@@ -28,14 +28,14 @@ func main() {
 	value, ok := cache.Get("key")
 	fmt.Println(value, ok) // 123 true
 
-	count := cache.Count(false)
-	fmt.Println(count) // 1
+	size := cache.Size()
+	fmt.Println(size) // 1
 
 	time.Sleep(200 * time.Millisecond)
 
 	value, ok = cache.Get("key")
 	fmt.Println(value, ok) // <nil> false
 
-	count = cache.Count(false)
-	fmt.Println(count) // 0
+	size = cache.Size()
+	fmt.Println(size) // 0
 }

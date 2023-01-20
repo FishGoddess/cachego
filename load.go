@@ -27,6 +27,9 @@ type Loader interface {
 	// Load loads a key with ttl to cache and returns an error if failed.
 	// We recommend you use this method to load missed keys to cache because it may use singleflight to reduce the times calling load function.
 	Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error)
+
+	// Reset resets loader to initial status which is like a new loader.
+	Reset()
 }
 
 // Loader loads a value to cache.
@@ -51,7 +54,6 @@ func NewLoader(cache Cache, enableSingleflight bool) Loader {
 }
 
 // Load loads a key with ttl to cache and returns an error if failed.
-// See Cache interface.
 func (l *loader) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
 	if load == nil {
 		return nil, errors.New("cachego: load function is nil in loader")
@@ -72,4 +74,11 @@ func (l *loader) Load(key string, ttl time.Duration, load func() (value interfac
 	}
 
 	return value, err
+}
+
+// Reset resets loader to initial status which is like a new loader.
+func (l *loader) Reset() {
+	if l.group != nil {
+		l.group.DeleteAll()
+	}
 }

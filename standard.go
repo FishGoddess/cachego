@@ -62,7 +62,7 @@ func (sc *standardCache) set(key string, value interface{}, ttl time.Duration) (
 		return nil
 	}
 
-	if sc.maxEntries > 0 && sc.count(true) >= sc.maxEntries {
+	if sc.maxEntries > 0 && sc.size() >= sc.maxEntries {
 		evictedValue = sc.evict()
 	}
 
@@ -84,12 +84,16 @@ func (sc *standardCache) remove(key string) (removedValue interface{}) {
 	return removedValue
 }
 
-func (sc *standardCache) clean(allKeys bool) (cleans int) {
+func (sc *standardCache) size() (size int) {
+	return len(sc.entries)
+}
+
+func (sc *standardCache) gc() (cleans int) {
 	scans := 0
 	for _, entry := range sc.entries {
 		scans++
 
-		if allKeys || entry.expired() {
+		if entry.expired() {
 			delete(sc.entries, entry.key)
 			cleans++
 		}
@@ -102,18 +106,9 @@ func (sc *standardCache) clean(allKeys bool) (cleans int) {
 	return cleans
 }
 
-func (sc *standardCache) count(allKeys bool) (count int) {
-	if allKeys {
-		return len(sc.entries)
-	}
-
-	for _, entry := range sc.entries {
-		if !entry.expired() {
-			count++
-		}
-	}
-
-	return count
+func (sc *standardCache) reset() {
+	sc.entries = make(map[string]*entry, MapInitialCap)
+	sc.loader.Reset()
 }
 
 // Get gets the value of key from cache and returns value if found.
@@ -143,22 +138,31 @@ func (sc *standardCache) Remove(key string) (removedValue interface{}) {
 	return sc.remove(key)
 }
 
-// Clean cleans some keys in cache and returns the exact count cleaned by cache.
+// Size returns the count of keys in cache.
 // See Cache interface.
-func (sc *standardCache) Clean(allKeys bool) (cleans int) {
-	sc.lock.Lock()
-	defer sc.lock.Unlock()
-
-	return sc.clean(allKeys)
-}
-
-// Count returns the count of keys in cache.
-// See Cache interface.
-func (sc *standardCache) Count(allKeys bool) (count int) {
+func (sc *standardCache) Size() (size int) {
 	sc.lock.RLock()
 	defer sc.lock.RUnlock()
 
-	return sc.count(allKeys)
+	return sc.size()
+}
+
+// GC cleans the expired keys in cache and returns the exact count cleaned.
+// See Cache interface.
+func (sc *standardCache) GC() (cleans int) {
+	sc.lock.Lock()
+	defer sc.lock.Unlock()
+
+	return sc.gc()
+}
+
+// Reset resets cache to initial status which is like a new cache.
+// See Cache interface.
+func (sc *standardCache) Reset() {
+	sc.lock.Lock()
+	defer sc.lock.Unlock()
+
+	sc.reset()
 }
 
 // Load loads a key with ttl to cache and returns an error if failed.

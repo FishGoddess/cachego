@@ -13,3 +13,35 @@
 // limitations under the License.
 
 package cachego
+
+import "testing"
+
+// go test -v -cover -run=^TestShardingCacheGet$
+func TestShardingCacheGet(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestShardingCacheSet$
+func TestShardingCacheSet(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestShardingCacheRemove$
+func TestShardingCacheRemove(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestShardingCacheSize$
+func TestShardingCacheSize(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestShardingCacheGC$
+func TestShardingCacheGC(t *testing.T) {
+
+}
+
+// go test -v -cover -run=^TestShardingCacheReset$
+func TestShardingCacheReset(t *testing.T) {
+
+}

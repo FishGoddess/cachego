@@ -64,24 +64,32 @@ func (sc *shardingCache) Remove(key string) (removedValue interface{}) {
 	return sc.cacheOf(key).Remove(key)
 }
 
-// Clean cleans some keys in cache and returns the exact count cleaned by cache.
+// Size returns the count of keys in cache.
 // See Cache interface.
-func (sc *shardingCache) Clean(allKeys bool) (cleans int) {
+func (sc *shardingCache) Size() (size int) {
 	for _, cache := range sc.caches {
-		cleans += cache.Clean(allKeys)
+		size += cache.Size()
+	}
+
+	return size
+}
+
+// GC cleans the expired keys in cache and returns the exact count cleaned.
+// See Cache interface.
+func (sc *shardingCache) GC() (cleans int) {
+	for _, cache := range sc.caches {
+		cleans += cache.GC()
 	}
 
 	return cleans
 }
 
-// Count returns the count of keys in cache.
+// Reset resets cache to initial status which is like a new cache.
 // See Cache interface.
-func (sc *shardingCache) Count(allKeys bool) (count int) {
+func (sc *shardingCache) Reset() {
 	for _, cache := range sc.caches {
-		count += cache.Count(allKeys)
+		cache.Reset()
 	}
-
-	return count
 }
 
 // Load loads a key with ttl to cache and returns an error if failed.

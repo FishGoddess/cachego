@@ -41,21 +41,27 @@ type Cache interface {
 	// A nil value will be returned if key doesn't exist in cache or expired.
 	Remove(key string) (removedValue interface{})
 
-	// Clean cleans some keys in cache and returns the exact count cleaned by cache.
-	// By default, it will only clean expired keys in cache, set allKeys=true if you want to clean all keys.
-	// Also, we limit the scans of cache due to scanning keys in cache may cause a performance problem, see newDefaultConfig.
-	// As you know we won't remove expired keys in get method, so this method is the only way to clean expired keys except set method.
-	// We recommend you to set a limit of keys, so you are no need to clean expired keys manually.
-	// Or you can start a goroutine to call Clean(false) at a fixed duration, of course, we provide an option for you, see WithGC.
-	Clean(allKeys bool) (cleans int)
+	// Size returns the count of keys in cache.
+	// The result may be different in different implements.
+	Size() (size int)
 
-	// Count returns the count of keys in cache.
-	// By default, expired keys won't be counted, set allKeys=true if you want to count all keys.
-	Count(allKeys bool) (count int)
+	// GC cleans the expired keys in cache and returns the exact count cleaned.
+	// The exact cleans depend on implements, however, all implements should have a limit of scanning.
+	GC() (cleans int)
+
+	// Reset resets cache to initial status which is like a new cache.
+	Reset()
 
 	// Loader loads a value to cache.
 	// See Loader interface.
 	Loader
+}
+
+func runCacheGCTask(cache Cache, gcDuration time.Duration) {
+	for {
+		time.Sleep(gcDuration)
+		cache.GC()
+	}
 }
 
 func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
@@ -66,12 +72,7 @@ func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
 	}
 
 	if conf.gcDuration > 0 {
-		go func() {
-			for {
-				time.Sleep(conf.gcDuration)
-				cache.Clean(false)
-			}
-		}()
+		go runCacheGCTask(cache, conf.gcDuration)
 	}
 
 	return cache
@@ -84,5 +85,6 @@ func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
 func NewStandardCache(opts ...Option) (cache Cache) {
 	conf := newDefaultConfig()
 	applyOptions(&conf, opts)
+
 	return newCache(conf, newStandardCache)
 }
