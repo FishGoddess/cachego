@@ -14,21 +14,18 @@
 ### 🕹 Features
 
 * Cache as entries with minimalist API design
-* Use option function mode to customize the operations of cache
-* Use fine-grained and segmented lock mechanism to provide a high performance in concurrency
+* Use option function mode to customize the creation of cache
+* TTL supports and max size of entries in cache
+* LRU supports and LFU supports.
+* Use sharding lock mechanism to provide a high performance in concurrency
 * Lazy cleanup supports, expired before accessing
 * Sentinel cleanup supports, cleaning up at fixed duration
 * Singleflight supports, which can decrease the times of cache penetration
-* ....
-
-_More features in [_examples](_examples) and designing detail in [introduction.md](_examples/docs/introduction.md)._
+* Timer task supports, which is convenient to load data to cache
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
 ### 🚀 Installation
-
-cachego has no more external dependencies, the only requirement is the [Golang Programming Language](https://golang.org)
-.
 
 ```bash
 $ go get -u github.com/FishGoddess/cachego
