@@ -32,17 +32,17 @@ type Task struct {
 }
 
 // Run runs this task at fixed duration d.
-func (tt *Task) Run(ctx context.Context, d time.Duration) {
-	if tt.Fn == nil {
+func (t *Task) Run(ctx context.Context, d time.Duration) {
+	if t.Fn == nil {
 		return
 	}
 
-	if tt.Before != nil {
-		tt.Before(ctx)
+	if t.Before != nil {
+		t.Before(ctx)
 	}
 
-	if tt.After != nil {
-		defer tt.After(ctx)
+	if t.After != nil {
+		defer t.After(ctx)
 	}
 
 	ticker := time.NewTicker(d)
@@ -53,7 +53,7 @@ func (tt *Task) Run(ctx context.Context, d time.Duration) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			tt.Fn(ctx)
+			t.Fn(ctx)
 		}
 	}
 }

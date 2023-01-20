@@ -79,6 +79,6 @@ func (l *loader) Load(key string, ttl time.Duration, load func() (value interfac
 // Reset resets loader to initial status which is like a new loader.
 func (l *loader) Reset() {
 	if l.group != nil {
-		l.group.DeleteAll()
+		l.group.Reset()
 	}
 }

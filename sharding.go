@@ -26,6 +26,10 @@ type shardingCache struct {
 }
 
 func newShardingCache(conf config, newCache func(conf config) Cache) Cache {
+	if conf.shardings <= 0 {
+		panic("cachego: shardings must be > 0.")
+	}
+
 	if bits.OnesCount(uint(conf.shardings)) > 1 {
 		panic("cachego: shardings must be the pow of 2 (such as 64).")
 	}

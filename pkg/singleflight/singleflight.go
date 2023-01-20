@@ -18,72 +18,68 @@ import (
 	"sync"
 )
 
-// call wraps fn and its results to a struct.
+// call is a call operation of a function.
 type call struct {
-	// fn is the target function that will be called.
-	fn func() (interface{}, error)
-
-	// result is the successful result of fn.
+	fn     func() (result interface{}, err error)
 	result interface{}
+	err    error
 
-	// err is the failed result of fn.
-	err error
-
-	// deleted means this call has been deleted from Group.
+	// deleted is a flag checking if this call has been deleted from Group.
 	deleted bool
 
-	// wg is for reading result concurrently.
 	wg sync.WaitGroup
 }
 
-// newCall wraps fn to a call holder.
-func newCall(fn func() (interface{}, error)) *call {
+func newCall(fn func() (result interface{}, err error)) *call {
 	return &call{
-		fn: fn,
+		fn:      fn,
+		deleted: false,
 	}
 }
 
-// do will call fn and fill results to c.
+// do will call fn and fill result/error to call.
 // Notice: Any panics or runtime.Goexit() will be ignored.
 func (c *call) do() {
 	defer c.wg.Done()
+
 	c.result, c.err = c.fn()
 }
 
-// Group stores all calls in flight.
+// Group groups many calls in it.
 type Group struct {
-	// calls stores all calls in flight.
 	calls map[string]*call
-
-	// lock is for safe-concurrency.
-	lock sync.Mutex
+	lock  sync.Mutex
 }
 
-// NewGroup returns a new Group holder with maps.
+// NewGroup returns a new Group with maps.
 func NewGroup(maps int) *Group {
 	return &Group{
 		calls: make(map[string]*call, maps),
 	}
 }
 
-// Call will call fn in single-flight mode.
+// Call calls fn in single-flight mode and returns its result and error.
 func (g *Group) Call(key string, fn func() (interface{}, error)) (interface{}, error) {
 	g.lock.Lock()
 
 	if c, ok := g.calls[key]; ok {
 		g.lock.Unlock()
-		c.wg.Wait() // Waiting for result...
+
+		// Waiting for result...
+		c.wg.Wait()
 		return c.result, c.err
 	}
 
 	c := newCall(fn)
 	c.wg.Add(1)
+
 	g.calls[key] = c
-
 	g.lock.Unlock()
-	c.do() // Call fn to get result...
-	g.lock.Lock()
 
+	// Get result...
+	c.do()
+
+	g.lock.Lock()
 	if !c.deleted {
 		delete(g.calls, key)
 	}
@@ -92,7 +88,7 @@ func (g *Group) Call(key string, fn func() (interface{}, error)) (interface{}, e
 	return c.result, c.err
 }
 
-// Delete removes the flight of key so a new flight will start.
+// Delete deletes the flight of key so a new flight will start.
 func (g *Group) Delete(key string) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
@@ -103,8 +99,8 @@ func (g *Group) Delete(key string) {
 	}
 }
 
-// DeleteAll removes all flights.
-func (g *Group) DeleteAll() {
+// Reset resets group to a new one.
+func (g *Group) Reset() {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
