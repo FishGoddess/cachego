@@ -13,3 +13,18 @@
 // limitations under the License.
 
 package cachego
+
+import (
+	"container/list"
+	"sync"
+)
+
+type lruCache struct {
+	config
+
+	entries     map[string]*list.Element
+	elementList *list.List
+	loader      Loader
+
+	lock sync.RWMutex
+}
