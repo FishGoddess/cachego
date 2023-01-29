@@ -51,10 +51,10 @@ type Group struct {
 	lock  sync.Mutex
 }
 
-// NewGroup returns a new Group with maps.
-func NewGroup(maps int) *Group {
+// NewGroup returns a new Group with initialCap.
+func NewGroup(initialCap int) *Group {
 	return &Group{
-		calls: make(map[string]*call, maps),
+		calls: make(map[string]*call, initialCap),
 	}
 }
 

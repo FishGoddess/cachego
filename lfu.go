@@ -13,3 +13,12 @@
 // limitations under the License.
 
 package cachego
+
+import "sync"
+
+type lfuCache struct {
+	config
+	Loader
+
+	lock sync.RWMutex
+}
