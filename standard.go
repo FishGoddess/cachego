@@ -40,7 +40,7 @@ func newStandardCache(conf config) Cache {
 
 func (sc *standardCache) get(key string) (value interface{}, found bool) {
 	entry, ok := sc.entries[key]
-	if ok && !entry.expired() {
+	if ok && !entry.expired(0) {
 		return entry.value, true
 	}
 
@@ -76,7 +76,7 @@ func (sc *standardCache) remove(key string) (removedValue interface{}) {
 		return nil
 	}
 
-	if !entry.expired() {
+	if !entry.expired(0) {
 		removedValue = entry.value
 	}
 
@@ -89,11 +89,13 @@ func (sc *standardCache) size() (size int) {
 }
 
 func (sc *standardCache) gc() (cleans int) {
+	now := Now()
 	scans := 0
+
 	for _, entry := range sc.entries {
 		scans++
 
-		if entry.expired() {
+		if entry.expired(now) {
 			delete(sc.entries, entry.key)
 			cleans++
 		}

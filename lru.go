@@ -73,7 +73,7 @@ func (lc *lruCache) get(key string) (value interface{}, found bool) {
 	}
 
 	entry := lc.unwrap(element)
-	if entry.expired() {
+	if entry.expired(0) {
 		return nil, false
 	}
 
@@ -105,7 +105,7 @@ func (lc *lruCache) removeElement(element *list.Element) (removedValue interface
 	lc.elementList.Remove(element)
 
 	entry := lc.unwrap(element)
-	if !entry.expired() {
+	if !entry.expired(0) {
 		removedValue = entry.value
 	}
 
@@ -126,13 +126,14 @@ func (lc *lruCache) size() (size int) {
 }
 
 func (lc *lruCache) gc() (cleans int) {
+	now := Now()
 	scans := 0
-
 	element := lc.elementList.Back()
+
 	for element != nil {
 		scans++
 
-		if entry := lc.unwrap(element); entry.expired() {
+		if entry := lc.unwrap(element); entry.expired(now) {
 			delete(lc.elementMap, entry.key)
 			cleans++
 		}

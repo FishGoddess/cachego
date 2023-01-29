@@ -102,13 +102,13 @@ func TestEntrySetup(t *testing.T) {
 func TestEntryExpired(t *testing.T) {
 	e := newEntry("", nil, time.Millisecond)
 
-	if e.expired() {
+	if e.expired(0) {
 		t.Error("e should be unexpired!")
 	}
 
 	time.Sleep(2 * time.Millisecond)
 
-	if !e.expired() {
+	if !e.expired(0) {
 		t.Error("e should be expired!")
 	}
 }

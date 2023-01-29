@@ -22,43 +22,18 @@ import (
 )
 
 func main() {
-	// Use NewCache function to create a cache.
-	// You can use WithLRU to specify the type of cache to lru.
-	// cache := cachego.New(cachego.WithLRU(100))
+	// By default, singleflight is enabled in cache.
+	// Use WithDisableSingleflight to disable if you want.
+	// cache := cachego.NewCache(cachego.WithDisableSingleflight())
 	cache := cachego.NewCache()
-	cache.Set("key", 123, time.Second)
 
 	value, ok := cache.Get("key")
-	fmt.Println(value, ok) // 123 true
-
-	size := cache.Size()
-	fmt.Println(size) // 1
-
-	time.Sleep(2 * time.Second)
-
-	value, ok = cache.Get("key")
 	fmt.Println(value, ok) // <nil> false
 
-	size = cache.Size()
-	fmt.Println(size) // 1
-
-	// Call GC manually.
-	// You can use WithGC in creating cache to run gc task background.
-	// cache = cachego.NewCache(cachego.WithGC(10*time.Minute))
-	cleans := cache.GC()
-	fmt.Println(cleans) // 1
-
-	cache.Set("key", 123, cachego.NoTTL)
-
-	removedValue := cache.Remove("key")
-	fmt.Println(removedValue) // 123
-
-	// Reset resets cache to an initial status.
-	cache.Reset()
-
-	// Get value from cache and load it to cache if not found.
-	value, ok = cache.Get("key")
 	if !ok {
+		// Load loads a value of key to cache with ttl.
+		// Use cachego.NoTTL if you want this value is no ttl.
+		// After loading value to cache, it returns the loaded value and error if failed.
 		value, _ = cache.Load("key", time.Second, func() (value interface{}, err error) {
 			return 666, nil
 		})
@@ -68,4 +43,9 @@ func main() {
 
 	value, ok = cache.Get("key")
 	fmt.Println(value, ok) // 666, true
+
+	time.Sleep(2 * time.Second)
+
+	value, ok = cache.Get("key")
+	fmt.Println(value, ok) // <nil>, false
 }

@@ -2,17 +2,17 @@
 
 ### v0.4.x
 
-* [ ] 设计 Cache 接口，Get 方法用 bool 判断，单个锁结构
-* [ ] 提供 ShardingCache 实现，实现 Cache 接口，细化锁粒度
-* [ ] 提供多种接口实现，包括 standard，lru，lfu，arc 等，尝试将缓存基础功能封装到通用结构
-* [ ] 提供 load 方法，集成 singleflight 进行数据加载
-* [ ] 提供 Hook 接口，默认提供 status 计数实现，包括 hit，miss，evict 等
-* [ ] 操作提供 option 机制，ttl 使用 option 设置，默认值使用 option 设置，最大遍历次数使用 option 设置
-* [ ] Delete 方法改 Remove 并返回被删除的 value
-* [ ] DeleteAll 方法改 Clear
-* [ ] GC 方法保留，去除 AutoGC 方法
+* [x] 设计 Cache 接口，Get 方法用 bool 判断，单个锁结构
+* [x] 提供 ShardingCache 实现，实现 Cache 接口，细化锁粒度
+* [ ] 提供多种接口实现，包括 standard，lru，lfu 等
+* [x] 提供 load 方法，集成 singleflight 进行数据加载
+* [x] 操作提供 option 机制，ttl 使用 option 设置，默认值使用 option 设置，最大遍历次数使用 option 设置
+* [x] Delete 方法改 Remove 并返回被删除的 value
+* [x] DeleteAll 方法改 Reset
+* [x] GC 方法保留，去除 AutoGC 方法
 * [ ] 增加对不存在的数据做防穿透的机制
-* [ ] 清理废话注释，完善 examples，完善单测，检查 pkg 代码设计
+* [ ] 完善 examples，完善单元测试
+* [x] 清理废话注释，检查 pkg 代码设计
 * [ ] 提供一个清空并设置全量值的方法，方便定时数据的全量替换
 * [ ] 提供定时缓存时间的 Clock 功能，可选标准库和快速两种
 

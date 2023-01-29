@@ -39,6 +39,10 @@ func (e *entry) setup(key string, value interface{}, ttl time.Duration) {
 	}
 }
 
-func (e *entry) expired() bool {
+func (e *entry) expired(now int64) bool {
+	if now > 0 {
+		return e.expiration > 0 && e.expiration < now
+	}
+
 	return e.expiration > 0 && e.expiration < Now()
 }
