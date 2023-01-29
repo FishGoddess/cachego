@@ -22,7 +22,10 @@ import (
 )
 
 func main() {
-	cache := cachego.NewStandardCache()
+	// Use NewCache function to create a cache.
+	// You can use WithLRU to specify the type of cache to lru.
+	// cache := cachego.New(cachego.WithLRU(100))
+	cache := cachego.NewCache()
 	cache.Set("key", 123, time.Second)
 
 	value, ok := cache.Get("key")
@@ -39,6 +42,9 @@ func main() {
 	size = cache.Size()
 	fmt.Println(size) // 1
 
+	// Call GC manually.
+	// You can use WithGC in creating cache to run gc task background.
+	// cache = cachego.NewCache(cachego.WithGC(10*time.Minute))
 	cleans := cache.GC()
 	fmt.Println(cleans) // 1
 

@@ -18,6 +18,7 @@ import "time"
 
 type config struct {
 	// These fields are for creating.
+	cacheType    cacheType
 	shardings    int
 	singleflight bool
 	gcDuration   time.Duration
@@ -29,6 +30,7 @@ type config struct {
 
 func newDefaultConfig() config {
 	return config{
+		cacheType:    standard,
 		shardings:    0,
 		singleflight: true,
 		gcDuration:   0,
@@ -50,11 +52,22 @@ func applyOptions(conf *config, opts []Option) {
 	}
 }
 
+// WithLRU returns an option setting the type of cache to lru.
+// Notice that lru cache must have max entries limit, so you should specify a maxEntries.
+func WithLRU(maxEntries int) Option {
+	return func(conf *config) {
+		conf.cacheType = lru
+		conf.maxEntries = maxEntries
+	}
+}
+
 // WithShardings returns an option setting the sharding count of cache.
-// Zero means no sharding.
+// Negative value means no sharding.
 func WithShardings(shardings int) Option {
 	return func(conf *config) {
-		conf.shardings = shardings
+		if shardings > 0 {
+			conf.shardings = shardings
+		}
 	}
 }
 
@@ -66,25 +79,31 @@ func WithDisableSingleflight() Option {
 }
 
 // WithGC returns an option setting the duration of cache gc.
-// Zero means no gc.
+// Negative value means no gc.
 func WithGC(gcDuration time.Duration) Option {
 	return func(conf *config) {
-		conf.gcDuration = gcDuration
+		if gcDuration > 0 {
+			conf.gcDuration = gcDuration
+		}
 	}
 }
 
 // WithMaxScans returns an option setting the max scans of cache.
-// Zero means no limit.
+// Negative value means no limit.
 func WithMaxScans(maxScans int) Option {
 	return func(conf *config) {
-		conf.maxScans = maxScans
+		if maxScans > 0 {
+			conf.maxScans = maxScans
+		}
 	}
 }
 
 // WithMaxEntries returns an option setting the max entries of cache.
-// Zero means no limit.
+// Negative value means no limit.
 func WithMaxEntries(maxEntries int) Option {
 	return func(conf *config) {
-		conf.maxEntries = maxEntries
+		if maxEntries > 0 {
+			conf.maxEntries = maxEntries
+		}
 	}
 }

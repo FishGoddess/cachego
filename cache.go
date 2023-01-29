@@ -23,6 +23,27 @@ const (
 	NoTTL = 0
 )
 
+const (
+	_ cacheType = iota
+
+	// standard cache is a simple cache with locked map.
+	// It evicts entries randomly if cache size reaches to max entries.
+	standard
+
+	// lru cache is a cache using lru to evict entries.
+	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU.
+	lru
+)
+
+var (
+	newCaches = map[cacheType]func(conf config) Cache{
+		standard: newStandardCache,
+		lru:      newLRUCache,
+	}
+)
+
+type cacheType = uint8
+
 // Cache is the core interface of cachego.
 // We provide some implements including standard cache and sharding cache.
 type Cache interface {
@@ -64,7 +85,20 @@ func runCacheGCTask(cache Cache, gcDuration time.Duration) {
 	}
 }
 
-func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
+// NewCache creates a cache with options.
+// By default, it will create a standard cache which uses one lock to solve data race.
+// It may cause a big performance problem in high concurrency.
+// You can use WithShardings to create a sharding cache which is good for concurrency.
+// Also, you can use options to specify the type of cache to others, such as lru.
+func NewCache(opts ...Option) (cache Cache) {
+	conf := newDefaultConfig()
+	applyOptions(&conf, opts)
+
+	newCache, ok := newCaches[conf.cacheType]
+	if !ok {
+		panic("cachego: cache type doesn't exist")
+	}
+
 	if conf.shardings > 0 {
 		cache = newShardingCache(conf, newCache)
 	} else {
@@ -76,15 +110,4 @@ func newCache(conf config, newCache func(conf config) Cache) (cache Cache) {
 	}
 
 	return cache
-}
-
-// NewStandardCache creates a standard cache with options.
-// By default, it will create a cache which uses one lock to solve data race.
-// It may cause a big performance problem in high concurrency.
-// You can use WithShardings to create a sharding standard cache which is good for concurrency.
-func NewStandardCache(opts ...Option) (cache Cache) {
-	conf := newDefaultConfig()
-	applyOptions(&conf, opts)
-
-	return newCache(conf, newStandardCache)
 }

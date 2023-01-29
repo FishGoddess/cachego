@@ -15,9 +15,7 @@
 package cachego
 
 import (
-	"strconv"
 	"testing"
-	"time"
 )
 
 func newTestStandardCache() Cache {
@@ -28,195 +26,35 @@ func newTestStandardCache() Cache {
 // go test -v -cover -run=^TestStandardCacheGet$
 func TestStandardCacheGet(t *testing.T) {
 	cache := newTestStandardCache()
-
-	value, found := cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
-	}
-
-	cache.Set("key", "value", time.Millisecond)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
-	}
-
-	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	value, found = cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
-	}
+	testCacheGet(t, cache)
 }
 
 // go test -v -cover -run=^TestStandardCacheSet$
 func TestStandardCacheSet(t *testing.T) {
 	cache := newTestStandardCache()
-
-	value, found := cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
-	}
-
-	cache.Set("key", "value", time.Millisecond)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
-	}
-
-	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	value, found = cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
-	}
-
-	cache.Set("key", "value", NoTTL)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
-	}
-
-	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
-	}
+	testCacheSet(t, cache)
 }
 
 // go test -v -cover -run=^TestStandardCacheRemove$
 func TestStandardCacheRemove(t *testing.T) {
 	cache := newTestStandardCache()
-
-	removedValue := cache.Remove("key")
-	if removedValue != nil {
-		t.Errorf("removedValue %+v is wrong", removedValue)
-	}
-
-	cache.Set("key", "value", NoTTL)
-
-	removedValue = cache.Remove("key")
-	if removedValue.(string) != "value" {
-		t.Errorf("removedValue %+v is wrong", removedValue)
-	}
-
-	cache.Set("key", "value", time.Millisecond)
-	time.Sleep(2 * time.Millisecond)
-
-	removedValue = cache.Remove("key")
-	if removedValue != nil {
-		t.Errorf("removedValue %+v is wrong", removedValue)
-	}
+	testCacheRemove(t, cache)
 }
 
 // go test -v -cover -run=^TestStandardCacheSize$
 func TestStandardCacheSize(t *testing.T) {
 	cache := newTestStandardCache()
-
-	size := cache.Size()
-	if size != 0 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	for i := int64(0); i < 100; i++ {
-		cache.Set(strconv.FormatInt(i, 10), i, NoTTL)
-	}
-
-	size = cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
+	testCacheSize(t, cache)
 }
 
 // go test -v -cover -run=^TestStandardCacheGC$
 func TestStandardCacheGC(t *testing.T) {
 	cache := newTestStandardCache()
-
-	size := cache.Size()
-	if size != 0 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	for i := int64(0); i < 100; i++ {
-		if i&1 == 0 {
-			cache.Set(strconv.FormatInt(i, 10), i, NoTTL)
-		} else {
-			cache.Set(strconv.FormatInt(i, 10), i, time.Millisecond)
-		}
-	}
-
-	size = cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	cache.GC()
-
-	size = cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	cache.GC()
-
-	size = cache.Size()
-	if size != 50 {
-		t.Errorf("size %d is wrong", size)
-	}
+	testCacheGC(t, cache)
 }
 
 // go test -v -cover -run=^TestStandardCacheReset$
 func TestStandardCacheReset(t *testing.T) {
 	cache := newTestStandardCache()
-
-	for i := int64(0); i < 100; i++ {
-		cache.Set(strconv.FormatInt(i, 10), i, NoTTL)
-	}
-
-	for i := int64(0); i < 100; i++ {
-		value, found := cache.Get(strconv.FormatInt(i, 10))
-		if !found {
-			t.Errorf("get %d should be found", i)
-		}
-
-		if value.(int64) != i {
-			t.Errorf("value %+v is wrong", value)
-		}
-	}
-
-	size := cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	cache.Reset()
-
-	for i := int64(0); i < 100; i++ {
-		value, found := cache.Get(strconv.FormatInt(i, 10))
-		if found {
-			t.Errorf("get %d, %+v should be not found", i, value)
-		}
-	}
-
-	size = cache.Size()
-	if size != 0 {
-		t.Errorf("size %d is wrong", size)
-	}
+	testCacheReset(t, cache)
 }

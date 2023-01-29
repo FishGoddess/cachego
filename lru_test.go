@@ -13,3 +13,47 @@
 // limitations under the License.
 
 package cachego
+
+import "testing"
+
+func newTestLRUCache() Cache {
+	conf := newDefaultConfig()
+	conf.maxEntries = maxTestEntries
+	return newLRUCache(conf)
+}
+
+// go test -v -cover -run=^TestLRUCacheGet$
+func TestLRUCacheGet(t *testing.T) {
+	cache := newTestLRUCache()
+	testCacheGet(t, cache)
+}
+
+// go test -v -cover -run=^TestLRUCacheSet$
+func TestLRUCacheSet(t *testing.T) {
+	cache := newTestLRUCache()
+	testCacheSet(t, cache)
+}
+
+// go test -v -cover -run=^TestLRUCacheRemove$
+func TestLRUCacheRemove(t *testing.T) {
+	cache := newTestLRUCache()
+	testCacheRemove(t, cache)
+}
+
+// go test -v -cover -run=^TestLRUCacheSize$
+func TestLRUCacheSize(t *testing.T) {
+	cache := newTestLRUCache()
+	testCacheSize(t, cache)
+}
+
+// go test -v -cover -run=^TestLRUCacheGC$
+func TestLRUCacheGC(t *testing.T) {
+	cache := newTestLRUCache()
+	testCacheGC(t, cache)
+}
+
+// go test -v -cover -run=^TestLRUCacheReset$
+func TestLRUCacheReset(t *testing.T) {
+	cache := newTestLRUCache()
+	testCacheReset(t, cache)
+}
