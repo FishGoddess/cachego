@@ -53,10 +53,19 @@ func applyOptions(conf *config, opts []Option) {
 }
 
 // WithLRU returns an option setting the type of cache to lru.
-// Notice that lru cache must have max entries limit, so you should specify a maxEntries.
+// Notice that lru cache must have max entries limit, so you have to specify a maxEntries.
 func WithLRU(maxEntries int) Option {
 	return func(conf *config) {
 		conf.cacheType = lru
+		conf.maxEntries = maxEntries
+	}
+}
+
+// WithLFU returns an option setting the type of cache to lfu.
+// Notice that lfu cache must have max entries limit, so you have to specify a maxEntries.
+func WithLFU(maxEntries int) Option {
+	return func(conf *config) {
+		conf.cacheType = lfu
 		conf.maxEntries = maxEntries
 	}
 }

@@ -50,6 +50,14 @@ func (lc *lfuCache) unwrap(item *heap.Item) *entry {
 	return entry
 }
 
+func (lc *lfuCache) evict() (evictedValue interface{}) {
+	if item := lc.itemHeap.Pop(); item != nil {
+		return lc.removeItem(item)
+	}
+
+	return nil
+}
+
 func (lc *lfuCache) get(key string) (value interface{}, found bool) {
 	item, ok := lc.itemMap[key]
 	if !ok {
@@ -66,7 +74,23 @@ func (lc *lfuCache) get(key string) (value interface{}, found bool) {
 }
 
 func (lc *lfuCache) set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
-	return nil // TODO
+	item, ok := lc.itemMap[key]
+	if ok {
+		entry := lc.unwrap(item)
+		entry.setup(key, value, ttl)
+
+		item.Adjust(item.Weight() + 1)
+		return nil
+	}
+
+	if lc.maxEntries > 0 && lc.itemHeap.Size() >= lc.maxEntries {
+		evictedValue = lc.evict()
+	}
+
+	item = lc.itemHeap.Push(0, newEntry(key, value, ttl))
+	lc.itemMap[key] = item
+
+	return evictedValue
 }
 
 func (lc *lfuCache) removeItem(item *heap.Item) (removedValue interface{}) {

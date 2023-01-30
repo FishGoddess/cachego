@@ -77,3 +77,88 @@ func TestGroupCallMultiKey(t *testing.T) {
 
 	wg.Wait()
 }
+
+// go test -v -cover -run=^TestGroupDelete$
+func TestGroupDelete(t *testing.T) {
+	group := NewGroup(128)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go group.Call("key", func() (interface{}, error) {
+		wg.Done()
+
+		time.Sleep(10 * time.Millisecond)
+		return nil, nil
+	})
+
+	wg.Wait()
+
+	call := group.calls["key"]
+	if call.deleted {
+		t.Error("call.deleted is wrong")
+	}
+
+	group.Delete("key")
+
+	if !call.deleted {
+		t.Error("call.deleted is wrong")
+	}
+
+	if _, ok := group.calls["key"]; ok {
+		t.Error("group.calls[\"key\"] is ok")
+	}
+
+	if len(group.calls) != 0 {
+		t.Errorf("len(group.calls) %d is wrong", len(group.calls))
+	}
+}
+
+// go test -v -cover -run=^TestGroupReset$
+func TestGroupReset(t *testing.T) {
+	group := NewGroup(128)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		key := strconv.Itoa(i)
+
+		go group.Call(key, func() (interface{}, error) {
+			wg.Done()
+
+			time.Sleep(10 * time.Millisecond)
+			return nil, nil
+		})
+	}
+
+	wg.Wait()
+
+	calls := make([]*call, 0, len(group.calls))
+	for i := 0; i < 10; i++ {
+		key := strconv.Itoa(i)
+
+		call := group.calls[key]
+		if call.deleted {
+			t.Errorf("key %s call.deleted is wrong", key)
+		}
+
+		calls = append(calls, call)
+	}
+
+	group.Reset()
+
+	for i, call := range calls {
+		if !call.deleted {
+			t.Errorf("i %d call.deleted is wrong", i)
+		}
+
+		key := strconv.Itoa(i)
+		if _, ok := group.calls[key]; ok {
+			t.Errorf("group.calls[%s] is ok", key)
+		}
+	}
+
+	if len(group.calls) != 0 {
+		t.Errorf("len(group.calls) %d is wrong", len(group.calls))
+	}
+}

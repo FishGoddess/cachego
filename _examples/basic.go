@@ -25,6 +25,7 @@ func main() {
 	// Use NewCache function to create a cache.
 	// You can use WithLRU to specify the type of cache to lru.
 	// cache := cachego.New(cachego.WithLRU(100))
+	// Also, try WithLFU if you want to use lfu to evict data.
 	cache := cachego.NewCache()
 	cache.Set("key", 123, time.Second)
 

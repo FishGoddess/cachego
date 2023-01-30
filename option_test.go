@@ -55,6 +55,17 @@ func TestWithLRU(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestWithLFU$
+func TestWithLFU(t *testing.T) {
+	got := config{cacheType: standard, maxEntries: 0}
+	expect := config{cacheType: lfu, maxEntries: 999}
+
+	WithLFU(999).applyTo(&got)
+	if got != expect {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
 // go test -v -cover -run=^TestWithShardings$
 func TestWithShardings(t *testing.T) {
 	got := config{shardings: 0}
