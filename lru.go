@@ -116,19 +116,13 @@ func (lc *lruCache) size() (size int) {
 func (lc *lruCache) gc() (cleans int) {
 	now := Now()
 	scans := 0
-	element := lc.elementList.Back()
 
-	for element != nil {
+	for _, element := range lc.elementMap {
 		scans++
 
 		if entry := lc.unwrap(element); entry.expired(now) {
-			old := element
-			element = element.Prev()
-
-			lc.removeElement(old)
+			lc.removeElement(element)
 			cleans++
-		} else {
-			element = element.Prev()
 		}
 
 		if lc.maxScans > 0 && scans >= lc.maxScans {

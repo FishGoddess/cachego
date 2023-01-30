@@ -32,6 +32,11 @@ func newTestData(count int) []int {
 	return data
 }
 
+// go test -v -cover -run=^TestItem$
+func TestItem(t *testing.T) {
+	// TODO
+}
+
 // go test -v -cover -run=^TestHeap$
 func TestHeap(t *testing.T) {
 	data := newTestData(10)
@@ -43,7 +48,7 @@ func TestHeap(t *testing.T) {
 	}
 
 	if heap.Size() != len(data) {
-		t.Errorf("heap.Size() %d is wrong", heap.Size())
+		t.Errorf("heap.Size() %d != len(data) %d", heap.Size(), len(data))
 	}
 
 	sort.Ints(data)
@@ -61,5 +66,30 @@ func TestHeap(t *testing.T) {
 
 	if heap.Size() != 0 {
 		t.Errorf("heap.Size() %d is wrong", heap.Size())
+	}
+
+	rand.Shuffle(len(data), func(i, j int) {
+		data[i], data[j] = data[j], data[i]
+	})
+
+	items := make([]*Item, 0, len(data))
+	for _, num := range data {
+		item := heap.Push(uint64(num), num)
+		items = append(items, item)
+	}
+
+	if heap.Size() != len(data) {
+		t.Errorf("heap.Size() %d != len(data) %d", heap.Size(), len(data))
+	}
+
+	if len(items) != len(data) {
+		t.Errorf("len(items) %d != len(data) %d", len(items), len(data))
+	}
+
+	for i, num := range data {
+		value := heap.Remove(items[i])
+		if value.(int) != num {
+			t.Errorf("value.(int) %d != num %d", value.(int), num)
+		}
 	}
 }

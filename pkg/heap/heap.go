@@ -37,6 +37,11 @@ func newItem(heap *Heap, index int, weight uint64, value interface{}) *Item {
 	}
 }
 
+// Weight returns the weight of item.
+func (i *Item) Weight() uint64 {
+	return i.weight
+}
+
 // Adjust adjusts weight of item in order to adjust heap.
 func (i *Item) Adjust(weight uint64) {
 	i.weight = weight
@@ -82,6 +87,8 @@ func (is *items) Pop() interface{} {
 }
 
 // Heap uses items to build a heap which always pops the min weight item first.
+// It uses weight of item to sort items which may overflow because weight is an uint64 integer.
+// When overflow happens, its weight will turn to 0 and become one of the lightest items in heap.
 type Heap struct {
 	items *items
 	size  int

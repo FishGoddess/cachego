@@ -51,11 +51,22 @@ func (lc *lfuCache) unwrap(item *heap.Item) *entry {
 }
 
 func (lc *lfuCache) get(key string) (value interface{}, found bool) {
-	return nil, false // TODO
+	item, ok := lc.itemMap[key]
+	if !ok {
+		return nil, false
+	}
+
+	entry := lc.unwrap(item)
+	if entry.expired(0) {
+		return nil, false
+	}
+
+	item.Adjust(item.Weight() + 1)
+	return entry.value, true
 }
 
 func (lc *lfuCache) set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
-	return nil //TODO
+	return nil // TODO
 }
 
 func (lc *lfuCache) removeItem(item *heap.Item) (removedValue interface{}) {
@@ -80,7 +91,23 @@ func (lc *lfuCache) size() (size int) {
 }
 
 func (lc *lfuCache) gc() (cleans int) {
-	return 0 // TODO
+	now := Now()
+	scans := 0
+
+	for _, item := range lc.itemMap {
+		scans++
+
+		if entry := lc.unwrap(item); entry.expired(now) {
+			lc.removeItem(item)
+			cleans++
+		}
+
+		if lc.maxScans > 0 && scans >= lc.maxScans {
+			break
+		}
+	}
+
+	return cleans
 }
 
 func (lc *lfuCache) reset() {
