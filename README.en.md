@@ -1,13 +1,14 @@
-# 📝 cachego
+# 🍰 cachego
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/cachego)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
 ![Test](https://github.com/FishGoddess/cachego/actions/workflows/test.yml/badge.svg)
 
-**cachego** is a high-performance and memory-based cache for [GoLang](https://golang.org) applications.
+**cachego** is an api friendly memory-based cache for [GoLang](https://golang.org) applications.
 
-> It has been used by many services in production, and even 17w/s qps is ok for it, so just use it if you want!
+> It has been used by many services in production, all services are running stable, and the highest qps in services is
+> 17w/s, so just use it if you want! 👏🏻
 
 [阅读中文版的 Read me](./README.md).
 

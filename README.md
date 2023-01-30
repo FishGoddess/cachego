@@ -1,13 +1,13 @@
-# 📜 cachego
+# 🍰 cachego
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/cachego)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
 ![Test](https://github.com/FishGoddess/cachego/actions/workflows/test.yml/badge.svg)
 
-**cachego** 是一个拥有高性能分段锁机制的轻量级内存缓存，拥有懒清理和哨兵清理两种清理机制，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
+**cachego** 是一个拥有分段锁机制的轻量级内存缓存库，API 友好，支持多种数据淘汰机制，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
-> 目前已经在多个线上服务中运行良好，也抵御过最高 17w/s qps 的冲击，可以稳定使用！
+> 目前 v0.3.x 版本已经在多个线上服务中运行稳定，服务日常请求过万 qps，最高抵御过 17w/s qps 的冲击，欢迎使用！👏🏻
 
 [Read me in English](./README.en.md).
 

@@ -78,14 +78,14 @@ func (t *Task) Run() {
 	defer ticker.Stop()
 
 	for {
-		if t.fn == nil {
-			return
-		}
-
 		select {
 		case <-t.ctx.Done():
 			return
 		case <-ticker.C:
+			if t.fn == nil {
+				return
+			}
+
 			t.fn(t.ctx)
 		}
 	}

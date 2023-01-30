@@ -18,7 +18,7 @@ import (
 	"sync"
 )
 
-// call is a call operation of a function.
+// call wraps function with some information and stores result and error after calling.
 type call struct {
 	fn     func() (result interface{}, err error)
 	result interface{}
@@ -37,15 +37,15 @@ func newCall(fn func() (result interface{}, err error)) *call {
 	}
 }
 
-// do will call fn and fill result/error to call.
-// Notice: Any panics or runtime.Goexit() will be ignored.
+// do will call fn and fill result and error to call.
+// Notice: Any panics or runtime.Goexit() happening in fn() will be ignored.
 func (c *call) do() {
 	defer c.wg.Done()
 
 	c.result, c.err = c.fn()
 }
 
-// Group groups many calls in it.
+// Group stores all function calls in it.
 type Group struct {
 	calls map[string]*call
 	lock  sync.Mutex
@@ -58,14 +58,14 @@ func NewGroup(initialCap int) *Group {
 	}
 }
 
-// Call calls fn in single-flight mode and returns its result and error.
+// Call calls fn in singleflight mode and returns its result and error.
 func (g *Group) Call(key string, fn func() (interface{}, error)) (interface{}, error) {
 	g.lock.Lock()
 
 	if c, ok := g.calls[key]; ok {
 		g.lock.Unlock()
 
-		// Waiting for result...
+		// Waiting...
 		c.wg.Wait()
 		return c.result, c.err
 	}
@@ -76,10 +76,9 @@ func (g *Group) Call(key string, fn func() (interface{}, error)) (interface{}, e
 	g.calls[key] = c
 	g.lock.Unlock()
 
-	// Get result...
 	c.do()
-
 	g.lock.Lock()
+
 	if !c.deleted {
 		delete(g.calls, key)
 	}
@@ -88,24 +87,24 @@ func (g *Group) Call(key string, fn func() (interface{}, error)) (interface{}, e
 	return c.result, c.err
 }
 
-// Delete deletes the flight of key so a new flight will start.
+// Delete deletes the call of key so a new call can be called.
 func (g *Group) Delete(key string) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
 	if c, ok := g.calls[key]; ok {
-		c.deleted = true
 		delete(g.calls, key)
+		c.deleted = true
 	}
 }
 
-// Reset resets group to a new one.
+// Reset resets group to initial status.
 func (g *Group) Reset() {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
 	for key, c := range g.calls {
-		c.deleted = true
 		delete(g.calls, key)
+		c.deleted = true
 	}
 }
