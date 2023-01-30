@@ -19,41 +19,74 @@ import (
 	"time"
 )
 
-// Task runs a task at fixed duration which will call fn().
+// Task runs a function at fixed duration.
 type Task struct {
-	// Before will be called before running this task.
-	Before func(ctx context.Context)
+	ctx      context.Context
+	duration time.Duration
 
-	// Fn is main function which will called in loop.
-	Fn func(ctx context.Context)
-
-	// After will be called after the task loop.
-	After func(ctx context.Context)
+	before func(ctx context.Context)
+	fn     func(ctx context.Context)
+	after  func(ctx context.Context)
 }
 
-// Run runs this task at fixed duration d.
-func (t *Task) Run(ctx context.Context, d time.Duration) {
-	if t.Fn == nil {
-		return
+// New returns a new task for use.
+// fn is main function which will called in task loop.
+// By default, its duration is 1min, and you can change it by Duration().
+func New(fn func(ctx context.Context)) *Task {
+	return &Task{
+		ctx:      context.Background(),
+		duration: time.Minute,
+		fn:       fn,
+	}
+}
+
+// Context sets ctx to task which will be passed to its functions in order to control context.
+func (t *Task) Context(ctx context.Context) *Task {
+	t.ctx = ctx
+	return t
+}
+
+// Duration sets duration to task which controls the duration between two task loops.
+func (t *Task) Duration(duration time.Duration) *Task {
+	t.duration = duration
+	return t
+}
+
+// Before sets fn to task which will be called before task starting.
+func (t *Task) Before(fn func(ctx context.Context)) *Task {
+	t.before = fn
+	return t
+}
+
+// After sets fn to task which will be called after task stopping.
+func (t *Task) After(fn func(ctx context.Context)) *Task {
+	t.after = fn
+	return t
+}
+
+// Run runs task.
+func (t *Task) Run() {
+	if t.before != nil {
+		t.before(t.ctx)
 	}
 
-	if t.Before != nil {
-		t.Before(ctx)
+	if t.after != nil {
+		defer t.after(t.ctx)
 	}
 
-	if t.After != nil {
-		defer t.After(ctx)
-	}
-
-	ticker := time.NewTicker(d)
+	ticker := time.NewTicker(t.duration)
 	defer ticker.Stop()
 
 	for {
+		if t.fn == nil {
+			return
+		}
+
 		select {
-		case <-ctx.Done():
+		case <-t.ctx.Done():
 			return
 		case <-ticker.C:
-			t.Fn(ctx)
+			t.fn(t.ctx)
 		}
 	}
 }

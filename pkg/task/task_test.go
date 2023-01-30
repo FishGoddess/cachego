@@ -36,44 +36,44 @@ func TestTickerTaskRun(t *testing.T) {
 	var loop int64
 	var result strings.Builder
 
-	task := Task{
-		Before: func(ctx context.Context) {
-			value, ok := ctx.Value(before.key).(string)
-			if !ok {
-				t.Errorf("ctx.Value(before.key).(string) %+v failed", ctx.Value(before.key))
-			}
+	beforeFn := func(ctx context.Context) {
+		value, ok := ctx.Value(before.key).(string)
+		if !ok {
+			t.Errorf("ctx.Value(before.key).(string) %+v failed", ctx.Value(before.key))
+		}
 
-			if value != before.value {
-				t.Errorf("value %s != before.value %s", value, before.value)
-			}
+		if value != before.value {
+			t.Errorf("value %s != before.value %s", value, before.value)
+		}
 
-			result.WriteString(value)
-		},
-		Fn: func(ctx context.Context) {
-			value, ok := ctx.Value(fn.key).(string)
-			if !ok {
-				t.Errorf("ctx.Value(fn.key).(string) %+v failed", ctx.Value(fn.key))
-			}
+		result.WriteString(value)
+	}
 
-			if value != fn.value {
-				t.Errorf("value %s != fn.value %s", value, fn.value)
-			}
+	mainFn := func(ctx context.Context) {
+		value, ok := ctx.Value(fn.key).(string)
+		if !ok {
+			t.Errorf("ctx.Value(fn.key).(string) %+v failed", ctx.Value(fn.key))
+		}
 
-			atomic.AddInt64(&loop, 1)
-			result.WriteString(value)
-		},
-		After: func(ctx context.Context) {
-			value, ok := ctx.Value(after.key).(string)
-			if !ok {
-				t.Errorf("ctx.Value(after.key).(string) %+v failed", ctx.Value(after.key))
-			}
+		if value != fn.value {
+			t.Errorf("value %s != fn.value %s", value, fn.value)
+		}
 
-			if value != after.value {
-				t.Errorf("value %s != after.value %s", value, after.value)
-			}
+		atomic.AddInt64(&loop, 1)
+		result.WriteString(value)
+	}
 
-			result.WriteString(value)
-		},
+	afterFn := func(ctx context.Context) {
+		value, ok := ctx.Value(after.key).(string)
+		if !ok {
+			t.Errorf("ctx.Value(after.key).(string) %+v failed", ctx.Value(after.key))
+		}
+
+		if value != after.value {
+			t.Errorf("value %s != after.value %s", value, after.value)
+		}
+
+		result.WriteString(value)
 	}
 
 	ctx := context.WithValue(context.Background(), before.key, before.value)
@@ -83,7 +83,7 @@ func TestTickerTaskRun(t *testing.T) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Millisecond)
 	defer cancel()
 
-	go task.Run(ctx, 3*time.Millisecond)
+	go New(mainFn).Context(ctx).Before(beforeFn).After(afterFn).Duration(3 * time.Millisecond).Run()
 	time.Sleep(time.Second)
 
 	var expect strings.Builder

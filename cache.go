@@ -15,8 +15,11 @@
 package cachego
 
 import (
+	"context"
 	"sync"
 	"time"
+
+	"github.com/FishGoddess/cachego/pkg/task"
 )
 
 const (
@@ -96,11 +99,12 @@ func (c *cache) setup(conf config, cache Cache) {
 	c.Loader = NewLoader(cache, conf.singleflight)
 }
 
-func runCacheGCTask(cache Cache, gcDuration time.Duration) {
-	for {
-		time.Sleep(gcDuration)
+func runCacheGCTask(cache Cache, duration time.Duration) {
+	fn := func(ctx context.Context) {
 		cache.GC()
 	}
+
+	task.New(fn).Duration(duration).Run()
 }
 
 // NewCache creates a cache with options.
