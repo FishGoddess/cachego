@@ -15,26 +15,21 @@
 package cachego
 
 import (
-	"sync"
 	"time"
 )
 
 type standardCache struct {
-	config
-	Loader
+	cache
 
 	entries map[string]*entry
-
-	lock sync.RWMutex
 }
 
 func newStandardCache(conf config) Cache {
 	cache := &standardCache{
-		config:  conf,
 		entries: make(map[string]*entry, MapInitialCap),
 	}
 
-	cache.Loader = NewLoader(cache, conf.singleflight)
+	cache.setup(conf, cache)
 	return cache
 }
 
@@ -76,12 +71,8 @@ func (sc *standardCache) remove(key string) (removedValue interface{}) {
 		return nil
 	}
 
-	if !entry.expired(0) {
-		removedValue = entry.value
-	}
-
 	delete(sc.entries, key)
-	return removedValue
+	return entry.value
 }
 
 func (sc *standardCache) size() (size int) {

@@ -109,8 +109,8 @@ func testCacheRemove(t *testing.T, cache Cache) {
 	time.Sleep(2 * time.Millisecond)
 
 	removedValue = cache.Remove("key")
-	if removedValue != nil {
-		t.Errorf("removedValue %+v is wrong", removedValue)
+	if removedValue == nil {
+		t.Error("removedValue == nil")
 	}
 }
 

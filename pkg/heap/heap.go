@@ -18,11 +18,13 @@ import (
 	"container/heap"
 )
 
+// Item stores all information needed by heap including value.
 type Item struct {
 	heap   *Heap
 	index  int
 	weight uint64
 
+	// Value is the exact data storing in heap.
 	Value interface{}
 }
 
@@ -35,6 +37,7 @@ func newItem(heap *Heap, index int, weight uint64, value interface{}) *Item {
 	}
 }
 
+// Adjust adjusts weight of item in order to adjust heap.
 func (i *Item) Adjust(weight uint64) {
 	i.weight = weight
 	heap.Fix(i.heap.items, i.index)
@@ -62,15 +65,6 @@ func (is *items) Swap(i, j int) {
 	(*is)[j].index = j
 }
 
-func (is *items) Pop() interface{} {
-	n := len(*is)
-	item := (*is)[n-1]
-	*is = (*is)[0 : n-1]
-
-	item.index = -1 // 标识该数据已经出堆
-	return item
-}
-
 func (is *items) Push(x interface{}) {
 	item := x.(*Item)
 	item.index = len(*is)
@@ -78,11 +72,22 @@ func (is *items) Push(x interface{}) {
 	*is = append(*is, item)
 }
 
+func (is *items) Pop() interface{} {
+	n := len(*is)
+	item := (*is)[n-1]
+	*is = (*is)[0 : n-1]
+
+	item.index = -1 // Already popped flag
+	return item
+}
+
+// Heap uses items to build a heap which always pops the min weight item first.
 type Heap struct {
 	items *items
 	size  int
 }
 
+// New creates a heap with initialCap of underlying slice.
 func New(initialCap int) *Heap {
 	return &Heap{
 		items: newItems(initialCap),
@@ -90,6 +95,7 @@ func New(initialCap int) *Heap {
 	}
 }
 
+// Push pushes a value with weight to item and returns the item.
 func (h *Heap) Push(weight uint64, value interface{}) *Item {
 	index := len(*h.items)
 	item := newItem(h, index, weight, value)
@@ -100,6 +106,7 @@ func (h *Heap) Push(weight uint64, value interface{}) *Item {
 	return item
 }
 
+// Pop pops the min item.
 func (h *Heap) Pop() *Item {
 	if pop := heap.Pop(h.items); pop != nil {
 		h.size--
@@ -109,6 +116,16 @@ func (h *Heap) Pop() *Item {
 	return nil
 }
 
+// Remove removes item from heap and returns its value.
+func (h *Heap) Remove(item *Item) interface{} {
+	if item.heap == h {
+		heap.Remove(h.items, item.index)
+	}
+
+	return item.Value
+}
+
+// Size returns how many items storing in heap.
 func (h *Heap) Size() int {
 	return h.size
 }

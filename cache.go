@@ -15,6 +15,7 @@
 package cachego
 
 import (
+	"sync"
 	"time"
 )
 
@@ -31,14 +32,19 @@ const (
 	standard
 
 	// lru cache is a cache using lru to evict entries.
-	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU.
+	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU).
 	lru
+
+	// lfu cache is a cache using lfu to evict entries.
+	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#Least-frequently_used_(LFU).
+	lfu
 )
 
 var (
 	newCaches = map[cacheType]func(conf config) Cache{
 		standard: newStandardCache,
 		lru:      newLRUCache,
+		lfu:      newLFUCache,
 	}
 )
 
@@ -76,6 +82,18 @@ type Cache interface {
 	// Loader loads a value to cache.
 	// See Loader interface.
 	Loader
+}
+
+type cache struct {
+	config
+	Loader
+
+	lock sync.RWMutex
+}
+
+func (c *cache) setup(conf config, cache Cache) {
+	c.config = conf
+	c.Loader = NewLoader(cache, conf.singleflight)
 }
 
 func runCacheGCTask(cache Cache, gcDuration time.Duration) {

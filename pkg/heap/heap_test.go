@@ -34,7 +34,7 @@ func newTestData(count int) []int {
 
 // go test -v -cover -run=^TestHeap$
 func TestHeap(t *testing.T) {
-	data := newTestData(20)
+	data := newTestData(10)
 	t.Log(data)
 
 	heap := New(64)

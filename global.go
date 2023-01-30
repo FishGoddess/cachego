@@ -19,6 +19,9 @@ import "time"
 var (
 	// MapInitialCap is the initial capacity of map.
 	MapInitialCap = 64
+
+	// SliceInitialCap is the initial capacity of slice.
+	SliceInitialCap = 64
 )
 
 var (

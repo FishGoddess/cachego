@@ -14,11 +14,131 @@
 
 package cachego
 
-import "sync"
+import (
+	"time"
+
+	"github.com/FishGoddess/cachego/pkg/heap"
+)
 
 type lfuCache struct {
-	config
-	Loader
+	cache
 
-	lock sync.RWMutex
+	itemMap  map[string]*heap.Item
+	itemHeap *heap.Heap
+}
+
+func newLFUCache(conf config) Cache {
+	if conf.maxEntries <= 0 {
+		panic("cachego: lfu cache must specify max entries")
+	}
+
+	cache := &lfuCache{
+		itemMap:  make(map[string]*heap.Item, MapInitialCap),
+		itemHeap: heap.New(SliceInitialCap),
+	}
+
+	cache.setup(conf, cache)
+	return cache
+}
+
+func (lc *lfuCache) unwrap(item *heap.Item) *entry {
+	entry, ok := item.Value.(*entry)
+	if !ok {
+		panic("cachego: failed to unwrap lfu item's value to entry")
+	}
+
+	return entry
+}
+
+func (lc *lfuCache) get(key string) (value interface{}, found bool) {
+	return nil, false // TODO
+}
+
+func (lc *lfuCache) set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
+	return nil //TODO
+}
+
+func (lc *lfuCache) removeItem(item *heap.Item) (removedValue interface{}) {
+	entry := lc.unwrap(item)
+
+	delete(lc.itemMap, entry.key)
+	lc.itemHeap.Remove(item)
+
+	return entry.value
+}
+
+func (lc *lfuCache) remove(key string) (removedValue interface{}) {
+	if item, ok := lc.itemMap[key]; ok {
+		return lc.removeItem(item)
+	}
+
+	return nil
+}
+
+func (lc *lfuCache) size() (size int) {
+	return len(lc.itemMap)
+}
+
+func (lc *lfuCache) gc() (cleans int) {
+	return 0 // TODO
+}
+
+func (lc *lfuCache) reset() {
+	lc.itemMap = make(map[string]*heap.Item, MapInitialCap)
+	lc.itemHeap = heap.New(SliceInitialCap)
+	lc.Loader.Reset()
+}
+
+// Get gets the value of key from cache and returns value if found.
+// See Cache interface.
+func (lc *lfuCache) Get(key string) (value interface{}, found bool) {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+
+	return lc.get(key)
+}
+
+// Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
+// See Cache interface.
+func (lc *lfuCache) Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+
+	return lc.set(key, value, ttl)
+}
+
+// Remove removes key and returns the removed value of key.
+// See Cache interface.
+func (lc *lfuCache) Remove(key string) (removedValue interface{}) {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+
+	return lc.remove(key)
+}
+
+// Size returns the count of keys in cache.
+// See Cache interface.
+func (lc *lfuCache) Size() (size int) {
+	lc.lock.RLock()
+	defer lc.lock.RUnlock()
+
+	return lc.size()
+}
+
+// GC cleans the expired keys in cache and returns the exact count cleaned.
+// See Cache interface.
+func (lc *lfuCache) GC() (cleans int) {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+
+	return lc.gc()
+}
+
+// Reset resets cache to initial status which is like a new cache.
+// See Cache interface.
+func (lc *lfuCache) Reset() {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+
+	lc.reset()
 }

@@ -16,18 +16,14 @@ package cachego
 
 import (
 	"container/list"
-	"sync"
 	"time"
 )
 
 type lruCache struct {
-	config
-	Loader
+	cache
 
 	elementMap  map[string]*list.Element
 	elementList *list.List
-
-	lock sync.RWMutex
 }
 
 func newLRUCache(conf config) Cache {
@@ -36,34 +32,29 @@ func newLRUCache(conf config) Cache {
 	}
 
 	cache := &lruCache{
-		config:      conf,
 		elementMap:  make(map[string]*list.Element, MapInitialCap),
 		elementList: list.New(),
 	}
 
-	cache.Loader = NewLoader(cache, conf.singleflight)
+	cache.setup(conf, cache)
 	return cache
 }
 
 func (lc *lruCache) unwrap(element *list.Element) *entry {
 	entry, ok := element.Value.(*entry)
 	if !ok {
-		panic("cachego: failed to unwrap element's value to entry")
+		panic("cachego: failed to unwrap lru element's value to entry")
 	}
 
 	return entry
 }
 
 func (lc *lruCache) evict() (evictedValue interface{}) {
-	element := lc.elementList.Back()
-	if element == nil {
-		return nil
+	if element := lc.elementList.Back(); element != nil {
+		return lc.removeElement(element)
 	}
 
-	//entry := lc.unwrap(element)
-	evictedValue = lc.removeElement(element)
-
-	return evictedValue
+	return nil
 }
 
 func (lc *lruCache) get(key string) (value interface{}, found bool) {
@@ -102,15 +93,12 @@ func (lc *lruCache) set(key string, value interface{}, ttl time.Duration) (evict
 }
 
 func (lc *lruCache) removeElement(element *list.Element) (removedValue interface{}) {
-	lc.elementList.Remove(element)
-
 	entry := lc.unwrap(element)
-	if !entry.expired(0) {
-		removedValue = entry.value
-	}
 
 	delete(lc.elementMap, entry.key)
-	return removedValue
+	lc.elementList.Remove(element)
+
+	return entry.value
 }
 
 func (lc *lruCache) remove(key string) (removedValue interface{}) {
@@ -134,15 +122,18 @@ func (lc *lruCache) gc() (cleans int) {
 		scans++
 
 		if entry := lc.unwrap(element); entry.expired(now) {
-			delete(lc.elementMap, entry.key)
+			old := element
+			element = element.Prev()
+
+			lc.removeElement(old)
 			cleans++
+		} else {
+			element = element.Prev()
 		}
 
 		if lc.maxScans > 0 && scans >= lc.maxScans {
 			break
 		}
-
-		element = element.Prev()
 	}
 
 	return cleans
