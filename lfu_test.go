@@ -15,6 +15,8 @@
 package cachego
 
 import (
+	"math/rand"
+	"sort"
 	"strconv"
 	"testing"
 	"time"
@@ -106,5 +108,97 @@ func TestLFUCacheEvict(t *testing.T) {
 		}
 
 		i++
+	}
+}
+
+// go test -v -cover -run=^TestLFUCacheEvictSimulate$
+func TestLFUCacheEvictSimulate(t *testing.T) {
+	cache := newTestLFUCache()
+
+	for i := 0; i < maxTestEntries; i++ {
+		data := strconv.Itoa(i)
+		cache.Set(data, data, NoTTL)
+	}
+
+	maxKeys := 10000
+	keys := make([]string, 0, maxKeys)
+	random := rand.New(rand.NewSource(time.Now().Unix()))
+
+	for i := 0; i < maxKeys; i++ {
+		key := strconv.Itoa(random.Intn(maxTestEntries))
+		keys = append(keys, key)
+	}
+
+	type times struct {
+		key   string
+		count int
+	}
+
+	counts := make([]times, maxTestEntries)
+	for _, key := range keys {
+		cache.Get(key)
+
+		i, err := strconv.ParseInt(key, 10, 64)
+		if err != nil {
+			t.Error(err)
+		}
+
+		counts[i].key = key
+		counts[i].count++
+	}
+
+	sort.Slice(counts, func(i, j int) bool {
+		return counts[i].count < counts[j].count
+	})
+
+	t.Log(counts)
+
+	expect := make([]string, 0, maxTestEntries)
+	for i := 0; i < maxTestEntries; i++ {
+		data := strconv.Itoa(maxTestEntries*10 + i)
+		expect = append(expect, data)
+		evictedValue := cache.Set(data, data, NoTTL)
+
+		for j := 0; j < maxKeys+i; j++ {
+			cache.Get(data)
+		}
+
+		if evictedValue.(string) != counts[i].key {
+			found := false
+
+			// Counts may repeat and the sequence may not the same as we think.
+			for _, count := range counts {
+				if count.key != evictedValue.(string) {
+					continue
+				}
+
+				// Count doesn't equal means something wrong happens.
+				if count.count != counts[i].count {
+					t.Errorf("evictedValue.(string) %s != counts[i].key %s", evictedValue.(string), counts[i].key)
+				}
+
+				found = true
+				break
+			}
+
+			if !found {
+				t.Errorf("evictedValue %s not found in counts %+v", evictedValue.(string), counts)
+			}
+		}
+	}
+
+	index := 0
+	for cache.itemHeap.Size() > 0 {
+		item := cache.itemHeap.Pop()
+
+		if item.Value.(*entry).key != expect[index] {
+			t.Errorf("item.Value.(*entry).key %s != expect[index] %s", item.Value.(*entry).key, expect[index])
+		}
+
+		if item.Weight() != uint64(maxKeys+index) {
+			t.Errorf("item.Weight() %d != uint64(maxKeys + index) %d", item.Weight(), uint64(maxKeys+index))
+		}
+
+		index++
 	}
 }

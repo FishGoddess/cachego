@@ -65,6 +65,7 @@ func (t *Task) After(fn func(ctx context.Context)) *Task {
 }
 
 // Run runs task.
+// You can use context to stop this task, see context.Context.
 func (t *Task) Run() {
 	if t.before != nil {
 		t.before(t.ctx)

@@ -24,8 +24,10 @@ import (
 func main() {
 	// By default, singleflight is enabled in cache.
 	// Use WithDisableSingleflight to disable if you want.
-	// cache := cachego.NewCache(cachego.WithDisableSingleflight())
-	cache := cachego.NewCache()
+	cache := cachego.NewCache(cachego.WithDisableSingleflight())
+
+	// We recommend you to use singleflight.
+	cache = cachego.NewCache()
 
 	value, ok := cache.Get("key")
 	fmt.Println(value, ok) // <nil> false

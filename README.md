@@ -34,6 +34,63 @@ $ go get -u github.com/FishGoddess/cachego
 ### 💡 参考案例
 
 ```go
+package main
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/FishGoddess/cachego"
+)
+
+func main() {
+	// Use NewCache function to create a cache.
+	// You can use WithLRU to specify the type of cache to lru.
+	// Also, try WithLFU if you want to use lfu to evict data.
+	cache := cachego.NewCache(cachego.WithLRU(100))
+	cache = cachego.NewCache(cachego.WithLFU(100))
+
+	// By default, it creates a standard cache which evicts entries randomly.
+	// Use WithShardings to shard cache to several parts for higher performance.
+	cache = cachego.NewCache(cachego.WithShardings(64))
+	cache = cachego.NewCache()
+
+	// Set an entry to cache with ttl.
+	cache.Set("key", 123, time.Second)
+
+	// Get an entry from cache.
+	value, ok := cache.Get("key")
+	fmt.Println(value, ok) // 123 true
+
+	// Check how many entries stores in cache.
+	size := cache.Size()
+	fmt.Println(size) // 1
+
+	// Clean expired entries.
+	cleans := cache.GC()
+	fmt.Println(cleans) // 1
+
+	// Set an entry which doesn't have ttl.
+	cache.Set("key", 123, cachego.NoTTL)
+
+	// Remove an entry.
+	removedValue := cache.Remove("key")
+	fmt.Println(removedValue) // 123
+
+	// Reset resets cache to initial status.
+	cache.Reset()
+
+	// Get value from cache and load it to cache if not found.
+	value, ok = cache.Get("key")
+	if !ok {
+		// Loaded entry will be set to cache and returned.
+		value, _ = cache.Load("key", time.Second, func() (value interface{}, err error) {
+			return 666, nil
+		})
+	}
+
+	fmt.Println(value) // 666
+}
 ```
 
 _更多使用案例请查看 [_examples](./_examples) 目录。_

@@ -15,7 +15,9 @@
 package cachego
 
 import (
+	"math/rand"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -99,5 +101,68 @@ func TestLRUCacheEvict(t *testing.T) {
 
 		element = element.Prev()
 		i++
+	}
+}
+
+// go test -v -cover -run=^TestLRUCacheEvictSimulate$
+func TestLRUCacheEvictSimulate(t *testing.T) {
+	cache := newTestLRUCache()
+
+	for i := 0; i < maxTestEntries; i++ {
+		data := strconv.Itoa(i)
+		cache.Set(data, data, NoTTL)
+	}
+
+	maxKeys := 10000
+	keys := make([]string, 0, maxKeys)
+	random := rand.New(rand.NewSource(time.Now().Unix()))
+
+	for i := 0; i < maxKeys; i++ {
+		key := strconv.Itoa(random.Intn(maxTestEntries))
+		keys = append(keys, key)
+	}
+
+	for _, key := range keys {
+		cache.Get(key)
+	}
+
+	expectKeys := make([]string, maxTestEntries)
+	index := len(expectKeys) - 1
+	for i := len(keys) - 1; i > 0; i-- {
+		exist := false
+
+		for _, expectKey := range expectKeys {
+			if keys[i] == expectKey {
+				exist = true
+			}
+		}
+
+		if !exist {
+			expectKeys[index] = keys[i]
+			index--
+		}
+	}
+
+	t.Log(expectKeys)
+
+	var got strings.Builder
+	element := cache.elementList.Back()
+	for element != nil {
+		got.WriteString(element.Value.(*entry).key)
+		element = element.Prev()
+	}
+
+	expect := strings.Join(expectKeys, "")
+	if strings.Compare(got.String(), expect) != 0 {
+		t.Errorf("got %s != expect %s", got.String(), expect)
+	}
+
+	for i := 0; i < maxTestEntries; i++ {
+		data := strconv.Itoa(maxTestEntries*10 + i)
+		evictedValue := cache.Set(data, data, NoTTL)
+
+		if evictedValue.(string) != expectKeys[i] {
+			t.Errorf("evictedValue.(string) %s != expectKeys[i] %s", evictedValue.(string), expectKeys[i])
+		}
 	}
 }
