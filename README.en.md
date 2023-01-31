@@ -98,26 +98,30 @@ _Check more examples in [_examples](./_examples)._
 
 ### 🔥 Benchmarks
 
-> Benchmark file：[_examples/performance_test.go](./_examples/performance_test.go)
-
 ```bash
-$ go test -v ./_examples/performance_test.go
+$ make bench
 ```
 
-> Data size is 1 million, concurrency is 100 thousands, loop is 50
+```bash
+goos: darwin
+goarch: amd64
+cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
 
-> Environment：R7-5800X CPU @ 3.8GHZ GHZ, 32 GB RAM, Deepin20 OS
+BenchmarkCachegoGet-12                  25214618               47.2 ns/op             0 B/op          0 allocs/op
+BenchmarkCachegoGetLRU-12                8169417              149.0 ns/op             0 B/op          0 allocs/op
+BenchmarkCachegoGetLFU-12                7071300              171.6 ns/op             0 B/op          0 allocs/op
+BenchmarkCachegoGetSharding-12          72568048               16.8 ns/op             0 B/op          0 allocs/op
 
-| tests       | read time (less is better) | write time (less is better) | mixed-operation time (less is better) |
-|-------------|----------------------------|-----------------------------|---------------------------------------|
-| **cachego** | **1092ms**                 | **1107ms**                  | **1098ms**                            |
-| go-cache    | 1111ms                     | 3152ms                      | 4738ms                                |
-| freeCache   | 1070ms                     | 1123ms                      | 1068ms                                |
-| ECache      | 1083ms                     | 1229ms                      | 1121ms                                |
+BenchmarkCachegoSet-12                   5743768               209.6 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetLRU-12                6105316               189.9 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetLFU-12                5505601               217.2 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetSharding-12          39012607                31.2 ns/op           16 B/op          1 allocs/op
+```
 
-As you can see, cachego has a high performance in concurrent, but segmented lock mechanism has one-more-time positioning
-operation, so if the price of locking is less than the cost of positioning, this mechanism is dragging. The reading
-performance will be optimized in the future version!
+> Benchmarks: [_examples/performance_test.go](./_examples/performance_test.go)
+
+As you can see, cachego has a higher performance with sharding, but sharding has one-more-time positioning
+operation, so if the locking cost is less than the cost of positioning, this sharding is dragging.
 
 ### 👥 Contributors
 

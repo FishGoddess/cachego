@@ -6,7 +6,7 @@ test:
 	go test -cover ./...
 
 bench:
-	go test -v ./_examples/performance_test.go
+	go test -v -bench=. -benchtime=1s ./_examples/performance_test.go
 
 fmt:
 	go fmt ./...

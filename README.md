@@ -97,25 +97,29 @@ _更多使用案例请查看 [_examples](./_examples) 目录。_
 
 ### 🔥 性能测试
 
-> 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
-
 ```bash
-$ go test -v ./_examples/performance_test.go
+$ make bench
 ```
 
-> 总缓存数据为 100w 条，并发数为 10w，循环测试写入和读取次数为 50 次
+```bash
+goos: darwin
+goarch: amd64
+cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
 
-> 测试环境：R7-5800X CPU @ 3.8GHZ GHZ，32 GB RAM，Manjaro21 OS
+BenchmarkCachegoGet-12                  25214618               47.2 ns/op             0 B/op          0 allocs/op
+BenchmarkCachegoGetLRU-12                8169417              149.0 ns/op             0 B/op          0 allocs/op
+BenchmarkCachegoGetLFU-12                7071300              171.6 ns/op             0 B/op          0 allocs/op
+BenchmarkCachegoGetSharding-12          72568048               16.8 ns/op             0 B/op          0 allocs/op
 
-| 测试          | 读取消耗时间 (越小越好) | 写入消耗时间 (越小越好) | 混合操作消耗时间 (越小越好) |
-|-------------|---------------|---------------|-----------------|
-| **cachego** | **1092ms**    | **1107ms**    | **1098ms**      |
-| go-cache    | 1111ms        | 3152ms        | 4738ms          |
-| freeCache   | 1070ms        | 1123ms        | 1068ms          |
-| ECache      | 1083ms        | 1229ms        | 1121ms          |
+BenchmarkCachegoSet-12                   5743768               209.6 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetLRU-12                6105316               189.9 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetLFU-12                5505601               217.2 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetSharding-12          39012607                31.2 ns/op           16 B/op          1 allocs/op
+```
 
-可以看出，由于使用了分段锁机制，读写性能在并发下依然非常高，但是分段锁会多一次定位的操作，如果加锁的消耗小于定位的消耗，那分段锁就不占优势。 这也是为什么 cachego 在写入性能上比 go-cache
-强一大截，但是读取性能却没强多少的原因。后续会着重优化读取性能！
+> 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
+
+可以看出，使用分片机制后的读写性能非常高，但是分片会多一次哈希定位的操作，如果加锁的消耗小于定位的消耗，那分片就不占优势。
 
 ### 👥 贡献者
 

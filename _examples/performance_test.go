@@ -15,10 +15,8 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
-	"sync"
 	"testing"
 	"time"
 	//"github.com/coocood/freecache"
@@ -29,10 +27,9 @@ import (
 )
 
 const (
-	benchTTL           = time.Minute
-	benchMaxKeys       = 100000
-	benchMaxLoops      = 1000
-	benchMaxGoroutines = 4096
+	benchTTL        = time.Minute
+	benchMaxKeys    = 10000
+	benchMaxEntries = 100000
 )
 
 type benchKeys []string
@@ -52,32 +49,137 @@ func (bks benchKeys) pick() string {
 	return bks[index]
 }
 
-func benchmarkCache(t *testing.T, fn func(loop int, key string)) {
-	keys := newBenchKeys()
-	begin := time.Now()
-
-	var wg sync.WaitGroup
-	for i := 0; i < benchMaxGoroutines; i++ {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			for loop := 0; loop < benchMaxLoops; loop++ {
-				fn(loop, keys.pick())
-			}
-		}()
+func (bks benchKeys) loop(fn func(key string)) {
+	for _, key := range bks {
+		fn(key)
 	}
-
-	wg.Wait()
-	fmt.Printf("%s: %s\n", t.Name(), time.Since(begin))
 }
 
-// go test -v -run=^TestCachegoSet$ ./_examples/performance_test.go
-func TestCachegoSet(t *testing.T) {
+func benchmarkCacheGet(b *testing.B, set func(key string, value string, ttl time.Duration), get func(key string)) {
+	keys := newBenchKeys()
+	keys.loop(func(key string) {
+		set(key, key, benchTTL)
+	})
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		key := keys.pick()
+
+		for pb.Next() {
+			get(key)
+		}
+	})
+}
+
+func benchmarkCacheSet(b *testing.B, set func(key string, value string, ttl time.Duration)) {
+	keys := newBenchKeys()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		key := keys.pick()
+
+		for pb.Next() {
+			set(key, key, benchTTL)
+		}
+	})
+}
+
+// go test -v -bench=^BenchmarkCachegoGet$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoGet(b *testing.B) {
 	cache := cachego.NewCache()
 
-	benchmarkCache(t, func(loop int, key string) {
-		cache.Set(key, loop, benchTTL)
+	set := func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
+	}
+
+	get := func(key string) {
+		cache.Get(key)
+	}
+
+	benchmarkCacheGet(b, set, get)
+}
+
+// go test -v -bench=^BenchmarkCachegoGetLRU$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoGetLRU(b *testing.B) {
+	cache := cachego.NewCache(cachego.WithLRU(benchMaxEntries))
+
+	set := func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
+	}
+
+	get := func(key string) {
+		cache.Get(key)
+	}
+
+	benchmarkCacheGet(b, set, get)
+}
+
+// go test -v -bench=^BenchmarkCachegoGetLFU$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoGetLFU(b *testing.B) {
+	cache := cachego.NewCache(cachego.WithLFU(benchMaxEntries))
+
+	set := func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
+	}
+
+	get := func(key string) {
+		cache.Get(key)
+	}
+
+	benchmarkCacheGet(b, set, get)
+}
+
+// go test -v -bench=^BenchmarkCachegoGetSharding$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoGetSharding(b *testing.B) {
+	cache := cachego.NewCache(cachego.WithShardings(16))
+
+	set := func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
+	}
+
+	get := func(key string) {
+		cache.Get(key)
+	}
+
+	benchmarkCacheGet(b, set, get)
+}
+
+// go test -v -bench=^BenchmarkCachegoSet$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoSet(b *testing.B) {
+	cache := cachego.NewCache()
+
+	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
+	})
+}
+
+// go test -v -bench=^BenchmarkCachegoSetLRU$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoSetLRU(b *testing.B) {
+	cache := cachego.NewCache(cachego.WithLRU(benchMaxEntries))
+
+	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
+	})
+}
+
+// go test -v -bench=^BenchmarkCachegoSetLFU$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoSetLFU(b *testing.B) {
+	cache := cachego.NewCache(cachego.WithLFU(benchMaxEntries))
+
+	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
+	})
+}
+
+// go test -v -bench=^BenchmarkCachegoSetSharding$ -benchtime=1s ./_examples/performance_test.go
+func BenchmarkCachegoSetSharding(b *testing.B) {
+	cache := cachego.NewCache(cachego.WithShardings(16))
+
+	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
+		cache.Set(key, value, ttl)
 	})
 }
