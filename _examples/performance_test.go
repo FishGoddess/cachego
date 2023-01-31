@@ -55,10 +55,10 @@ func (bks benchKeys) loop(fn func(key string)) {
 	}
 }
 
-func benchmarkCacheGet(b *testing.B, set func(key string, value string, ttl time.Duration), get func(key string)) {
+func benchmarkCacheGet(b *testing.B, set func(key string, value string), get func(key string)) {
 	keys := newBenchKeys()
 	keys.loop(func(key string) {
-		set(key, key, benchTTL)
+		set(key, key)
 	})
 
 	b.ReportAllocs()
@@ -73,7 +73,7 @@ func benchmarkCacheGet(b *testing.B, set func(key string, value string, ttl time
 	})
 }
 
-func benchmarkCacheSet(b *testing.B, set func(key string, value string, ttl time.Duration)) {
+func benchmarkCacheSet(b *testing.B, set func(key string, value string)) {
 	keys := newBenchKeys()
 
 	b.ReportAllocs()
@@ -83,7 +83,7 @@ func benchmarkCacheSet(b *testing.B, set func(key string, value string, ttl time
 		key := keys.pick()
 
 		for pb.Next() {
-			set(key, key, benchTTL)
+			set(key, key)
 		}
 	})
 }
@@ -92,8 +92,8 @@ func benchmarkCacheSet(b *testing.B, set func(key string, value string, ttl time
 func BenchmarkCachegoGet(b *testing.B) {
 	cache := cachego.NewCache()
 
-	set := func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	set := func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	}
 
 	get := func(key string) {
@@ -107,8 +107,8 @@ func BenchmarkCachegoGet(b *testing.B) {
 func BenchmarkCachegoGetLRU(b *testing.B) {
 	cache := cachego.NewCache(cachego.WithLRU(benchMaxEntries))
 
-	set := func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	set := func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	}
 
 	get := func(key string) {
@@ -122,8 +122,8 @@ func BenchmarkCachegoGetLRU(b *testing.B) {
 func BenchmarkCachegoGetLFU(b *testing.B) {
 	cache := cachego.NewCache(cachego.WithLFU(benchMaxEntries))
 
-	set := func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	set := func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	}
 
 	get := func(key string) {
@@ -137,8 +137,8 @@ func BenchmarkCachegoGetLFU(b *testing.B) {
 func BenchmarkCachegoGetSharding(b *testing.B) {
 	cache := cachego.NewCache(cachego.WithShardings(16))
 
-	set := func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	set := func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	}
 
 	get := func(key string) {
@@ -152,8 +152,8 @@ func BenchmarkCachegoGetSharding(b *testing.B) {
 func BenchmarkCachegoSet(b *testing.B) {
 	cache := cachego.NewCache()
 
-	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	benchmarkCacheSet(b, func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	})
 }
 
@@ -161,8 +161,8 @@ func BenchmarkCachegoSet(b *testing.B) {
 func BenchmarkCachegoSetLRU(b *testing.B) {
 	cache := cachego.NewCache(cachego.WithLRU(benchMaxEntries))
 
-	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	benchmarkCacheSet(b, func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	})
 }
 
@@ -170,8 +170,8 @@ func BenchmarkCachegoSetLRU(b *testing.B) {
 func BenchmarkCachegoSetLFU(b *testing.B) {
 	cache := cachego.NewCache(cachego.WithLFU(benchMaxEntries))
 
-	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	benchmarkCacheSet(b, func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	})
 }
 
@@ -179,7 +179,7 @@ func BenchmarkCachegoSetLFU(b *testing.B) {
 func BenchmarkCachegoSetSharding(b *testing.B) {
 	cache := cachego.NewCache(cachego.WithShardings(16))
 
-	benchmarkCacheSet(b, func(key string, value string, ttl time.Duration) {
-		cache.Set(key, value, ttl)
+	benchmarkCacheSet(b, func(key string, value string) {
+		cache.Set(key, value, benchTTL)
 	})
 }
