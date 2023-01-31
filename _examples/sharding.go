@@ -25,7 +25,7 @@ func main() {
 	// All operations in cache share one lock for concurrency.
 	// Use read lock or write lock is depends on cache implements.
 	// Get will use read lock in standard cache, but lru and lfu don't.
-	// This may be a big performance problem in high qps.
+	// This may be a serious performance problem in high qps.
 	cache := cachego.NewCache()
 
 	// We provide a sharding cache wrapper to shard one cache to several parts with hash.

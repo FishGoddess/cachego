@@ -14,7 +14,9 @@
 
 package cachego
 
-import "time"
+import (
+	"time"
+)
 
 type config struct {
 	// These fields are for creating.

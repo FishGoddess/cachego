@@ -35,9 +35,8 @@ var (
 func hash(key string) int {
 	hash := 1469598103934665603
 
-	keyBytes := []byte(key)
-	for _, b := range keyBytes {
-		hash = (hash << 5) - hash + int(b&0xff)
+	for _, r := range key {
+		hash = (hash << 5) - hash + int(r&0xffff)
 		hash *= 1099511628211
 	}
 

@@ -1,4 +1,4 @@
-.PHONY: test bench benchfile fmt
+.PHONY: test bench fmt
 
 all: test bench
 
@@ -6,7 +6,7 @@ test:
 	go test -cover ./...
 
 bench:
-	go test -v ./_examples/performance_test.go -benchtime=1s
+	go test -v ./_examples/performance_test.go
 
 fmt:
 	go fmt ./...

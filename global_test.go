@@ -19,6 +19,16 @@ import (
 	"time"
 )
 
+// go test -v -bench=^BenchmarkHash$ -benchtime=1s ./global.go ./global_test.go
+func BenchmarkHash(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		Hash("key")
+	}
+}
+
 // go test -v -cover -run=^TestHash$
 func TestHash(t *testing.T) {
 	hash := Hash("test")

@@ -54,4 +54,10 @@ func main() {
 
 	size = cache.Size()
 	fmt.Println(size) // 0
+
+	// By default, gc only scans at most maxScans entries one time to remove expired entries.
+	// This is because scans all entries may cost much time if there is so many entries in cache, and a "stw" will happen.
+	// This can be a serious problem in some situations.
+	// Use WithMaxScans to set this value, remember, a value <= 0 means no scan limit.
+	cache = cachego.NewCache(cachego.WithGC(10*time.Minute), cachego.WithMaxScans(0))
 }
