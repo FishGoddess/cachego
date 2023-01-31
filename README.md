@@ -133,6 +133,8 @@ BenchmarkFreecacheSet-12                44181687                28.4 ns/op      
 BenchmarkGoCacheSet-12                   4921483               249.0 ns/op           16 B/op          1 allocs/op
 ```
 
+> 注：Ecache 只有 LRU 模式，v1 和 v2 两个版本；Freecache 默认是 256 分片，无法调节为 1 个分片进行对比测试。
+
 > 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
 
 可以看出，使用分片机制后的读写性能非常高，但是分片会多一次哈希定位的操作，如果加锁的消耗小于定位的消耗，那分片就不占优势。

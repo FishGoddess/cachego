@@ -134,6 +134,8 @@ BenchmarkFreecacheSet-12                44181687                28.4 ns/op      
 BenchmarkGoCacheSet-12                   4921483               249.0 ns/op           16 B/op          1 allocs/op
 ```
 
+> Notice: Ecache only has lru mode, including v1 and v2; Freecache has 256 shardings, and we can't reset to 1.
+
 > Benchmarks: [_examples/performance_test.go](./_examples/performance_test.go)
 
 As you can see, cachego has a higher performance with sharding, but sharding has one-more-time positioning
