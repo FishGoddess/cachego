@@ -115,7 +115,7 @@ func (sc *standardCache) Get(key string) (value interface{}, found bool) {
 
 // Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
 // See Cache interface.
-func (sc *standardCache) Set(key string, value interface{}, ttl time.Duration) (oldValue interface{}) {
+func (sc *standardCache) Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
 	sc.lock.Lock()
 	defer sc.lock.Unlock()
 

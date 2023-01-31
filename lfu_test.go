@@ -14,12 +14,16 @@
 
 package cachego
 
-import "testing"
+import (
+	"strconv"
+	"testing"
+	"time"
+)
 
-func newTestLFUCache() Cache {
+func newTestLFUCache() *lfuCache {
 	conf := newDefaultConfig()
 	conf.maxEntries = maxTestEntries
-	return newLFUCache(conf)
+	return newLFUCache(conf).(*lfuCache)
 }
 
 // go test -v -cover -run=^TestLFUCacheGet$
@@ -56,4 +60,51 @@ func TestLFUCacheGC(t *testing.T) {
 func TestLFUCacheReset(t *testing.T) {
 	cache := newTestLFUCache()
 	testCacheReset(t, cache)
+}
+
+// go test -v -cover -run=^TestLFUCacheEvict$
+func TestLFUCacheEvict(t *testing.T) {
+	cache := newTestLFUCache()
+
+	for i := 0; i < cache.maxEntries*10; i++ {
+		data := strconv.Itoa(i)
+		evictedValue := cache.Set(data, data, time.Duration(i)*time.Second)
+
+		if i >= cache.maxEntries && evictedValue == nil {
+			t.Errorf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
+		}
+	}
+
+	if cache.Size() != cache.maxEntries {
+		t.Errorf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
+	}
+
+	for i := cache.maxEntries*10 - cache.maxEntries; i < cache.maxEntries*10; i++ {
+		for j := 0; j < i; j++ {
+			data := strconv.Itoa(i)
+			cache.Set(data, data, time.Duration(i)*time.Second)
+			cache.Get(data)
+		}
+	}
+
+	for i := cache.maxEntries*10 - cache.maxEntries; i < cache.maxEntries*10; i++ {
+		data := strconv.Itoa(i)
+		value, ok := cache.Get(data)
+		if !ok || value.(string) != data {
+			t.Errorf("!ok %+v || value.(string) %s != data %s", !ok, value.(string), data)
+		}
+	}
+
+	i := cache.maxEntries*10 - cache.maxEntries
+	for cache.itemHeap.Size() > 0 {
+		item := cache.itemHeap.Pop()
+		entry := item.Value.(*entry)
+		data := strconv.Itoa(i)
+
+		if entry.key != data || entry.value.(string) != data {
+			t.Errorf("entry.key %s != data %s || entry.value.(string) %s != data %s", entry.key, data, entry.value.(string), data)
+		}
+
+		i++
+	}
 }

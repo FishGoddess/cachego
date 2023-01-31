@@ -14,12 +14,16 @@
 
 package cachego
 
-import "testing"
+import (
+	"strconv"
+	"testing"
+	"time"
+)
 
-func newTestLRUCache() Cache {
+func newTestLRUCache() *lruCache {
 	conf := newDefaultConfig()
 	conf.maxEntries = maxTestEntries
-	return newLRUCache(conf)
+	return newLRUCache(conf).(*lruCache)
 }
 
 // go test -v -cover -run=^TestLRUCacheGet$
@@ -56,4 +60,44 @@ func TestLRUCacheGC(t *testing.T) {
 func TestLRUCacheReset(t *testing.T) {
 	cache := newTestLRUCache()
 	testCacheReset(t, cache)
+}
+
+// go test -v -cover -run=^TestLRUCacheEvict$
+func TestLRUCacheEvict(t *testing.T) {
+	cache := newTestLRUCache()
+
+	for i := 0; i < cache.maxEntries*10; i++ {
+		data := strconv.Itoa(i)
+		evictedValue := cache.Set(data, data, time.Duration(i)*time.Second)
+
+		if i >= cache.maxEntries && evictedValue == nil {
+			t.Errorf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
+		}
+	}
+
+	if cache.Size() != cache.maxEntries {
+		t.Errorf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
+	}
+
+	for i := cache.maxEntries*10 - cache.maxEntries; i < cache.maxEntries*10; i++ {
+		data := strconv.Itoa(i)
+		value, ok := cache.Get(data)
+		if !ok || value.(string) != data {
+			t.Errorf("!ok %+v || value.(string) %s != data %s", !ok, value.(string), data)
+		}
+	}
+
+	i := cache.maxEntries*10 - cache.maxEntries
+	element := cache.elementList.Back()
+	for element != nil {
+		entry := element.Value.(*entry)
+		data := strconv.Itoa(i)
+
+		if entry.key != data || entry.value.(string) != data {
+			t.Errorf("entry.key %s != data %s || entry.value.(string) %s != data %s", entry.key, data, entry.value.(string), data)
+		}
+
+		element = element.Prev()
+		i++
+	}
 }

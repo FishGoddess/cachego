@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	maxTestEntries = 100
+	maxTestEntries = 10
 )
 
 func testCacheGet(t *testing.T, cache Cache) {

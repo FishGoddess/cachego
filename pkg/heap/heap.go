@@ -18,6 +18,10 @@ import (
 	"container/heap"
 )
 
+const (
+	poppedIndex = -1
+)
+
 // Item stores all information needed by heap including value.
 type Item struct {
 	heap   *Heap
@@ -82,7 +86,7 @@ func (is *items) Pop() interface{} {
 	item := (*is)[n-1]
 	*is = (*is)[0 : n-1]
 
-	item.index = -1 // Already popped flag
+	item.index = poppedIndex // Already popped flag
 	return item
 }
 
@@ -125,8 +129,9 @@ func (h *Heap) Pop() *Item {
 
 // Remove removes item from heap and returns its value.
 func (h *Heap) Remove(item *Item) interface{} {
-	if item.heap == h {
+	if item.heap == h && item.index != poppedIndex {
 		heap.Remove(h.items, item.index)
+		h.size--
 	}
 
 	return item.Value

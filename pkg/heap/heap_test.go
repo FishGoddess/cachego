@@ -162,4 +162,13 @@ func TestHeap(t *testing.T) {
 			t.Errorf("value.(int) %d != num %d", value.(int), num)
 		}
 	}
+
+	if heap.Size() != 0 {
+		t.Errorf("heap.Size() %d is wrong", heap.Size())
+	}
+
+	item := &Item{heap: heap, index: poppedIndex, Value: 123}
+	if value := heap.Remove(item); value.(int) != 123 {
+		t.Errorf("value.(int) %d is wrong", value.(int))
+	}
 }

@@ -15,12 +15,15 @@
 package cachego
 
 import (
+	"strconv"
 	"testing"
+	"time"
 )
 
-func newTestStandardCache() Cache {
+func newTestStandardCache() *standardCache {
 	conf := newDefaultConfig()
-	return newStandardCache(conf)
+	conf.maxEntries = maxTestEntries
+	return newStandardCache(conf).(*standardCache)
 }
 
 // go test -v -cover -run=^TestStandardCacheGet$
@@ -57,4 +60,22 @@ func TestStandardCacheGC(t *testing.T) {
 func TestStandardCacheReset(t *testing.T) {
 	cache := newTestStandardCache()
 	testCacheReset(t, cache)
+}
+
+// go test -v -cover -run=^TestStandardCacheEvict$
+func TestStandardCacheEvict(t *testing.T) {
+	cache := newTestStandardCache()
+
+	for i := 0; i < cache.maxEntries*10; i++ {
+		data := strconv.Itoa(i)
+		evictedValue := cache.Set(data, data, time.Duration(i)*time.Second)
+
+		if i >= cache.maxEntries && evictedValue == nil {
+			t.Errorf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
+		}
+	}
+
+	if cache.Size() != cache.maxEntries {
+		t.Errorf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
+	}
 }
