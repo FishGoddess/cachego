@@ -19,9 +19,6 @@ import (
 	"strconv"
 	"testing"
 	"time"
-	//"github.com/coocood/freecache"
-	//"github.com/orca-zhang/ecache"
-	//gocache "github.com/patrickmn/go-cache"
 
 	"github.com/FishGoddess/cachego"
 )
@@ -183,3 +180,205 @@ func BenchmarkCachegoSetSharding(b *testing.B) {
 		cache.Set(key, value, benchTTL)
 	})
 }
+
+//// go test -v -bench=^BenchmarkGcacheGet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGcacheGet(b *testing.B) {
+//	cache := gcache.New(benchMaxEntries).Expiration(benchTTL).Build()
+//
+//	set := func(key string, value string) {
+//		cache.Set(key, value)
+//	}
+//
+//	get := func(key string) {
+//		cache.Get(key)
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkGcacheGetLRU$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGcacheGetLRU(b *testing.B) {
+//	cache := gcache.New(benchMaxEntries).Expiration(benchTTL).LRU().Build()
+//
+//	set := func(key string, value string) {
+//		cache.Set(key, value)
+//	}
+//
+//	get := func(key string) {
+//		cache.Get(key)
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkGcacheGetLFU$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGcacheGetLFU(b *testing.B) {
+//	cache := gcache.New(benchMaxEntries).Expiration(benchTTL).LFU().Build()
+//
+//	set := func(key string, value string) {
+//		cache.Set(key, value)
+//	}
+//
+//	get := func(key string) {
+//		cache.Get(key)
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkEcacheGet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkEcacheGet(b *testing.B) {
+//	cache := ecache.NewLRUCache(1, math.MaxUint16, benchTTL)
+//
+//	set := func(key string, value string) {
+//		cache.Put(key, value)
+//	}
+//
+//	get := func(key string) {
+//		cache.Get(key)
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkEcache2Get$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkEcache2Get(b *testing.B) {
+//	cache := ecache.NewLRUCache(1, math.MaxUint16, benchTTL).LRU2(16)
+//
+//	set := func(key string, value string) {
+//		cache.Put(key, value)
+//	}
+//
+//	get := func(key string) {
+//		cache.Get(key)
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkBigcacheGet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkBigcacheGet(b *testing.B) {
+//	cache, _ := bigcache.New(context.Background(), bigcache.Config{
+//		Shards:             1,
+//		LifeWindow:         benchTTL,
+//		MaxEntriesInWindow: benchMaxEntries,
+//		Verbose:            false,
+//	})
+//
+//	set := func(key string, value string) {
+//		cache.Set(key, []byte(value))
+//	}
+//
+//	get := func(key string) {
+//		cache.Get(key)
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkFreecacheGet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkFreecacheGet(b *testing.B) {
+//	cache := freecache.NewCache(benchMaxEntries)
+//
+//	set := func(key string, value string) {
+//		cache.Set([]byte(key), []byte(value), int(benchTTL.Seconds()))
+//	}
+//
+//	get := func(key string) {
+//		cache.Get([]byte(key))
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkGoCacheGet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGoCacheGet(b *testing.B) {
+//	cache := gocache.New(benchTTL, 0)
+//
+//	set := func(key string, value string) {
+//		cache.Set(key, value, benchTTL)
+//	}
+//
+//	get := func(key string) {
+//		cache.Get(key)
+//	}
+//
+//	benchmarkCacheGet(b, set, get)
+//}
+//
+//// go test -v -bench=^BenchmarkGcacheSet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGcacheSet(b *testing.B) {
+//	cache := gcache.New(benchMaxEntries).Expiration(benchTTL).Build()
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Set(key, value)
+//	})
+//}
+//
+//// go test -v -bench=^BenchmarkGcacheSetLRU$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGcacheSetLRU(b *testing.B) {
+//	cache := gcache.New(benchMaxEntries).Expiration(benchTTL).LRU().Build()
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Set(key, value)
+//	})
+//}
+//
+//// go test -v -bench=^BenchmarkGcacheSetLFU$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGcacheSetLFU(b *testing.B) {
+//	cache := gcache.New(benchMaxEntries).Expiration(benchTTL).LFU().Build()
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Set(key, value)
+//	})
+//}
+//
+//// go test -v -bench=^BenchmarkEcacheSet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkEcacheSet(b *testing.B) {
+//	cache := ecache.NewLRUCache(1, math.MaxUint16, benchTTL)
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Put(key, value)
+//	})
+//}
+//
+//// go test -v -bench=^BenchmarkEcache2Set$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkEcache2Set(b *testing.B) {
+//	cache := ecache.NewLRUCache(1, math.MaxUint16, benchTTL).LRU2(16)
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Put(key, value)
+//	})
+//}
+//
+//// go test -v -bench=^BenchmarkBigcacheSet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkBigcacheSet(b *testing.B) {
+//	cache, _ := bigcache.New(context.Background(), bigcache.Config{
+//		Shards:             1,
+//		LifeWindow:         benchTTL,
+//		MaxEntriesInWindow: benchMaxEntries,
+//		Verbose:            false,
+//	})
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Set(key, []byte(value))
+//	})
+//}
+//
+//// go test -v -bench=^BenchmarkFreecacheSet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkFreecacheSet(b *testing.B) {
+//	cache := freecache.NewCache(benchMaxEntries)
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Set([]byte(key), []byte(value), int(benchTTL.Seconds()))
+//	})
+//}
+//
+//// go test -v -bench=^BenchmarkGoCacheSet$ -benchtime=1s ./_examples/performance_test.go
+//func BenchmarkGoCacheSet(b *testing.B) {
+//	cache := gocache.New(benchTTL, 0)
+//
+//	benchmarkCacheSet(b, func(key string, value string) {
+//		cache.Set(key, value, benchTTL)
+//	})
+//}

@@ -111,11 +111,27 @@ BenchmarkCachegoGet-12                  25214618               47.2 ns/op       
 BenchmarkCachegoGetLRU-12                8169417              149.0 ns/op             0 B/op          0 allocs/op
 BenchmarkCachegoGetLFU-12                7071300              171.6 ns/op             0 B/op          0 allocs/op
 BenchmarkCachegoGetSharding-12          72568048               16.8 ns/op             0 B/op          0 allocs/op
+BenchmarkGcacheGet-12                    4765129              252.1 ns/op            16 B/op          1 allocs/op
+BenchmarkGcacheGetLRU-12                 5735739              214.0 ns/op            16 B/op          1 allocs/op
+BenchmarkGcacheGetLFU-12                 4830048              250.8 ns/op            16 B/op          1 allocs/op
+BenchmarkEcacheGet-12                   11515140              101.0 ns/op             0 B/op          0 allocs/op
+BenchmarkEcache2Get-12                  12255506               95.6 ns/op             0 B/op          0 allocs/op
+BenchmarkBigcacheGet-12                 21711988               60.4 ns/op             7 B/op          2 allocs/op
+BenchmarkFreecacheGet-12                24903388               44.3 ns/op            27 B/op          2 allocs/op
+BenchmarkGoCacheGet-12                  19818014               61.4 ns/op             0 B/op          0 allocs/op
 
 BenchmarkCachegoSet-12                   5743768               209.6 ns/op           16 B/op          1 allocs/op
 BenchmarkCachegoSetLRU-12                6105316               189.9 ns/op           16 B/op          1 allocs/op
 BenchmarkCachegoSetLFU-12                5505601               217.2 ns/op           16 B/op          1 allocs/op
 BenchmarkCachegoSetSharding-12          39012607                31.2 ns/op           16 B/op          1 allocs/op
+BenchmarkGcacheSet-12                    3326841               365.3 ns/op           56 B/op          3 allocs/op
+BenchmarkGcacheSetLRU-12                 3471307               318.7 ns/op           56 B/op          3 allocs/op
+BenchmarkGcacheSetLFU-12                 3896512               335.1 ns/op           56 B/op          3 allocs/op
+BenchmarkEcacheSet-12                    7318136               167.5 ns/op           32 B/op          2 allocs/op
+BenchmarkEcache2Set-12                   7020867               175.7 ns/op           32 B/op          2 allocs/op
+BenchmarkBigcacheSet-12                  4107825               268.9 ns/op           55 B/op          0 allocs/op
+BenchmarkFreecacheSet-12                44181687                28.4 ns/op            0 B/op          0 allocs/op
+BenchmarkGoCacheSet-12                   4921483               249.0 ns/op           16 B/op          1 allocs/op
 ```
 
 > Benchmarks: [_examples/performance_test.go](./_examples/performance_test.go)
