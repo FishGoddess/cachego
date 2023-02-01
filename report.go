@@ -50,13 +50,7 @@ func (rc *reportableCache) Get(key string) (value interface{}, found bool) {
 // Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
 // See Cache interface.
 func (rc *reportableCache) Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
-	evictedValue = rc.cache.Set(key, value, ttl)
-
-	if rc.conf.reportEvicted != nil && evictedValue != nil {
-		rc.conf.reportEvicted(key, evictedValue)
-	}
-
-	return evictedValue
+	return rc.cache.Set(key, value, ttl)
 }
 
 // Remove removes key and returns the removed value of key.

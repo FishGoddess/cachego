@@ -14,6 +14,65 @@
 
 package main
 
-func main() {
+import (
+	"fmt"
+	"io"
+	"strconv"
+	"time"
 
+	"github.com/FishGoddess/cachego"
+)
+
+func reportMissed(key string) {
+	fmt.Printf("report: missed key %s\n", key)
+}
+
+func reportHit(key string, value interface{}) {
+	fmt.Printf("report: hit key %s value %+v\n", key, value)
+}
+
+func reportGC(cost time.Duration, cleans int) {
+	fmt.Printf("report: gc cost %s cleans %d\n", cost, cleans)
+}
+
+func reportLoad(key string, value interface{}, ttl time.Duration, err error) {
+	fmt.Printf("report: load key %s value %+v ttl %s, err %+v\n", key, value, ttl, err)
+}
+
+func main() {
+	// We provide some reporting points for monitor cache.
+	// ReportMissed reports the missed key getting from cache.
+	// ReportHit reports the hit entry getting from cache.
+	// ReportEvicted reports the evicted entry after setting a new entry to cache.
+	// ReportGC reports the status of cache gc.
+	// ReportLoad reports the result of loading.
+	cache := cachego.NewCache(
+		cachego.WithMaxEntries(3),
+		cachego.WithGC(100*time.Millisecond),
+
+		cachego.WithReportMissed(reportMissed),
+		cachego.WithReportHit(reportHit),
+		cachego.WithReportGC(reportGC),
+		cachego.WithReportLoad(reportLoad),
+	)
+
+	for i := 0; i < 5; i++ {
+		key := strconv.Itoa(i)
+		evictedValue := cache.Set(key, key, 10*time.Millisecond)
+		fmt.Println(evictedValue)
+	}
+
+	for i := 0; i < 5; i++ {
+		key := strconv.Itoa(i)
+		value, ok := cache.Get(key)
+		fmt.Println(value, ok)
+	}
+
+	time.Sleep(200 * time.Millisecond)
+
+	value, err := cache.Load("key", time.Second, func() (value interface{}, err error) {
+		return 666, io.EOF
+	})
+
+	fmt.Println(value, err)
 }

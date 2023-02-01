@@ -1,5 +1,21 @@
 ## ✒ 历史版本的特性介绍 (Features in old versions)
 
+### v0.4.0-alpha
+
+> 此版本发布于 2023-02-01
+
+* 设计 Cache 接口，Get 方法用 bool 判断，单个锁结构
+* 提供 ShardingCache 实现，实现 Cache 接口，细化锁粒度
+* 提供多种接口实现，包括 standard，lru，lfu 等
+* 提供 load 方法，集成 singleflight 进行数据加载
+* 操作提供 option 机制，ttl 使用 option 设置，默认值使用 option 设置，最大遍历次数使用 option 设置
+* Delete 方法改 Remove 并返回被删除的 value
+* DeleteAll 方法改 Reset
+* GC 方法保留，去除 AutoGC 方法
+* 检查 pkg 代码，完善单元测试，提高覆盖率
+* 清理废话注释，完善 examples 和性能测试
+* 增加 report 机制用于监控缓存的情况
+
 ### v0.3.7
 
 > 此版本发布于 2022-10-04

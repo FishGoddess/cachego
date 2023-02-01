@@ -140,7 +140,8 @@ BenchmarkGoCacheSet-12                   4921483               249.0 ns/op      
 > Benchmarks: [_examples/performance_test.go](./_examples/performance_test.go)
 
 As you can see, cachego has a higher performance with sharding, but sharding has one-more-time positioning
-operation, so if the locking cost is less than the cost of positioning, this sharding is dragging.
+operation, so if the locking cost is less than the cost of positioning, this sharding is dragging. However, it has
+better performance in most time.
 
 ### 👥 Contributors
 

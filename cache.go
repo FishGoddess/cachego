@@ -63,12 +63,12 @@ type Cache interface {
 	// of expired key after getting it (so we can reuse the memory of entry).
 	Get(key string) (value interface{}, found bool)
 
-	// Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
+	// Set sets key and value to cache with ttl and returns evicted value if exists.
 	// See NoTTL if you want your key is never expired.
 	Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{})
 
 	// Remove removes key and returns the removed value of key.
-	// A nil value will be returned if key doesn't exist in cache or expired.
+	// A nil value will be returned if key doesn't exist in cache.
 	Remove(key string) (removedValue interface{})
 
 	// Size returns the count of keys in cache.
