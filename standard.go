@@ -24,7 +24,7 @@ type standardCache struct {
 	entries map[string]*entry
 }
 
-func newStandardCache(conf config) Cache {
+func newStandardCache(conf *config) Cache {
 	cache := &standardCache{
 		entries: make(map[string]*entry, MapInitialCap),
 	}

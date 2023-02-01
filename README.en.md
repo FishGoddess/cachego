@@ -23,6 +23,7 @@
 * Sentinel cleanup supports, cleaning up at fixed duration
 * Singleflight supports, which can decrease the times of cache penetration
 * Timer task supports, which is convenient to load data to cache
+* Report supports, providing several reporting points.
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 

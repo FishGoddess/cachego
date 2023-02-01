@@ -55,6 +55,32 @@ func main() {
 	size = cache.Size()
 	fmt.Println(size) // 0
 
+	// Or you want a cancalable gc task? Try RunGCTask:
+	cache = cachego.NewCache()
+	cancel := cachego.RunGCTask(cache, 2*time.Second)
+
+	cache.Set("key", 666, time.Second)
+
+	size = cache.Size()
+	fmt.Println(size) // 1
+
+	time.Sleep(3 * time.Second)
+
+	size = cache.Size()
+	fmt.Println(size) // 0
+
+	cancel()
+
+	cache.Set("key", 666, time.Second)
+
+	size = cache.Size()
+	fmt.Println(size) // 1
+
+	time.Sleep(3 * time.Second)
+
+	size = cache.Size()
+	fmt.Println(size) // 1
+
 	// By default, gc only scans at most maxScans entries one time to remove expired entries.
 	// This is because scans all entries may cost much time if there is so many entries in cache, and a "stw" will happen.
 	// This can be a serious problem in some situations.

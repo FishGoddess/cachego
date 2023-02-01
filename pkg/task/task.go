@@ -67,6 +67,10 @@ func (t *Task) After(fn func(ctx context.Context)) *Task {
 // Run runs task.
 // You can use context to stop this task, see context.Context.
 func (t *Task) Run() {
+	if t.fn == nil {
+		return
+	}
+
 	if t.before != nil {
 		t.before(t.ctx)
 	}
@@ -83,10 +87,6 @@ func (t *Task) Run() {
 		case <-t.ctx.Done():
 			return
 		case <-ticker.C:
-			if t.fn == nil {
-				return
-			}
-
 			t.fn(t.ctx)
 		}
 	}

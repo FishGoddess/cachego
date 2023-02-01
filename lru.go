@@ -26,7 +26,7 @@ type lruCache struct {
 	elementList *list.List
 }
 
-func newLRUCache(conf config) Cache {
+func newLRUCache(conf *config) Cache {
 	if conf.maxEntries <= 0 {
 		panic("cachego: lru cache must specify max entries")
 	}

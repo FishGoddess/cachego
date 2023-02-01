@@ -44,7 +44,7 @@ const (
 )
 
 var (
-	newCaches = map[cacheType]func(conf config) Cache{
+	newCaches = map[cacheType]func(conf *config) Cache{
 		standard: newStandardCache,
 		lru:      newLRUCache,
 		lfu:      newLFUCache,
@@ -88,23 +88,34 @@ type Cache interface {
 }
 
 type cache struct {
-	config
+	*config
 	Loader
 
 	lock sync.RWMutex
 }
 
-func (c *cache) setup(conf config, cache Cache) {
+func (c *cache) setup(conf *config, cache Cache) {
 	c.config = conf
 	c.Loader = NewLoader(cache, conf.singleflight)
 }
 
-func runCacheGCTask(cache Cache, duration time.Duration) {
+func shouldReport(conf *config) bool {
+	return conf.reportMissed != nil || conf.reportHit != nil || conf.reportGC != nil || conf.reportLoad != nil
+}
+
+// RunGCTask runs a gc task in a new goroutine and returns a cancel function to cancel the task.
+// However, you don't need to call it manually for most time, instead, use options is a better choice.
+// Making it a public function is for more customizations in some situations.
+func RunGCTask(cache Cache, duration time.Duration) (cancel func()) {
 	fn := func(ctx context.Context) {
 		cache.GC()
 	}
 
-	task.New(fn).Duration(duration).Run()
+	ctx := context.Background()
+	ctx, cancel = context.WithCancel(ctx)
+
+	go task.New(fn).Context(ctx).Duration(duration).Run()
+	return cancel
 }
 
 // NewCache creates a cache with options.
@@ -114,7 +125,7 @@ func runCacheGCTask(cache Cache, duration time.Duration) {
 // Also, you can use options to specify the type of cache to others, such as lru.
 func NewCache(opts ...Option) (cache Cache) {
 	conf := newDefaultConfig()
-	applyOptions(&conf, opts)
+	applyOptions(conf, opts)
 
 	newCache, ok := newCaches[conf.cacheType]
 	if !ok {
@@ -127,8 +138,13 @@ func NewCache(opts ...Option) (cache Cache) {
 		cache = newCache(conf)
 	}
 
+	// Wrap cache with report functions if it needs.
+	if shouldReport(conf) {
+		cache = report(conf, cache)
+	}
+
 	if conf.gcDuration > 0 {
-		go runCacheGCTask(cache, conf.gcDuration)
+		RunGCTask(cache, conf.gcDuration)
 	}
 
 	return cache

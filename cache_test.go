@@ -16,6 +16,7 @@ package cachego
 
 import (
 	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -23,6 +24,38 @@ import (
 const (
 	maxTestEntries = 10
 )
+
+type testCache struct {
+	cache
+	count int32
+}
+
+func (tc *testCache) currentCount() int32 {
+	return atomic.LoadInt32(&tc.count)
+}
+
+func (tc *testCache) Get(key string) (value interface{}, found bool) {
+	return nil, false
+}
+
+func (tc *testCache) Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
+	return nil
+}
+
+func (tc *testCache) Remove(key string) (removedValue interface{}) {
+	return nil
+}
+
+func (tc *testCache) Size() (size int) {
+	return 0
+}
+
+func (tc *testCache) GC() (cleans int) {
+	atomic.AddInt32(&tc.count, 1)
+	return 0
+}
+
+func (tc *testCache) Reset() {}
 
 func testCacheGet(t *testing.T, cache Cache) {
 	value, found := cache.Get("key")
@@ -202,7 +235,7 @@ func testCacheReset(t *testing.T, cache Cache) {
 	}
 }
 
-// go test -v -cover=^TestNewStandardCache$
+// go test -v -cover=^TestNew$
 func TestNew(t *testing.T) {
 	cache := NewCache()
 
@@ -244,4 +277,96 @@ func TestNew(t *testing.T) {
 	}()
 
 	cache = NewCache(WithLRU(0))
+}
+
+// go test -v -cover=^TestNewReport$
+func TestNewReport(t *testing.T) {
+	cache := NewCache()
+
+	sc1, ok := cache.(*standardCache)
+	if !ok {
+		t.Errorf("cache.(*standardCache) %T not ok", cache)
+	}
+
+	if sc1 == nil {
+		t.Error("sc1 == nil")
+	}
+
+	cache = NewCache(WithReportMissed(func(key string) {}))
+
+	sc2, ok := cache.(*reportableCache)
+	if !ok {
+		t.Errorf("cache.(*reportableCache) %T not ok", cache)
+	}
+
+	if sc2 == nil {
+		t.Error("sc2 == nil")
+	}
+
+	cache = NewCache(WithReportHit(func(key string, value interface{}) {}))
+
+	sc2, ok = cache.(*reportableCache)
+	if !ok {
+		t.Errorf("cache.(*reportableCache) %T not ok", cache)
+	}
+
+	if sc2 == nil {
+		t.Error("sc2 == nil")
+	}
+
+	cache = NewCache(WithReportGC(func(cost time.Duration, cleans int) {}))
+
+	sc2, ok = cache.(*reportableCache)
+	if !ok {
+		t.Errorf("cache.(*reportableCache) %T not ok", cache)
+	}
+
+	if sc2 == nil {
+		t.Error("sc2 == nil")
+	}
+
+	cache = NewCache(WithReportLoad(func(key string, value interface{}, ttl time.Duration, err error) {}))
+
+	sc2, ok = cache.(*reportableCache)
+	if !ok {
+		t.Errorf("cache.(*reportableCache) %T not ok", cache)
+	}
+
+	if sc2 == nil {
+		t.Error("sc2 == nil")
+	}
+}
+
+// go test -v -cover=^TestRunGCTask$
+func TestRunGCTask(t *testing.T) {
+	cache := new(testCache)
+
+	count := cache.currentCount()
+	if count != 0 {
+		t.Errorf("cache.currentCount() %d is wrong", count)
+	}
+
+	cancel := RunGCTask(cache, 10*time.Millisecond)
+
+	time.Sleep(105 * time.Millisecond)
+
+	count = cache.currentCount()
+	if count != 10 {
+		t.Errorf("cache.currentCount() %d is wrong", count)
+	}
+
+	time.Sleep(80 * time.Millisecond)
+	cancel()
+
+	count = cache.currentCount()
+	if count != 18 {
+		t.Errorf("cache.currentCount() %d is wrong", count)
+	}
+
+	time.Sleep(time.Second)
+
+	count = cache.currentCount()
+	if count != 18 {
+		t.Errorf("cache.currentCount() %d is wrong", count)
+	}
 }

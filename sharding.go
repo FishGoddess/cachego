@@ -20,12 +20,10 @@ import (
 )
 
 type shardingCache struct {
-	config
-
 	caches []Cache
 }
 
-func newShardingCache(conf config, newCache func(conf config) Cache) Cache {
+func newShardingCache(conf *config, newCache func(conf *config) Cache) Cache {
 	if conf.shardings <= 0 {
 		panic("cachego: shardings must be > 0.")
 	}
@@ -40,7 +38,6 @@ func newShardingCache(conf config, newCache func(conf config) Cache) Cache {
 	}
 
 	return &shardingCache{
-		config: conf,
 		caches: caches,
 	}
 }

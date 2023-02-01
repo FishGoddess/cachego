@@ -27,7 +27,7 @@ type lfuCache struct {
 	itemHeap *heap.Heap
 }
 
-func newLFUCache(conf config) Cache {
+func newLFUCache(conf *config) Cache {
 	if conf.maxEntries <= 0 {
 		panic("cachego: lfu cache must specify max entries")
 	}

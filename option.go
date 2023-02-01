@@ -19,19 +19,22 @@ import (
 )
 
 type config struct {
-	// These fields are for creating.
 	cacheType    cacheType
 	shardings    int
 	singleflight bool
 	gcDuration   time.Duration
 
-	// These fields are for operating.
 	maxScans   int
 	maxEntries int
+
+	reportMissed func(key string)
+	reportHit    func(key string, value interface{})
+	reportGC     func(cost time.Duration, cleans int)
+	reportLoad   func(key string, value interface{}, ttl time.Duration, err error)
 }
 
-func newDefaultConfig() config {
-	return config{
+func newDefaultConfig() *config {
+	return &config{
 		cacheType:    standard,
 		shardings:    0,
 		singleflight: true,
@@ -115,6 +118,42 @@ func WithMaxEntries(maxEntries int) Option {
 	return func(conf *config) {
 		if maxEntries > 0 {
 			conf.maxEntries = maxEntries
+		}
+	}
+}
+
+// WithReportMissed returns an option setting the reportMissed of cache.
+func WithReportMissed(reportMissed func(key string)) Option {
+	return func(conf *config) {
+		if reportMissed != nil {
+			conf.reportMissed = reportMissed
+		}
+	}
+}
+
+// WithReportHit returns an option setting the reportHit of cache.
+func WithReportHit(reportHit func(key string, value interface{})) Option {
+	return func(conf *config) {
+		if reportHit != nil {
+			conf.reportHit = reportHit
+		}
+	}
+}
+
+// WithReportGC returns an option setting the reportGC of cache.
+func WithReportGC(reportGC func(cost time.Duration, cleans int)) Option {
+	return func(conf *config) {
+		if reportGC != nil {
+			conf.reportGC = reportGC
+		}
+	}
+}
+
+// WithReportLoad returns an option setting the reportLoad of cache.
+func WithReportLoad(reportLoad func(key string, value interface{}, ttl time.Duration, err error)) Option {
+	return func(conf *config) {
+		if reportLoad != nil {
+			conf.reportLoad = reportLoad
 		}
 	}
 }
