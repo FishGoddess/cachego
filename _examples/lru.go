@@ -59,4 +59,13 @@ func main() {
 		value, ok := cache.Get(key)
 		fmt.Println(key, value, ok)
 	}
+
+	// By default, lru will share one lock to do all operations.
+	// You can sharding cache to several parts for higher performance.
+	// Notice that max entries only effect to one part in sharding mode.
+	// For example, the total max entries will be 2*10 if shardings is 2 and max entries is 10 in WithLRU or WithMaxEntries.
+	// In some cache libraries, they will calculate max entries in each parts of shardings, like 10/2.
+	// However, the result divided by max entries and shardings may be not an integer which will make the total max entries incorrect.
+	// So we let users decide the exact max entries in each parts of shardings.
+	cache = cachego.NewCache(cachego.WithShardings(2), cachego.WithLRU(10))
 }

@@ -32,13 +32,31 @@ func report(conf *config, cache Cache) Cache {
 
 // Get gets the value of key from cache and returns value if found.
 func (rc *reportableCache) Get(key string) (value interface{}, found bool) {
-	return rc.cache.Get(key)
+	value, found = rc.cache.Get(key)
+
+	if found {
+		if rc.conf.reportHit != nil {
+			rc.conf.reportHit(key, value)
+		}
+	} else {
+		if rc.conf.reportMissed != nil {
+			rc.conf.reportMissed(key)
+		}
+	}
+
+	return value, found
 }
 
 // Set sets key and value to cache with ttl and returns evicted value if exists and unexpired.
 // See Cache interface.
 func (rc *reportableCache) Set(key string, value interface{}, ttl time.Duration) (evictedValue interface{}) {
-	return rc.cache.Set(key, value, ttl)
+	evictedValue = rc.cache.Set(key, value, ttl)
+
+	if rc.conf.reportEvicted != nil && evictedValue != nil {
+		rc.conf.reportEvicted(key, evictedValue)
+	}
+
+	return evictedValue
 }
 
 // Remove removes key and returns the removed value of key.
@@ -79,5 +97,11 @@ func (rc *reportableCache) Reset() {
 // Load loads a key with ttl to cache and returns an error if failed.
 // See Cache interface.
 func (rc *reportableCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
-	return rc.cache.Load(key, ttl, load)
+	value, err = rc.cache.Load(key, ttl, load)
+
+	if rc.conf.reportLoad != nil {
+		rc.conf.reportLoad(key, value, ttl, err)
+	}
+
+	return value, err
 }

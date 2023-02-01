@@ -5,7 +5,7 @@
 [![License](_icons/coverage.svg)](_icons/coverage.svg)
 ![Test](https://github.com/FishGoddess/cachego/actions/workflows/test.yml/badge.svg)
 
-**cachego** 是一个拥有分段锁机制的轻量级内存缓存库，API 友好，支持多种数据淘汰机制，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
+**cachego** 是一个拥有分片机制的轻量级内存缓存库，API 友好，支持多种数据淘汰机制，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
 > 目前 v0.3.x 版本已经在多个线上服务中运行稳定，服务日常请求过万 qps，最高抵御过 17w/s qps 的冲击，欢迎使用！👏🏻
 
@@ -139,6 +139,7 @@ BenchmarkGoCacheSet-12                   4921483               249.0 ns/op      
 > 测试文件：[_examples/performance_test.go](./_examples/performance_test.go)
 
 可以看出，使用分片机制后的读写性能非常高，但是分片会多一次哈希定位的操作，如果加锁的消耗小于定位的消耗，那分片就不占优势。
+不过在绝大多数的情况下，分片机制带来的性能提升都是巨大的，尤其是对写操作较多的 lru 和 lfu 实现。
 
 ### 👥 贡献者
 

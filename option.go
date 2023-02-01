@@ -27,10 +27,11 @@ type config struct {
 	maxScans   int
 	maxEntries int
 
-	reportMissed func(key string)
-	reportHit    func(key string, value interface{})
-	reportGC     func(cost time.Duration, cleans int)
-	reportLoad   func(key string, value interface{}, ttl time.Duration, err error)
+	reportMissed  func(key string)
+	reportHit     func(key string, value interface{})
+	reportEvicted func(key string, value interface{})
+	reportGC      func(cost time.Duration, cleans int)
+	reportLoad    func(key string, value interface{}, ttl time.Duration, err error)
 }
 
 func newDefaultConfig() *config {
@@ -136,6 +137,15 @@ func WithReportHit(reportHit func(key string, value interface{})) Option {
 	return func(conf *config) {
 		if reportHit != nil {
 			conf.reportHit = reportHit
+		}
+	}
+}
+
+// WithReportEvicted returns an option setting the reportEvicted of cache.
+func WithReportEvicted(reportEvicted func(key string, value interface{})) Option {
+	return func(conf *config) {
+		if reportEvicted != nil {
+			conf.reportEvicted = reportEvicted
 		}
 	}
 }

@@ -198,6 +198,19 @@ func TestWithReportHit(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestWithReportEvicted$
+func TestWithReportEvicted(t *testing.T) {
+	reportEvicted := func(key string, value interface{}) {}
+
+	got := &config{reportEvicted: nil}
+	expect := &config{reportEvicted: reportEvicted}
+
+	WithReportEvicted(reportEvicted).applyTo(got)
+	if !isConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
 // go test -v -cover -run=^TestWithReportGC$
 func TestWithReportGC(t *testing.T) {
 	reportGC := func(cost time.Duration, cleans int) {}
