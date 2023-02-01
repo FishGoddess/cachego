@@ -66,7 +66,7 @@ func (l *loader) Load(key string, ttl time.Duration, load func() (value interfac
 	}
 
 	if err != nil {
-		return nil, err
+		return value, err
 	}
 
 	if l.cache != nil {

@@ -235,6 +235,17 @@ func testCacheReset(t *testing.T, cache Cache) {
 	}
 }
 
+func testCacheImplement(t *testing.T, cache Cache) {
+	testCaches := []func(t *testing.T, cache Cache){
+		testCacheGet, testCacheSet, testCacheRemove, testCacheSize, testCacheGC, testCacheReset,
+	}
+
+	for _, testCache := range testCaches {
+		cache.Reset()
+		testCache(t, cache)
+	}
+}
+
 // go test -v -cover=^TestNew$
 func TestNew(t *testing.T) {
 	cache := NewCache()

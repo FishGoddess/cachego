@@ -28,40 +28,10 @@ func newTestLFUCache() *lfuCache {
 	return newLFUCache(conf).(*lfuCache)
 }
 
-// go test -v -cover -run=^TestLFUCacheGet$
-func TestLFUCacheGet(t *testing.T) {
+// go test -v -cover -run=^TestLFUCache$
+func TestLFUCache(t *testing.T) {
 	cache := newTestLFUCache()
-	testCacheGet(t, cache)
-}
-
-// go test -v -cover -run=^TestLFUCacheSet$
-func TestLFUCacheSet(t *testing.T) {
-	cache := newTestLFUCache()
-	testCacheSet(t, cache)
-}
-
-// go test -v -cover -run=^TestLFUCacheRemove$
-func TestLFUCacheRemove(t *testing.T) {
-	cache := newTestLFUCache()
-	testCacheRemove(t, cache)
-}
-
-// go test -v -cover -run=^TestLFUCacheSize$
-func TestLFUCacheSize(t *testing.T) {
-	cache := newTestLFUCache()
-	testCacheSize(t, cache)
-}
-
-// go test -v -cover -run=^TestLFUCacheGC$
-func TestLFUCacheGC(t *testing.T) {
-	cache := newTestLFUCache()
-	testCacheGC(t, cache)
-}
-
-// go test -v -cover -run=^TestLFUCacheReset$
-func TestLFUCacheReset(t *testing.T) {
-	cache := newTestLFUCache()
-	testCacheReset(t, cache)
+	testCacheImplement(t, cache)
 }
 
 // go test -v -cover -run=^TestLFUCacheEvict$

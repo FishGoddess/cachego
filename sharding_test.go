@@ -17,207 +17,39 @@ package cachego
 import (
 	"strconv"
 	"testing"
-	"time"
 )
 
-func newTestShardingCache() Cache {
+const (
+	testShardings = 4
+)
+
+func newTestShardingCache() *shardingCache {
 	conf := newDefaultConfig()
-	conf.shardings = 4
-	return newShardingCache(conf, newStandardCache)
+	conf.shardings = testShardings
+	return newShardingCache(conf, newStandardCache).(*shardingCache)
 }
 
-// go test -v -cover -run=^TestShardingCacheGet$
-func TestShardingCacheGet(t *testing.T) {
+// go test -v -cover -run=^TestShardingCache$
+func TestShardingCache(t *testing.T) {
 	cache := newTestShardingCache()
-
-	value, found := cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
-	}
-
-	cache.Set("key", "value", time.Millisecond)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
-	}
-
-	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	value, found = cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
-	}
+	testCacheImplement(t, cache)
 }
 
-// go test -v -cover -run=^TestShardingCacheSet$
-func TestShardingCacheSet(t *testing.T) {
+// go test -v -cover -run=^TestShardingCacheIndex$
+func TestShardingCacheIndex(t *testing.T) {
 	cache := newTestShardingCache()
-
-	value, found := cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
+	if len(cache.caches) != testShardings {
+		t.Errorf("len(cache.caches) %d is wrong", len(cache.caches))
 	}
 
-	cache.Set("key", "value", time.Millisecond)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
+	for i := 0; i < 100; i++ {
+		data := strconv.Itoa(i)
+		cache.Set(data, data, NoTTL)
 	}
 
-	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	value, found = cache.Get("key")
-	if found {
-		t.Errorf("get %+v should be not found", value)
-	}
-
-	cache.Set("key", "value", NoTTL)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
-	}
-
-	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	value, found = cache.Get("key")
-	if !found {
-		t.Error("get should be found")
-	}
-}
-
-// go test -v -cover -run=^TestShardingCacheRemove$
-func TestShardingCacheRemove(t *testing.T) {
-	cache := newTestShardingCache()
-
-	removedValue := cache.Remove("key")
-	if removedValue != nil {
-		t.Errorf("removedValue %+v is wrong", removedValue)
-	}
-
-	cache.Set("key", "value", NoTTL)
-
-	removedValue = cache.Remove("key")
-	if removedValue.(string) != "value" {
-		t.Errorf("removedValue %+v is wrong", removedValue)
-	}
-
-	cache.Set("key", "value", time.Millisecond)
-	time.Sleep(2 * time.Millisecond)
-
-	removedValue = cache.Remove("key")
-	if removedValue == nil {
-		t.Error("removedValue == nil")
-	}
-}
-
-// go test -v -cover -run=^TestShardingCacheSize$
-func TestShardingCacheSize(t *testing.T) {
-	cache := newTestShardingCache()
-
-	size := cache.Size()
-	if size != 0 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	for i := int64(0); i < 100; i++ {
-		cache.Set(strconv.FormatInt(i, 10), i, NoTTL)
-	}
-
-	size = cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
-}
-
-// go test -v -cover -run=^TestShardingCacheGC$
-func TestShardingCacheGC(t *testing.T) {
-	cache := newTestShardingCache()
-
-	size := cache.Size()
-	if size != 0 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	for i := int64(0); i < 100; i++ {
-		if i&1 == 0 {
-			cache.Set(strconv.FormatInt(i, 10), i, NoTTL)
-		} else {
-			cache.Set(strconv.FormatInt(i, 10), i, time.Millisecond)
+	for i := range cache.caches {
+		if cache.caches[i].Size() <= 0 {
+			t.Errorf("cache.caches[i].Size() %d <= 0", cache.caches[i].Size())
 		}
-	}
-
-	size = cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	cache.GC()
-
-	size = cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	time.Sleep(2 * time.Millisecond)
-
-	cache.GC()
-
-	size = cache.Size()
-	if size != 50 {
-		t.Errorf("size %d is wrong", size)
-	}
-}
-
-// go test -v -cover -run=^TestShardingCacheReset$
-func TestShardingCacheReset(t *testing.T) {
-	cache := newTestShardingCache()
-
-	for i := int64(0); i < 100; i++ {
-		cache.Set(strconv.FormatInt(i, 10), i, NoTTL)
-	}
-
-	for i := int64(0); i < 100; i++ {
-		value, found := cache.Get(strconv.FormatInt(i, 10))
-		if !found {
-			t.Errorf("get %d should be found", i)
-		}
-
-		if value.(int64) != i {
-			t.Errorf("value %+v is wrong", value)
-		}
-	}
-
-	size := cache.Size()
-	if size != 100 {
-		t.Errorf("size %d is wrong", size)
-	}
-
-	cache.Reset()
-
-	for i := int64(0); i < 100; i++ {
-		value, found := cache.Get(strconv.FormatInt(i, 10))
-		if found {
-			t.Errorf("get %d, %+v should be not found", i, value)
-		}
-	}
-
-	size = cache.Size()
-	if size != 0 {
-		t.Errorf("size %d is wrong", size)
 	}
 }

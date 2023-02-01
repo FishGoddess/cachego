@@ -26,40 +26,10 @@ func newTestStandardCache() *standardCache {
 	return newStandardCache(conf).(*standardCache)
 }
 
-// go test -v -cover -run=^TestStandardCacheGet$
-func TestStandardCacheGet(t *testing.T) {
+// go test -v -cover -run=^TestStandardCache$
+func TestStandardCache(t *testing.T) {
 	cache := newTestStandardCache()
-	testCacheGet(t, cache)
-}
-
-// go test -v -cover -run=^TestStandardCacheSet$
-func TestStandardCacheSet(t *testing.T) {
-	cache := newTestStandardCache()
-	testCacheSet(t, cache)
-}
-
-// go test -v -cover -run=^TestStandardCacheRemove$
-func TestStandardCacheRemove(t *testing.T) {
-	cache := newTestStandardCache()
-	testCacheRemove(t, cache)
-}
-
-// go test -v -cover -run=^TestStandardCacheSize$
-func TestStandardCacheSize(t *testing.T) {
-	cache := newTestStandardCache()
-	testCacheSize(t, cache)
-}
-
-// go test -v -cover -run=^TestStandardCacheGC$
-func TestStandardCacheGC(t *testing.T) {
-	cache := newTestStandardCache()
-	testCacheGC(t, cache)
-}
-
-// go test -v -cover -run=^TestStandardCacheReset$
-func TestStandardCacheReset(t *testing.T) {
-	cache := newTestStandardCache()
-	testCacheReset(t, cache)
+	testCacheImplement(t, cache)
 }
 
 // go test -v -cover -run=^TestStandardCacheEvict$
