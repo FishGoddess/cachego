@@ -381,8 +381,65 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	})
 
 	fmt.Println(value, err)
+
+9. task:
+
+	// Create a context to stop the task.
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Wrap context with key and value
+	ctx = context.WithValue(ctx, contextKey, "hello")
+
+	// Use New to create a task and run it.
+	// You can use it to load some hot data to cache at fixed duration.
+	// Before is called before the task loop, optional.
+	// After is called after the task loop, optional.
+	// Context is passed to fn include fn/before/after which can stop the task by Done(), optional.
+	// Duration is the duration between two loop of fn, optional.
+	// Run will start a new goroutine and run the task loop.
+	// The task will stop if context is done.
+	task.New(printContextValue).
+		Before(beforePrint).
+		After(afterPrint).
+		Context(ctx).
+		Duration(time.Second).
+		Run()
+
+10. clock:
+
+	// Create a fast clock and get current time in nanosecond by Now.
+	c := clock.New()
+	c.Now()
+
+	// Fast clock may return an "incorrect" time compared with time.Now.
+	// The gap will be smaller than about 100 ms.
+	for i := 0; i < 10; i++ {
+		time.Sleep(time.Duration(rand.Int63n(int64(time.Second))))
+
+		timeNow := time.Now().UnixNano()
+		clockNow := c.Now()
+
+		fmt.Println(timeNow)
+		fmt.Println(clockNow)
+		fmt.Println("gap:", time.Duration(timeNow-clockNow))
+		fmt.Println()
+	}
+
+	// You can specify the fast clock to cache by WithNow.
+	// All getting current time operations in this cache will use fast clock.
+	cache := cachego.NewCache(cachego.WithNow(clock.New().Now))
+	cache.Set("key", 666, 100*time.Millisecond)
+
+	value, ok := cache.Get("key")
+	fmt.Println(value, ok) // 666, true
+
+	time.Sleep(200 * time.Millisecond)
+
+	value, ok = cache.Get("key")
+	fmt.Println(value, ok) // <nil>, false
 */
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.4.1-alpha"
+const Version = "v0.4.2-alpha"

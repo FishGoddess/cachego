@@ -16,6 +16,7 @@ package clock
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 	"time"
 )
@@ -44,15 +45,25 @@ func BenchmarkClockNow(b *testing.B) {
 
 // go test -v -cover -run=^TestClock$
 func TestClock(t *testing.T) {
-	clock := New()
+	testClock := New()
+
+	for i := 0; i < 100; i++ {
+		testClock = New()
+
+		if testClock != clock {
+			t.Errorf("testClock %p != clock %p", testClock, clock)
+		}
+	}
 
 	for i := 0; i < 10; i++ {
-		now := clock.Now()
+		now := testClock.Now()
 		t.Log(now)
 
 		expect := time.Now().UnixNano()
 		if math.Abs(float64(expect-now)) > float64(duration)*1.5 {
 			t.Errorf("now %d is wrong with expect %d", now, expect)
 		}
+
+		time.Sleep(time.Duration(rand.Int63n(int64(duration))))
 	}
 }

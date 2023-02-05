@@ -15,12 +15,18 @@
 package clock
 
 import (
+	"sync"
 	"sync/atomic"
 	"time"
 )
 
 const (
 	duration = 100 * time.Millisecond
+)
+
+var (
+	clock     *Clock
+	clockOnce sync.Once
 )
 
 // Clock is a fast clock for getting current time.
@@ -63,11 +69,14 @@ type Clock struct {
 
 // New creates a new clock which caches time and updates it in fixed duration.
 func New() *Clock {
-	clock := &Clock{
-		now: time.Now().UnixNano(),
-	}
+	clockOnce.Do(func() {
+		clock = &Clock{
+			now: time.Now().UnixNano(),
+		}
 
-	go clock.start()
+		go clock.start()
+	})
+
 	return clock
 }
 
