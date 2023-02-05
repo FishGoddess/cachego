@@ -35,6 +35,13 @@ const (
 // BenchmarkTimeNow-16             338466458                3.523 ns/op           0 B/op          0 allocs/op
 // BenchmarkClockNow-16            1000000000               0.2165 ns/op          0 B/op          0 allocs/op
 //
+// goos: linux
+// goarch: amd64
+// pkg: github.com/FishGoddess/cachego/pkg/clock
+// cpu: AMD EPYC 7K62 48-Core Processor
+// BenchmarkTimeNow-2      17946441                65.62 ns/op            0 B/op          0 allocs/op
+// BenchmarkClockNow-2     1000000000               0.3162 ns/op          0 B/op          0 allocs/op
+//
 // However, the performance of time.Now is faster enough in many os and is enough for 99.9% situations.
 // So, we hope you will never use it :)
 type Clock struct {
