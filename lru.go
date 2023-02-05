@@ -32,7 +32,7 @@ func newLRUCache(conf *config) Cache {
 	}
 
 	cache := &lruCache{
-		elementMap:  make(map[string]*list.Element, MapInitialCap),
+		elementMap:  make(map[string]*list.Element, mapInitialCap),
 		elementList: list.New(),
 	}
 
@@ -86,7 +86,7 @@ func (lc *lruCache) set(key string, value interface{}, ttl time.Duration) (evict
 		evictedValue = lc.evict()
 	}
 
-	element = lc.elementList.PushFront(newEntry(key, value, ttl))
+	element = lc.elementList.PushFront(newEntry(key, value, ttl, lc.now))
 	lc.elementMap[key] = element
 
 	return evictedValue
@@ -114,7 +114,7 @@ func (lc *lruCache) size() (size int) {
 }
 
 func (lc *lruCache) gc() (cleans int) {
-	now := Now()
+	now := lc.now()
 	scans := 0
 
 	for _, element := range lc.elementMap {
@@ -134,7 +134,7 @@ func (lc *lruCache) gc() (cleans int) {
 }
 
 func (lc *lruCache) reset() {
-	lc.elementMap = make(map[string]*list.Element, MapInitialCap)
+	lc.elementMap = make(map[string]*list.Element, mapInitialCap)
 	lc.elementList = list.New()
 	lc.Loader.Reset()
 }

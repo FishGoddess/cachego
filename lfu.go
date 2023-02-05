@@ -33,8 +33,8 @@ func newLFUCache(conf *config) Cache {
 	}
 
 	cache := &lfuCache{
-		itemMap:  make(map[string]*heap.Item, MapInitialCap),
-		itemHeap: heap.New(SliceInitialCap),
+		itemMap:  make(map[string]*heap.Item, mapInitialCap),
+		itemHeap: heap.New(sliceInitialCap),
 	}
 
 	cache.setup(conf, cache)
@@ -87,7 +87,7 @@ func (lc *lfuCache) set(key string, value interface{}, ttl time.Duration) (evict
 		evictedValue = lc.evict()
 	}
 
-	item = lc.itemHeap.Push(0, newEntry(key, value, ttl))
+	item = lc.itemHeap.Push(0, newEntry(key, value, ttl, lc.now))
 	lc.itemMap[key] = item
 
 	return evictedValue
@@ -115,7 +115,7 @@ func (lc *lfuCache) size() (size int) {
 }
 
 func (lc *lfuCache) gc() (cleans int) {
-	now := Now()
+	now := lc.now()
 	scans := 0
 
 	for _, item := range lc.itemMap {
@@ -135,8 +135,8 @@ func (lc *lfuCache) gc() (cleans int) {
 }
 
 func (lc *lfuCache) reset() {
-	lc.itemMap = make(map[string]*heap.Item, MapInitialCap)
-	lc.itemHeap = heap.New(SliceInitialCap)
+	lc.itemMap = make(map[string]*heap.Item, mapInitialCap)
+	lc.itemHeap = heap.New(sliceInitialCap)
 	lc.Loader.Reset()
 }
 

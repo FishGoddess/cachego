@@ -47,7 +47,7 @@ func NewLoader(cache Cache, enableSingleflight bool) Loader {
 	}
 
 	if enableSingleflight {
-		loader.group = singleflight.NewGroup(MapInitialCap)
+		loader.group = singleflight.NewGroup(mapInitialCap)
 	}
 
 	return loader

@@ -38,7 +38,7 @@ func TestReportableCacheReportMissed(t *testing.T) {
 	cache.Set("key", 666, NoTTL)
 
 	checked := false
-	cache.conf.reportMissed = func(key string) {
+	cache.reportMissed = func(key string) {
 		if key == "key" {
 			t.Error("key == \"key\"")
 		}
@@ -64,7 +64,7 @@ func TestReportableCacheReportHit(t *testing.T) {
 	cache.Set("key", 666, NoTTL)
 
 	checked := false
-	cache.conf.reportHit = func(key string, value interface{}) {
+	cache.reportHit = func(key string, value interface{}) {
 		if key == "missed" {
 			t.Error("key == \"missed\"")
 		}
@@ -98,7 +98,7 @@ func TestReportableCacheReportGC(t *testing.T) {
 	cache.Set("key5", 5, time.Second)
 
 	checked := false
-	cache.conf.reportGC = func(cost time.Duration, cleans int) {
+	cache.reportGC = func(cost time.Duration, cleans int) {
 		if cost <= 0 {
 			t.Errorf("cost %d <= 0", cost)
 		}
@@ -127,7 +127,7 @@ func TestReportableCacheReportLoad(t *testing.T) {
 	cache := newTestReportableCache()
 
 	checked := false
-	cache.conf.reportLoad = func(key string, value interface{}, ttl time.Duration, err error) {
+	cache.reportLoad = func(key string, value interface{}, ttl time.Duration, err error) {
 		if key != "load" {
 			t.Errorf("key %s is wrong", key)
 		}

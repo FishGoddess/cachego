@@ -20,12 +20,15 @@ type entry struct {
 	key        string
 	value      interface{}
 	expiration int64 // Time in nanosecond, valid util 2262 year (enough, uh?)
+	now        func() int64
 }
 
-func newEntry(key string, value interface{}, ttl time.Duration) *entry {
-	e := new(entry)
-	e.setup(key, value, ttl)
+func newEntry(key string, value interface{}, ttl time.Duration, now func() int64) *entry {
+	e := &entry{
+		now: now,
+	}
 
+	e.setup(key, value, ttl)
 	return e
 }
 
@@ -35,7 +38,7 @@ func (e *entry) setup(key string, value interface{}, ttl time.Duration) {
 	e.expiration = 0
 
 	if ttl > 0 {
-		e.expiration = Now() + ttl.Nanoseconds()
+		e.expiration = e.now() + ttl.Nanoseconds()
 	}
 }
 
@@ -44,5 +47,5 @@ func (e *entry) expired(now int64) bool {
 		return e.expiration > 0 && e.expiration < now
 	}
 
-	return e.expiration > 0 && e.expiration < Now()
+	return e.expiration > 0 && e.expiration < e.now()
 }

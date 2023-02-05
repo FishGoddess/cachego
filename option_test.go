@@ -45,6 +45,14 @@ func isConfigEquals(conf1 *config, conf2 *config) bool {
 		return false
 	}
 
+	if fmt.Sprintf("%p", conf1.now) != fmt.Sprintf("%p", conf2.now) {
+		return false
+	}
+
+	if fmt.Sprintf("%p", conf1.hash) != fmt.Sprintf("%p", conf2.hash) {
+		return false
+	}
+
 	if fmt.Sprintf("%p", conf1.reportMissed) != fmt.Sprintf("%p", conf2.reportMissed) {
 		return false
 	}
@@ -167,6 +175,36 @@ func TestWithMaxEntries(t *testing.T) {
 	expect := &config{maxEntries: 1024}
 
 	WithMaxEntries(1024).applyTo(got)
+	if !isConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithNow$
+func TestWithNow(t *testing.T) {
+	now := func() int64 {
+		return 0
+	}
+
+	got := &config{now: nil}
+	expect := &config{now: now}
+
+	WithNow(now).applyTo(got)
+	if !isConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithHash$
+func TestWithHash(t *testing.T) {
+	hash := func(key string) int {
+		return 0
+	}
+
+	got := &config{hash: nil}
+	expect := &config{hash: hash}
+
+	WithHash(hash).applyTo(got)
 	if !isConfigEquals(got, expect) {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}

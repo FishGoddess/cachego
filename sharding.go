@@ -20,6 +20,7 @@ import (
 )
 
 type shardingCache struct {
+	*config
 	caches []Cache
 }
 
@@ -38,12 +39,13 @@ func newShardingCache(conf *config, newCache func(conf *config) Cache) Cache {
 	}
 
 	return &shardingCache{
+		config: conf,
 		caches: caches,
 	}
 }
 
 func (sc *shardingCache) cacheOf(key string) Cache {
-	hash := Hash(key)
+	hash := sc.hash(key)
 	mask := len(sc.caches) - 1
 	return sc.caches[hash&mask]
 }

@@ -27,6 +27,9 @@ type config struct {
 	maxScans   int
 	maxEntries int
 
+	now  func() int64
+	hash func(key string) int
+
 	reportMissed func(key string)
 	reportHit    func(key string, value interface{})
 	reportGC     func(cost time.Duration, cleans int)
@@ -41,6 +44,8 @@ func newDefaultConfig() *config {
 		gcDuration:   0,
 		maxScans:     10000,
 		maxEntries:   0,
+		now:          now,
+		hash:         hash,
 	}
 }
 
@@ -118,6 +123,26 @@ func WithMaxEntries(maxEntries int) Option {
 	return func(conf *config) {
 		if maxEntries > 0 {
 			conf.maxEntries = maxEntries
+		}
+	}
+}
+
+// WithNow returns an option setting the now function of cache.
+// A now function should return a nanosecond unix time.
+func WithNow(now func() int64) Option {
+	return func(conf *config) {
+		if now != nil {
+			conf.now = now
+		}
+	}
+}
+
+// WithHash returns an option setting the hash function of cache.
+// A hash function should return the hash code of key.
+func WithHash(hash func(key string) int) Option {
+	return func(conf *config) {
+		if hash != nil {
+			conf.hash = hash
 		}
 	}
 }

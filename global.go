@@ -17,19 +17,8 @@ package cachego
 import "time"
 
 var (
-	// MapInitialCap is the initial capacity of map.
-	MapInitialCap = 64
-
-	// SliceInitialCap is the initial capacity of slice.
-	SliceInitialCap = 64
-)
-
-var (
-	// Hash returns the hash code of one key.
-	Hash = hash
-
-	// Now returns the current time in nanosecond.
-	Now = now
+	mapInitialCap   = 64
+	sliceInitialCap = 64
 )
 
 func hash(key string) int {
@@ -45,4 +34,18 @@ func hash(key string) int {
 
 func now() int64 {
 	return time.Now().UnixNano()
+}
+
+// SetMapInitialCap sets the initial capacity of map.
+func SetMapInitialCap(initialCap int) {
+	if initialCap > 0 {
+		mapInitialCap = initialCap
+	}
+}
+
+// SetSliceInitialCap sets the initial capacity of slice.
+func SetSliceInitialCap(initialCap int) {
+	if initialCap > 0 {
+		sliceInitialCap = initialCap
+	}
 }

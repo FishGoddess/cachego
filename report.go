@@ -19,14 +19,14 @@ import (
 )
 
 type reportableCache struct {
-	conf  *config
+	*config
 	cache Cache
 }
 
 func report(conf *config, cache Cache) Cache {
 	return &reportableCache{
-		conf:  conf,
-		cache: cache,
+		config: conf,
+		cache:  cache,
 	}
 }
 
@@ -35,12 +35,12 @@ func (rc *reportableCache) Get(key string) (value interface{}, found bool) {
 	value, found = rc.cache.Get(key)
 
 	if found {
-		if rc.conf.reportHit != nil {
-			rc.conf.reportHit(key, value)
+		if rc.reportHit != nil {
+			rc.reportHit(key, value)
 		}
 	} else {
-		if rc.conf.reportMissed != nil {
-			rc.conf.reportMissed(key)
+		if rc.reportMissed != nil {
+			rc.reportMissed(key)
 		}
 	}
 
@@ -68,16 +68,16 @@ func (rc *reportableCache) Size() (size int) {
 // GC cleans the expired keys in cache and returns the exact count cleaned.
 // See Cache interface.
 func (rc *reportableCache) GC() (cleans int) {
-	if rc.conf.reportGC == nil {
+	if rc.reportGC == nil {
 		return rc.cache.GC()
 	}
 
-	begin := Now()
+	begin := rc.now()
 	cleans = rc.cache.GC()
-	end := Now()
+	end := rc.now()
 
 	cost := time.Duration(end - begin)
-	rc.conf.reportGC(cost, cleans)
+	rc.reportGC(cost, cleans)
 
 	return cleans
 }
@@ -93,8 +93,8 @@ func (rc *reportableCache) Reset() {
 func (rc *reportableCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
 	value, err = rc.cache.Load(key, ttl, load)
 
-	if rc.conf.reportLoad != nil {
-		rc.conf.reportLoad(key, value, ttl, err)
+	if rc.reportLoad != nil {
+		rc.reportLoad(key, value, ttl, err)
 	}
 
 	return value, err

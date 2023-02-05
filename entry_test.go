@@ -15,13 +15,14 @@
 package cachego
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
 
 // go test -v -cover -run=^TestNewEntry$
 func TestNewEntry(t *testing.T) {
-	e := newEntry("key", "value", 0)
+	e := newEntry("key", "value", 0, now)
 
 	if e.key != "key" {
 		t.Errorf("e.key %s is wrong", e.key)
@@ -35,7 +36,11 @@ func TestNewEntry(t *testing.T) {
 		t.Errorf("e.expiration %+v != 0", e.expiration)
 	}
 
-	e = newEntry("k", "v", time.Second)
+	if fmt.Sprintf("%p", e.now) != fmt.Sprintf("%p", now) {
+		t.Errorf("e.now %p is wrong", e.now)
+	}
+
+	e = newEntry("k", "v", time.Second, now)
 	expiration := time.Now().Add(time.Second).UnixNano()
 
 	if e.key != "k" {
@@ -50,6 +55,10 @@ func TestNewEntry(t *testing.T) {
 		t.Error("e.expiration == 0")
 	}
 
+	if fmt.Sprintf("%p", e.now) != fmt.Sprintf("%p", now) {
+		t.Errorf("e.now %p is wrong", e.now)
+	}
+
 	// Keep one us for code running.
 	if expiration < e.expiration || e.expiration < expiration-time.Microsecond.Nanoseconds() {
 		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
@@ -58,7 +67,7 @@ func TestNewEntry(t *testing.T) {
 
 // go test -v -cover -run=^TestEntrySetup$
 func TestEntrySetup(t *testing.T) {
-	e := newEntry("key", "value", 0)
+	e := newEntry("key", "value", 0, now)
 
 	if e.key != "key" {
 		t.Errorf("e.key %s is wrong", e.key)
@@ -100,7 +109,7 @@ func TestEntrySetup(t *testing.T) {
 
 // go test -cover -run=^TestEntryExpired$
 func TestEntryExpired(t *testing.T) {
-	e := newEntry("", nil, time.Millisecond)
+	e := newEntry("", nil, time.Millisecond, now)
 
 	if e.expired(0) {
 		t.Error("e should be unexpired!")

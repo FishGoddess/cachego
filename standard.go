@@ -26,7 +26,7 @@ type standardCache struct {
 
 func newStandardCache(conf *config) Cache {
 	cache := &standardCache{
-		entries: make(map[string]*entry, MapInitialCap),
+		entries: make(map[string]*entry, mapInitialCap),
 	}
 
 	cache.setup(conf, cache)
@@ -61,7 +61,7 @@ func (sc *standardCache) set(key string, value interface{}, ttl time.Duration) (
 		evictedValue = sc.evict()
 	}
 
-	sc.entries[key] = newEntry(key, value, ttl)
+	sc.entries[key] = newEntry(key, value, ttl, sc.now)
 	return evictedValue
 }
 
@@ -80,7 +80,7 @@ func (sc *standardCache) size() (size int) {
 }
 
 func (sc *standardCache) gc() (cleans int) {
-	now := Now()
+	now := sc.now()
 	scans := 0
 
 	for _, entry := range sc.entries {
@@ -100,7 +100,7 @@ func (sc *standardCache) gc() (cleans int) {
 }
 
 func (sc *standardCache) reset() {
-	sc.entries = make(map[string]*entry, MapInitialCap)
+	sc.entries = make(map[string]*entry, mapInitialCap)
 	sc.Loader.Reset()
 }
 
