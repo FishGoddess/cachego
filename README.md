@@ -108,31 +108,31 @@ goarch: amd64
 cpu: AMD Ryzen 7 5800X 8-Core Processor
 mem: DDR4 16GB*2 4000MHZ
 
-BenchmarkCachegoGet-16                  74407530                34.03 ns/op            0 B/op          0 allocs/op
-BenchmarkCachegoGetLRU-16               23960895                53.91 ns/op            0 B/op          0 allocs/op
-BenchmarkCachegoGetLFU-16               19882065                55.43 ns/op            0 B/op          0 allocs/op
-BenchmarkCachegoGetSharding-16         336675870                 4.14 ns/op            0 B/op          0 allocs/op
-BenchmarkGcacheGet-16                   18201260                70.98 ns/op           16 B/op          1 allocs/op
-BenchmarkGcacheGetLRU-16                17121699                77.70 ns/op           16 B/op          1 allocs/op
-BenchmarkGcacheGetLFU-16                10893463               105.70 ns/op           16 B/op          1 allocs/op
-BenchmarkEcacheGet-16                   19975329                56.65 ns/op            0 B/op          0 allocs/op
-BenchmarkEcache2Get-16                  23964244                56.41 ns/op            0 B/op          0 allocs/op
-BenchmarkBigcacheGet-16                 40498809                37.23 ns/op            7 B/op          2 allocs/op
-BenchmarkFreecacheGet-16               112763769                14.58 ns/op           27 B/op          2 allocs/op
-BenchmarkGoCacheGet-16                  35064342                35.02 ns/op            0 B/op          0 allocs/op
+BenchmarkCachegoGet-16                  36299835                33.75 ns/op            0 B/op          0 allocs/op
+BenchmarkCachegoGetLRU-16               22167474                54.61 ns/op            0 B/op          0 allocs/op
+BenchmarkCachegoGetLFU-16               19970642                56.66 ns/op            0 B/op          0 allocs/op
+BenchmarkCachegoGetSharding-16         328267346                 4.13 ns/op            0 B/op          0 allocs/op
+BenchmarkGcacheGet-16                   17657367                71.44 ns/op           16 B/op          1 allocs/op
+BenchmarkGcacheGetLRU-16                14978523                76.25 ns/op           16 B/op          1 allocs/op
+BenchmarkGcacheGetLFU-16                11984180               101.10 ns/op           16 B/op          1 allocs/op
+BenchmarkEcacheGet-16                   23887726                49.47 ns/op            0 B/op          0 allocs/op
+BenchmarkEcache2Get-16                  23970516                57.68 ns/op            0 B/op          0 allocs/op
+BenchmarkBigcacheGet-16                 41191674                37.16 ns/op            7 B/op          2 allocs/op
+BenchmarkFreecacheGet-16               100525257                11.22 ns/op           27 B/op          2 allocs/op
+BenchmarkGoCacheGet-16                  74411682                35.19 ns/op            0 B/op          0 allocs/op
 
-BenchmarkCachegoSet-16                  17117400                67.89 ns/op            16 B/op          1 allocs/op
-BenchmarkCachegoSetLRU-16               14967333                72.25 ns/op            16 B/op          1 allocs/op
-BenchmarkCachegoSetLFU-16               17119159                78.98 ns/op            16 B/op          1 allocs/op
-BenchmarkCachegoSetSharding-16         122153866                 9.74 ns/op            16 B/op          1 allocs/op
-BenchmarkGcacheSet-16                    9607416               126.00 ns/op            56 B/op          3 allocs/op
-BenchmarkGcacheSetLRU-16                 9974630               123.50 ns/op            56 B/op          3 allocs/op
-BenchmarkGcacheSetLFU-16                 9210434               127.10 ns/op            56 B/op          3 allocs/op
-BenchmarkEcacheSet-16                   11981607               101.10 ns/op            32 B/op          2 allocs/op
-BenchmarkEcache2Set-16                  10876806               101.10 ns/op            32 B/op          2 allocs/op
-BenchmarkBigcacheSet-16                  9985694               121.40 ns/op            90 B/op          0 allocs/op
-BenchmarkFreecacheSet-16               190178876                 6.10 ns/op             0 B/op          0 allocs/op
-BenchmarkGoCacheSet-16                  14977252                74.90 ns/op            16 B/op          1 allocs/op
+BenchmarkCachegoSet-16                  14683694                70.30 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetLRU-16               17116057                70.84 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetLFU-16               14976692                81.79 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSetSharding-16         100000000                10.24 ns/op           16 B/op          1 allocs/op
+BenchmarkGcacheSet-16                    9618228               127.00 ns/op           56 B/op          3 allocs/op
+BenchmarkGcacheSetLRU-16                 9984690               123.30 ns/op           56 B/op          3 allocs/op
+BenchmarkGcacheSetLFU-16                 9982962               127.50 ns/op           56 B/op          3 allocs/op
+BenchmarkEcacheSet-16                   11765893               101.30 ns/op           32 B/op          2 allocs/op
+BenchmarkEcache2Set-16                  10891723               100.10 ns/op           32 B/op          2 allocs/op
+BenchmarkBigcacheSet-16                  9985014               119.70 ns/op           90 B/op          0 allocs/op
+BenchmarkFreecacheSet-16               191627598                 6.29 ns/op            0 B/op          0 allocs/op
+BenchmarkGoCacheSet-16                  15304384                76.57 ns/op           16 B/op          1 allocs/op
 ```
 
 > 注：Ecache 只有 LRU 模式，v1 和 v2 两个版本；Freecache 默认是 256 分片，无法调节为 1 个分片进行对比测试。
