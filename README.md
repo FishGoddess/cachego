@@ -7,7 +7,7 @@
 
 **cachego** 是一个拥有分片机制的轻量级内存缓存库，API 友好，支持多种数据淘汰机制，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
-> 目前 v0.3.x 版本已经在多个线上服务中运行稳定，服务日常请求过万 qps，最高抵御过 17w/s qps 的冲击，欢迎使用！👏🏻
+> 目前 v0.3.x 版本已经在多个线上服务中运行稳定，服务日常请求过万 qps，最高抵御过 30w/s qps 的冲击，欢迎使用！👏🏻
 
 [Read me in English](./README.en.md).
 
@@ -103,35 +103,36 @@ $ make bench
 ```
 
 ```bash
-goos: darwin
+goos: windows
 goarch: amd64
-cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
+cpu: AMD Ryzen 7 5800X 8-Core Processor
+mem: DDR4 16GB*2 4000MHZ
 
-BenchmarkCachegoGet-12                  25214618               47.2 ns/op             0 B/op          0 allocs/op
-BenchmarkCachegoGetLRU-12                8169417              149.0 ns/op             0 B/op          0 allocs/op
-BenchmarkCachegoGetLFU-12                7071300              171.6 ns/op             0 B/op          0 allocs/op
-BenchmarkCachegoGetSharding-12          72568048               16.8 ns/op             0 B/op          0 allocs/op
-BenchmarkGcacheGet-12                    4765129              252.1 ns/op            16 B/op          1 allocs/op
-BenchmarkGcacheGetLRU-12                 5735739              214.0 ns/op            16 B/op          1 allocs/op
-BenchmarkGcacheGetLFU-12                 4830048              250.8 ns/op            16 B/op          1 allocs/op
-BenchmarkEcacheGet-12                   11515140              101.0 ns/op             0 B/op          0 allocs/op
-BenchmarkEcache2Get-12                  12255506               95.6 ns/op             0 B/op          0 allocs/op
-BenchmarkBigcacheGet-12                 21711988               60.4 ns/op             7 B/op          2 allocs/op
-BenchmarkFreecacheGet-12                24903388               44.3 ns/op            27 B/op          2 allocs/op
-BenchmarkGoCacheGet-12                  19818014               61.4 ns/op             0 B/op          0 allocs/op
+BenchmarkCachegoGet-16                  74407530                34.03 ns/op            0 B/op          0 allocs/op
+BenchmarkCachegoGetLRU-16               23960895                53.91 ns/op            0 B/op          0 allocs/op
+BenchmarkCachegoGetLFU-16               19882065                55.43 ns/op            0 B/op          0 allocs/op
+BenchmarkCachegoGetSharding-16         336675870                 4.14 ns/op            0 B/op          0 allocs/op
+BenchmarkGcacheGet-16                   18201260                70.98 ns/op           16 B/op          1 allocs/op
+BenchmarkGcacheGetLRU-16                17121699                77.70 ns/op           16 B/op          1 allocs/op
+BenchmarkGcacheGetLFU-16                10893463               105.70 ns/op           16 B/op          1 allocs/op
+BenchmarkEcacheGet-16                   19975329                56.65 ns/op            0 B/op          0 allocs/op
+BenchmarkEcache2Get-16                  23964244                56.41 ns/op            0 B/op          0 allocs/op
+BenchmarkBigcacheGet-16                 40498809                37.23 ns/op            7 B/op          2 allocs/op
+BenchmarkFreecacheGet-16               112763769                14.58 ns/op           27 B/op          2 allocs/op
+BenchmarkGoCacheGet-16                  35064342                35.02 ns/op            0 B/op          0 allocs/op
 
-BenchmarkCachegoSet-12                   5743768               209.6 ns/op           16 B/op          1 allocs/op
-BenchmarkCachegoSetLRU-12                6105316               189.9 ns/op           16 B/op          1 allocs/op
-BenchmarkCachegoSetLFU-12                5505601               217.2 ns/op           16 B/op          1 allocs/op
-BenchmarkCachegoSetSharding-12          39012607                31.2 ns/op           16 B/op          1 allocs/op
-BenchmarkGcacheSet-12                    3326841               365.3 ns/op           56 B/op          3 allocs/op
-BenchmarkGcacheSetLRU-12                 3471307               318.7 ns/op           56 B/op          3 allocs/op
-BenchmarkGcacheSetLFU-12                 3896512               335.1 ns/op           56 B/op          3 allocs/op
-BenchmarkEcacheSet-12                    7318136               167.5 ns/op           32 B/op          2 allocs/op
-BenchmarkEcache2Set-12                   7020867               175.7 ns/op           32 B/op          2 allocs/op
-BenchmarkBigcacheSet-12                  4107825               268.9 ns/op           55 B/op          0 allocs/op
-BenchmarkFreecacheSet-12                44181687                28.4 ns/op            0 B/op          0 allocs/op
-BenchmarkGoCacheSet-12                   4921483               249.0 ns/op           16 B/op          1 allocs/op
+BenchmarkCachegoSet-16                  17117400                67.89 ns/op            16 B/op          1 allocs/op
+BenchmarkCachegoSetLRU-16               14967333                72.25 ns/op            16 B/op          1 allocs/op
+BenchmarkCachegoSetLFU-16               17119159                78.98 ns/op            16 B/op          1 allocs/op
+BenchmarkCachegoSetSharding-16         122153866                 9.74 ns/op            16 B/op          1 allocs/op
+BenchmarkGcacheSet-16                    9607416               126.00 ns/op            56 B/op          3 allocs/op
+BenchmarkGcacheSetLRU-16                 9974630               123.50 ns/op            56 B/op          3 allocs/op
+BenchmarkGcacheSetLFU-16                 9210434               127.10 ns/op            56 B/op          3 allocs/op
+BenchmarkEcacheSet-16                   11981607               101.10 ns/op            32 B/op          2 allocs/op
+BenchmarkEcache2Set-16                  10876806               101.10 ns/op            32 B/op          2 allocs/op
+BenchmarkBigcacheSet-16                  9985694               121.40 ns/op            90 B/op          0 allocs/op
+BenchmarkFreecacheSet-16               190178876                 6.10 ns/op             0 B/op          0 allocs/op
+BenchmarkGoCacheSet-16                  14977252                74.90 ns/op            16 B/op          1 allocs/op
 ```
 
 > 注：Ecache 只有 LRU 模式，v1 和 v2 两个版本；Freecache 默认是 256 分片，无法调节为 1 个分片进行对比测试。
