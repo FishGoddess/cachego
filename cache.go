@@ -106,6 +106,8 @@ func shouldReport(conf *config) bool {
 // RunGCTask runs a gc task in a new goroutine and returns a cancel function to cancel the task.
 // However, you don't need to call it manually for most time, instead, use options is a better choice.
 // Making it a public function is for more customizations in some situations.
+// For example, using options to run gc task is un-cancelable, so you can use it to run gc task by your own
+// and get a cancel function to cancel the gc task.
 func RunGCTask(cache Cache, duration time.Duration) (cancel func()) {
 	fn := func(ctx context.Context) {
 		cache.GC()

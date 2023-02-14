@@ -84,9 +84,7 @@ func WithLFU(maxEntries int) Option {
 // Negative value means no sharding.
 func WithShardings(shardings int) Option {
 	return func(conf *config) {
-		if shardings > 0 {
-			conf.shardings = shardings
-		}
+		conf.shardings = shardings
 	}
 }
 
@@ -101,9 +99,7 @@ func WithDisableSingleflight() Option {
 // Negative value means no gc.
 func WithGC(gcDuration time.Duration) Option {
 	return func(conf *config) {
-		if gcDuration > 0 {
-			conf.gcDuration = gcDuration
-		}
+		conf.gcDuration = gcDuration
 	}
 }
 
@@ -111,9 +107,7 @@ func WithGC(gcDuration time.Duration) Option {
 // Negative value means no limit.
 func WithMaxScans(maxScans int) Option {
 	return func(conf *config) {
-		if maxScans > 0 {
-			conf.maxScans = maxScans
-		}
+		conf.maxScans = maxScans
 	}
 }
 
@@ -121,9 +115,7 @@ func WithMaxScans(maxScans int) Option {
 // Negative value means no limit.
 func WithMaxEntries(maxEntries int) Option {
 	return func(conf *config) {
-		if maxEntries > 0 {
-			conf.maxEntries = maxEntries
-		}
+		conf.maxEntries = maxEntries
 	}
 }
 
@@ -150,35 +142,27 @@ func WithHash(hash func(key string) int) Option {
 // WithReportMissed returns an option setting the reportMissed of cache.
 func WithReportMissed(reportMissed func(key string)) Option {
 	return func(conf *config) {
-		if reportMissed != nil {
-			conf.reportMissed = reportMissed
-		}
+		conf.reportMissed = reportMissed
 	}
 }
 
 // WithReportHit returns an option setting the reportHit of cache.
 func WithReportHit(reportHit func(key string, value interface{})) Option {
 	return func(conf *config) {
-		if reportHit != nil {
-			conf.reportHit = reportHit
-		}
+		conf.reportHit = reportHit
 	}
 }
 
 // WithReportGC returns an option setting the reportGC of cache.
 func WithReportGC(reportGC func(cost time.Duration, cleans int)) Option {
 	return func(conf *config) {
-		if reportGC != nil {
-			conf.reportGC = reportGC
-		}
+		conf.reportGC = reportGC
 	}
 }
 
 // WithReportLoad returns an option setting the reportLoad of cache.
 func WithReportLoad(reportLoad func(key string, value interface{}, ttl time.Duration, err error)) Option {
 	return func(conf *config) {
-		if reportLoad != nil {
-			conf.reportLoad = reportLoad
-		}
+		conf.reportLoad = reportLoad
 	}
 }
