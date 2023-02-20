@@ -40,20 +40,16 @@ func reportLoad(reporter *cachego.Reporter, key string, value interface{}, ttl t
 }
 
 func main() {
-	// Create a cache as usual.
-	cache := cachego.NewCache(
-		cachego.WithMaxEntries(3),
-		cachego.WithGC(100*time.Millisecond),
-	)
-
-	// Use Report function to wrap a cache with reporting logics.
 	// We provide some reporting points for monitor cache.
 	// ReportMissed reports the missed key getting from cache.
 	// ReportHit reports the hit entry getting from cache.
 	// ReportGC reports the status of cache gc.
 	// ReportLoad reports the result of loading.
-	cache, reporter := cachego.Report(
-		cache,
+	// Use NewCacheWithReport to create a cache with report.
+	cache, reporter := cachego.NewCacheWithReport(
+		cachego.WithMaxEntries(3),
+		cachego.WithGC(100*time.Millisecond),
+
 		cachego.WithReportMissed(reportMissed),
 		cachego.WithReportHit(reportHit),
 		cachego.WithReportGC(reportGC),

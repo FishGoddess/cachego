@@ -97,17 +97,11 @@ func (r *Reporter) HitRate() float64 {
 }
 
 type reportableCache struct {
-	*reportConfig
+	*config
 	*Reporter
 }
 
-// Report wraps cache with reporting logics with options.
-// You should use the returned cache instead of passed cache.
-// Use reporter if you want to get some reporting values.
-func Report(cache Cache, opts ...ReportOption) (Cache, *Reporter) {
-	conf := newDefaultReportConfig()
-	applyReportOptions(conf, opts)
-
+func report(conf *config, cache Cache) (Cache, *Reporter) {
 	reporter := &Reporter{
 		cache:       cache,
 		hitCount:    0,
@@ -117,8 +111,8 @@ func Report(cache Cache, opts ...ReportOption) (Cache, *Reporter) {
 	}
 
 	cache = &reportableCache{
-		reportConfig: conf,
-		Reporter:     reporter,
+		config:   conf,
+		Reporter: reporter,
 	}
 
 	return cache, reporter

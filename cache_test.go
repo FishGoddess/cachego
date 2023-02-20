@@ -246,8 +246,8 @@ func testCacheImplement(t *testing.T, cache Cache) {
 	}
 }
 
-// go test -v -cover=^TestNew$
-func TestNew(t *testing.T) {
+// go test -v -cover=^TestNewCache$
+func TestNewCache(t *testing.T) {
 	cache := NewCache()
 
 	sc1, ok := cache.(*standardCache)
@@ -288,6 +288,24 @@ func TestNew(t *testing.T) {
 	}()
 
 	cache = NewCache(WithLRU(0))
+}
+
+// go test -v -cover=^TestNewCacheWithReport$
+func TestNewCacheWithReport(t *testing.T) {
+	cache, reporter := NewCacheWithReport()
+
+	sc1, ok := cache.(*reportableCache)
+	if !ok {
+		t.Errorf("cache.(*reportableCache) %T not ok", cache)
+	}
+
+	if sc1 == nil {
+		t.Error("sc1 == nil")
+	}
+
+	if reporter == nil {
+		t.Error("reporter == nil")
+	}
 }
 
 // go test -v -cover=^TestRunGCTask$

@@ -27,23 +27,6 @@ type config struct {
 
 	now  func() int64
 	hash func(key string) int
-}
-
-func newDefaultConfig() *config {
-	return &config{
-		cacheType:    standard,
-		shardings:    0,
-		singleflight: true,
-		gcDuration:   0,
-		maxScans:     10000,
-		maxEntries:   0,
-		now:          now,
-		hash:         hash,
-	}
-}
-
-type reportConfig struct {
-	now func() int64
 
 	recordMissed bool
 	recordHit    bool
@@ -56,16 +39,19 @@ type reportConfig struct {
 	reportLoad   func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error)
 }
 
-func newDefaultReportConfig() *reportConfig {
-	return &reportConfig{
+func newDefaultConfig() *config {
+	return &config{
+		cacheType:    standard,
+		shardings:    0,
+		singleflight: true,
+		gcDuration:   0,
+		maxScans:     10000,
+		maxEntries:   0,
 		now:          now,
+		hash:         hash,
 		recordMissed: true,
 		recordHit:    true,
 		recordGC:     true,
 		recordLoad:   true,
-		reportMissed: nil,
-		reportHit:    nil,
-		reportGC:     nil,
-		reportLoad:   nil,
 	}
 }

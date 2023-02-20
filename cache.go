@@ -116,12 +116,7 @@ func RunGCTask(cache Cache, duration time.Duration) (cancel func()) {
 	return cancel
 }
 
-// NewCache creates a cache with options.
-// By default, it will create a standard cache which uses one lock to solve data race.
-// It may cause a big performance problem in high concurrency.
-// You can use WithShardings to create a sharding cache which is good for concurrency.
-// Also, you can use options to specify the type of cache to others, such as lru.
-func NewCache(opts ...Option) (cache Cache) {
+func newCache(withReport bool, opts ...Option) (cache Cache, reporter *Reporter) {
 	conf := newDefaultConfig()
 	applyOptions(conf, opts)
 
@@ -136,9 +131,33 @@ func NewCache(opts ...Option) (cache Cache) {
 		cache = newCache(conf)
 	}
 
+	if withReport {
+		cache, reporter = report(conf, cache)
+	}
+
 	if conf.gcDuration > 0 {
 		RunGCTask(cache, conf.gcDuration)
 	}
 
+	return cache, reporter
+}
+
+// NewCache creates a cache with options.
+// By default, it will create a standard cache which uses one lock to solve data race.
+// It may cause a big performance problem in high concurrency.
+// You can use WithShardings to create a sharding cache which is good for concurrency.
+// Also, you can use options to specify the type of cache to others, such as lru.
+// Use NewCacheWithReporter to get a reporter for use if you want.
+func NewCache(opts ...Option) (cache Cache) {
+	cache, _ = newCache(false, opts...)
 	return cache
+}
+
+// NewCacheWithReport creates a cache and a reporter with options.
+// By default, it will create a standard cache which uses one lock to solve data race.
+// It may cause a big performance problem in high concurrency.
+// You can use WithShardings to create a sharding cache which is good for concurrency.
+// Also, you can use options to specify the type of cache to others, such as lru.
+func NewCacheWithReport(opts ...Option) (cache Cache, reporter *Reporter) {
+	return newCache(true, opts...)
 }

@@ -23,7 +23,7 @@ import (
 func newTestReportableCache() (*reportableCache, *Reporter) {
 	conf := newDefaultConfig()
 	conf.maxEntries = maxTestEntries
-	cache, reporter := Report(newStandardCache(conf), WithRecordMissed(true), WithRecordHit(true), WithRecordGC(true), WithRecordLoad(true))
+	cache, reporter := report(conf, newStandardCache(conf))
 	return cache.(*reportableCache), reporter
 }
 

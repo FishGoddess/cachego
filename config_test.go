@@ -52,14 +52,6 @@ func isConfigEquals(conf1 *config, conf2 *config) bool {
 		return false
 	}
 
-	return true
-}
-
-func isReportConfigEquals(conf1 *reportConfig, conf2 *reportConfig) bool {
-	if fmt.Sprintf("%p", conf1.now) != fmt.Sprintf("%p", conf2.now) {
-		return false
-	}
-
 	if conf1.recordMissed != conf2.recordMissed {
 		return false
 	}
@@ -69,6 +61,10 @@ func isReportConfigEquals(conf1 *reportConfig, conf2 *reportConfig) bool {
 	}
 
 	if conf1.recordGC != conf2.recordGC {
+		return false
+	}
+
+	if conf1.recordLoad != conf2.recordLoad {
 		return false
 	}
 
@@ -99,6 +95,10 @@ func TestApplyOptions(t *testing.T) {
 		gcDuration:   0,
 		maxScans:     0,
 		maxEntries:   0,
+		recordMissed: false,
+		recordHit:    false,
+		recordGC:     false,
+		recordLoad:   false,
 	}
 
 	expect := &config{
@@ -107,6 +107,10 @@ func TestApplyOptions(t *testing.T) {
 		gcDuration:   2,
 		maxScans:     3,
 		maxEntries:   4,
+		recordMissed: true,
+		recordHit:    true,
+		recordGC:     true,
+		recordLoad:   true,
 	}
 
 	applyOptions(got, []Option{
@@ -115,45 +119,13 @@ func TestApplyOptions(t *testing.T) {
 		WithGC(2),
 		WithMaxScans(3),
 		WithMaxEntries(4),
-	})
-
-	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
-	}
-}
-
-// go test -v -cover -run=^TestApplyReportOptions$
-func TestApplyReportOptions(t *testing.T) {
-	reportHit := func(reporter *Reporter, key string, value interface{}) {}
-
-	got := &reportConfig{
-		now:          nil,
-		recordMissed: false,
-		recordHit:    false,
-		recordGC:     false,
-		recordLoad:   false,
-		reportHit:    nil,
-	}
-
-	expect := &reportConfig{
-		now:          now,
-		recordMissed: true,
-		recordHit:    true,
-		recordGC:     true,
-		recordLoad:   true,
-		reportHit:    reportHit,
-	}
-
-	applyReportOptions(got, []ReportOption{
-		WithReporterNow(now),
 		WithRecordMissed(true),
 		WithRecordHit(true),
 		WithRecordGC(true),
 		WithRecordLoad(true),
-		WithReportHit(reportHit),
 	})
 
-	if !isReportConfigEquals(got, expect) {
+	if !isConfigEquals(got, expect) {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}
 }
