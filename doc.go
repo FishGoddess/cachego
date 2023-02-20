@@ -346,16 +346,20 @@ Package cachego provides an easy way to use foundation for your caching operatio
 		fmt.Printf("report: load key %s value %+v ttl %s, err %+v\n", key, value, ttl, err)
 	}
 
-	// We provide some reporting points for monitor cache.
-	// ReportMissed reports the missed key getting from cache.
-	// ReportHit reports the hit entry getting from cache.
-	// ReportEvicted reports the evicted entry after setting a new entry to cache.
-	// ReportGC reports the status of cache gc.
-	// ReportLoad reports the result of loading.
+	// Create a cache as usual.
 	cache := cachego.NewCache(
 		cachego.WithMaxEntries(3),
 		cachego.WithGC(100*time.Millisecond),
+	)
 
+	// Use Report function to wrap a cache with reporting logics.
+	// We provide some reporting points for monitor cache.
+	// ReportMissed reports the missed key getting from cache.
+	// ReportHit reports the hit entry getting from cache.
+	// ReportGC reports the status of cache gc.
+	// ReportLoad reports the result of loading.
+	cache, reporter := cachego.Report(
+		cache,
 		cachego.WithReportMissed(reportMissed),
 		cachego.WithReportHit(reportHit),
 		cachego.WithReportGC(reportGC),
@@ -381,6 +385,14 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	})
 
 	fmt.Println(value, err)
+
+	// These are some methods of reporter.
+	fmt.Println("CountMissed:", reporter.CountMissed())
+	fmt.Println("CountHit:", reporter.CountHit())
+	fmt.Println("CountGC:", reporter.CountGC())
+	fmt.Println("CacheSize:", reporter.CacheSize())
+	fmt.Println("MissedRate:", reporter.MissedRate())
+	fmt.Println("HitRate:", reporter.HitRate())
 
 9. task:
 
@@ -442,4 +454,4 @@ Package cachego provides an easy way to use foundation for your caching operatio
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.4.3-alpha"
+const Version = "v0.4.4-alpha"
