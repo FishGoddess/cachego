@@ -141,9 +141,53 @@ func TestWithReporterNow(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestWithRecordMissed$
+func TestWithRecordMissed(t *testing.T) {
+	got := &reportConfig{recordMissed: false}
+	expect := &reportConfig{recordMissed: true}
+
+	WithRecordMissed(true).applyTo(got)
+	if !isReportConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithRecordHit$
+func TestWithRecordHit(t *testing.T) {
+	got := &reportConfig{recordHit: false}
+	expect := &reportConfig{recordHit: true}
+
+	WithRecordHit(true).applyTo(got)
+	if !isReportConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithRecordGC$
+func TestWithRecordGC(t *testing.T) {
+	got := &reportConfig{recordGC: false}
+	expect := &reportConfig{recordGC: true}
+
+	WithRecordGC(true).applyTo(got)
+	if !isReportConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
+// go test -v -cover -run=^TestWithRecordLoad$
+func TestWithRecordLoad(t *testing.T) {
+	got := &reportConfig{recordLoad: false}
+	expect := &reportConfig{recordLoad: true}
+
+	WithRecordLoad(true).applyTo(got)
+	if !isReportConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
 // go test -v -cover -run=^TestWithReportMissed$
 func TestWithReportMissed(t *testing.T) {
-	reportMissed := func(key string) {}
+	reportMissed := func(reporter *Reporter, key string) {}
 
 	got := &reportConfig{reportMissed: nil}
 	expect := &reportConfig{reportMissed: reportMissed}
@@ -156,7 +200,7 @@ func TestWithReportMissed(t *testing.T) {
 
 // go test -v -cover -run=^TestWithReportHit$
 func TestWithReportHit(t *testing.T) {
-	reportHit := func(key string, value interface{}) {}
+	reportHit := func(reporter *Reporter, key string, value interface{}) {}
 
 	got := &reportConfig{reportHit: nil}
 	expect := &reportConfig{reportHit: reportHit}
@@ -169,7 +213,7 @@ func TestWithReportHit(t *testing.T) {
 
 // go test -v -cover -run=^TestWithReportGC$
 func TestWithReportGC(t *testing.T) {
-	reportGC := func(cost time.Duration, cleans int) {}
+	reportGC := func(reporter *Reporter, cost time.Duration, cleans int) {}
 
 	got := &reportConfig{reportGC: nil}
 	expect := &reportConfig{reportGC: reportGC}
@@ -182,7 +226,7 @@ func TestWithReportGC(t *testing.T) {
 
 // go test -v -cover -run=^TestWithReportLoad$
 func TestWithReportLoad(t *testing.T) {
-	reportLoad := func(key string, value interface{}, ttl time.Duration, err error) {}
+	reportLoad := func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error) {}
 
 	got := &reportConfig{reportLoad: nil}
 	expect := &reportConfig{reportLoad: reportLoad}

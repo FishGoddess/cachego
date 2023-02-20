@@ -23,7 +23,7 @@ import (
 func newTestReportableCache() (*reportableCache, *Reporter) {
 	conf := newDefaultConfig()
 	conf.maxEntries = maxTestEntries
-	cache, reporter := Report(newStandardCache(conf))
+	cache, reporter := Report(newStandardCache(conf), WithRecordMissed(true), WithRecordHit(true), WithRecordGC(true), WithRecordLoad(true))
 	return cache.(*reportableCache), reporter
 }
 
@@ -39,7 +39,7 @@ func TestReportableCacheReportMissed(t *testing.T) {
 	cache.Set("key", 666, NoTTL)
 
 	checked := false
-	cache.reportMissed = func(key string) {
+	cache.reportMissed = func(reporter *Reporter, key string) {
 		if key == "key" {
 			t.Error("key == \"key\"")
 		}
@@ -74,7 +74,7 @@ func TestReportableCacheReportHit(t *testing.T) {
 	cache.Set("key", 666, NoTTL)
 
 	checked := false
-	cache.reportHit = func(key string, value interface{}) {
+	cache.reportHit = func(reporter *Reporter, key string, value interface{}) {
 		if key == "missed" {
 			t.Error("key == \"missed\"")
 		}
@@ -118,7 +118,7 @@ func TestReportableCacheReportGC(t *testing.T) {
 
 	gcCount := uint64(0)
 	checked := false
-	cache.reportGC = func(cost time.Duration, cleans int) {
+	cache.reportGC = func(reporter *Reporter, cost time.Duration, cleans int) {
 		if cost <= 0 {
 			t.Errorf("cost %d <= 0", cost)
 		}
@@ -149,10 +149,11 @@ func TestReportableCacheReportGC(t *testing.T) {
 
 // go test -v -cover -run=^TestReportableCacheReportLoad$
 func TestReportableCacheReportLoad(t *testing.T) {
-	cache, _ := newTestReportableCache()
+	cache, reporter := newTestReportableCache()
 
+	loadCount := uint64(0)
 	checked := false
-	cache.reportLoad = func(key string, value interface{}, ttl time.Duration, err error) {
+	cache.reportLoad = func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error) {
 		if key != "load" {
 			t.Errorf("key %s is wrong", key)
 		}
@@ -169,6 +170,7 @@ func TestReportableCacheReportLoad(t *testing.T) {
 			t.Errorf("err %+v is wrong", err)
 		}
 
+		loadCount++
 		checked = true
 	}
 
@@ -186,6 +188,10 @@ func TestReportableCacheReportLoad(t *testing.T) {
 
 	if !checked {
 		t.Error("reportLoad not checked")
+	}
+
+	if reporter.CountLoad() != loadCount {
+		t.Errorf("CountLoad %d is wrong", reporter.CountLoad())
 	}
 }
 

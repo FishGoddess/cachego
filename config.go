@@ -27,11 +27,6 @@ type config struct {
 
 	now  func() int64
 	hash func(key string) int
-
-	reportMissed func(key string)
-	reportHit    func(key string, value interface{})
-	reportGC     func(cost time.Duration, cleans int)
-	reportLoad   func(key string, value interface{}, ttl time.Duration, err error)
 }
 
 func newDefaultConfig() *config {
@@ -50,15 +45,24 @@ func newDefaultConfig() *config {
 type reportConfig struct {
 	now func() int64
 
-	reportMissed func(key string)
-	reportHit    func(key string, value interface{})
-	reportGC     func(cost time.Duration, cleans int)
-	reportLoad   func(key string, value interface{}, ttl time.Duration, err error)
+	recordMissed bool
+	recordHit    bool
+	recordGC     bool
+	recordLoad   bool
+
+	reportMissed func(reporter *Reporter, key string)
+	reportHit    func(reporter *Reporter, key string, value interface{})
+	reportGC     func(reporter *Reporter, cost time.Duration, cleans int)
+	reportLoad   func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error)
 }
 
 func newDefaultReportConfig() *reportConfig {
 	return &reportConfig{
 		now:          now,
+		recordMissed: true,
+		recordHit:    true,
+		recordGC:     true,
+		recordLoad:   true,
 		reportMissed: nil,
 		reportHit:    nil,
 		reportGC:     nil,

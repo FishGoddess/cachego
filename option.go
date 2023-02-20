@@ -131,29 +131,57 @@ func WithReporterNow(now func() int64) ReportOption {
 	}
 }
 
+// WithRecordMissed returns an option setting the recordMissed of report config.
+func WithRecordMissed(recordMissed bool) ReportOption {
+	return func(conf *reportConfig) {
+		conf.recordMissed = recordMissed
+	}
+}
+
+// WithRecordHit returns an option setting the recordHit of report config.
+func WithRecordHit(recordHit bool) ReportOption {
+	return func(conf *reportConfig) {
+		conf.recordHit = recordHit
+	}
+}
+
+// WithRecordGC returns an option setting the recordGC of report config.
+func WithRecordGC(recordGC bool) ReportOption {
+	return func(conf *reportConfig) {
+		conf.recordGC = recordGC
+	}
+}
+
+// WithRecordLoad returns an option setting the recordLoad of report config.
+func WithRecordLoad(recordLoad bool) ReportOption {
+	return func(conf *reportConfig) {
+		conf.recordLoad = recordLoad
+	}
+}
+
 // WithReportMissed returns an option setting the reportMissed of report config.
-func WithReportMissed(reportMissed func(key string)) ReportOption {
+func WithReportMissed(reportMissed func(reporter *Reporter, key string)) ReportOption {
 	return func(conf *reportConfig) {
 		conf.reportMissed = reportMissed
 	}
 }
 
 // WithReportHit returns an option setting the reportHit of report config.
-func WithReportHit(reportHit func(key string, value interface{})) ReportOption {
+func WithReportHit(reportHit func(reporter *Reporter, key string, value interface{})) ReportOption {
 	return func(conf *reportConfig) {
 		conf.reportHit = reportHit
 	}
 }
 
 // WithReportGC returns an option setting the reportGC of report config.
-func WithReportGC(reportGC func(cost time.Duration, cleans int)) ReportOption {
+func WithReportGC(reportGC func(reporter *Reporter, cost time.Duration, cleans int)) ReportOption {
 	return func(conf *reportConfig) {
 		conf.reportGC = reportGC
 	}
 }
 
 // WithReportLoad returns an option setting the reportLoad of report config.
-func WithReportLoad(reportLoad func(key string, value interface{}, ttl time.Duration, err error)) ReportOption {
+func WithReportLoad(reportLoad func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error)) ReportOption {
 	return func(conf *reportConfig) {
 		conf.reportLoad = reportLoad
 	}

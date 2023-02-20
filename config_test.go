@@ -52,27 +52,23 @@ func isConfigEquals(conf1 *config, conf2 *config) bool {
 		return false
 	}
 
-	if fmt.Sprintf("%p", conf1.reportMissed) != fmt.Sprintf("%p", conf2.reportMissed) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.reportHit) != fmt.Sprintf("%p", conf2.reportHit) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.reportGC) != fmt.Sprintf("%p", conf2.reportGC) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.reportLoad) != fmt.Sprintf("%p", conf2.reportLoad) {
-		return false
-	}
-
 	return true
 }
 
 func isReportConfigEquals(conf1 *reportConfig, conf2 *reportConfig) bool {
 	if fmt.Sprintf("%p", conf1.now) != fmt.Sprintf("%p", conf2.now) {
+		return false
+	}
+
+	if conf1.recordMissed != conf2.recordMissed {
+		return false
+	}
+
+	if conf1.recordHit != conf2.recordHit {
+		return false
+	}
+
+	if conf1.recordGC != conf2.recordGC {
 		return false
 	}
 
@@ -128,17 +124,32 @@ func TestApplyOptions(t *testing.T) {
 
 // go test -v -cover -run=^TestApplyReportOptions$
 func TestApplyReportOptions(t *testing.T) {
-	reportHit := func(key string, value interface{}) {}
+	reportHit := func(reporter *Reporter, key string, value interface{}) {}
 
-	got := &reportConfig{}
+	got := &reportConfig{
+		now:          nil,
+		recordMissed: false,
+		recordHit:    false,
+		recordGC:     false,
+		recordLoad:   false,
+		reportHit:    nil,
+	}
 
 	expect := &reportConfig{
-		now:       now,
-		reportHit: reportHit,
+		now:          now,
+		recordMissed: true,
+		recordHit:    true,
+		recordGC:     true,
+		recordLoad:   true,
+		reportHit:    reportHit,
 	}
 
 	applyReportOptions(got, []ReportOption{
 		WithReporterNow(now),
+		WithRecordMissed(true),
+		WithRecordHit(true),
+		WithRecordGC(true),
+		WithRecordLoad(true),
 		WithReportHit(reportHit),
 	})
 

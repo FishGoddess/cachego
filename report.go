@@ -19,12 +19,14 @@ import (
 	"time"
 )
 
+// Reporter stores some values for reporting.
 type Reporter struct {
 	cache Cache
 
 	missedCount uint64
 	hitCount    uint64
 	gcCount     uint64
+	loadCount   uint64
 }
 
 func (r *Reporter) increaseMissedCount() {
@@ -39,34 +41,36 @@ func (r *Reporter) increaseGCCount() {
 	atomic.AddUint64(&r.gcCount, 1)
 }
 
+func (r *Reporter) increaseLoadCount() {
+	atomic.AddUint64(&r.loadCount, 1)
+}
+
+// CountMissed returns the missed count.
 func (r *Reporter) CountMissed() uint64 {
 	return atomic.LoadUint64(&r.missedCount)
 }
 
+// CountHit returns the hit count.
 func (r *Reporter) CountHit() uint64 {
 	return atomic.LoadUint64(&r.hitCount)
 }
 
+// CountGC returns the gc count.
 func (r *Reporter) CountGC() uint64 {
 	return atomic.LoadUint64(&r.gcCount)
 }
 
+// CountLoad returns the load count.
+func (r *Reporter) CountLoad() uint64 {
+	return atomic.LoadUint64(&r.loadCount)
+}
+
+// CacheSize returns the size of cache.
 func (r *Reporter) CacheSize() int {
 	return r.cache.Size()
 }
 
-func (r *Reporter) HitRate() float64 {
-	hit := r.CountHit()
-	missed := r.CountMissed()
-
-	total := hit + missed
-	if total <= 0 {
-		return 0.0
-	}
-
-	return float64(hit) / float64(total)
-}
-
+// MissedRate returns the missed rate.
 func (r *Reporter) MissedRate() float64 {
 	hit := r.CountHit()
 	missed := r.CountMissed()
@@ -79,11 +83,27 @@ func (r *Reporter) MissedRate() float64 {
 	return float64(missed) / float64(total)
 }
 
+// HitRate returns the hit rate.
+func (r *Reporter) HitRate() float64 {
+	hit := r.CountHit()
+	missed := r.CountMissed()
+
+	total := hit + missed
+	if total <= 0 {
+		return 0.0
+	}
+
+	return float64(hit) / float64(total)
+}
+
 type reportableCache struct {
 	*reportConfig
 	*Reporter
 }
 
+// Report wraps cache with reporting logics with options.
+// You should use the returned cache instead of passed cache.
+// Use reporter if you want to get some reporting values.
 func Report(cache Cache, opts ...ReportOption) (Cache, *Reporter) {
 	conf := newDefaultReportConfig()
 	applyReportOptions(conf, opts)
@@ -93,6 +113,7 @@ func Report(cache Cache, opts ...ReportOption) (Cache, *Reporter) {
 		hitCount:    0,
 		missedCount: 0,
 		gcCount:     0,
+		loadCount:   0,
 	}
 
 	cache = &reportableCache{
@@ -108,16 +129,20 @@ func (rc *reportableCache) Get(key string) (value interface{}, found bool) {
 	value, found = rc.cache.Get(key)
 
 	if found {
-		rc.increaseHitCount()
+		if rc.recordHit {
+			rc.increaseHitCount()
+		}
 
 		if rc.reportHit != nil {
-			rc.reportHit(key, value)
+			rc.reportHit(rc.Reporter, key, value)
 		}
 	} else {
-		rc.increaseMissedCount()
+		if rc.recordMissed {
+			rc.increaseMissedCount()
+		}
 
 		if rc.reportMissed != nil {
-			rc.reportMissed(key)
+			rc.reportMissed(rc.Reporter, key)
 		}
 	}
 
@@ -145,7 +170,9 @@ func (rc *reportableCache) Size() (size int) {
 // GC cleans the expired keys in cache and returns the exact count cleaned.
 // See Cache interface.
 func (rc *reportableCache) GC() (cleans int) {
-	rc.increaseGCCount()
+	if rc.recordGC {
+		rc.increaseGCCount()
+	}
 
 	if rc.reportGC == nil {
 		return rc.cache.GC()
@@ -156,7 +183,7 @@ func (rc *reportableCache) GC() (cleans int) {
 	end := rc.now()
 
 	cost := time.Duration(end - begin)
-	rc.reportGC(cost, cleans)
+	rc.reportGC(rc.Reporter, cost, cleans)
 
 	return cleans
 }
@@ -172,8 +199,12 @@ func (rc *reportableCache) Reset() {
 func (rc *reportableCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
 	value, err = rc.cache.Load(key, ttl, load)
 
+	if rc.recordLoad {
+		rc.increaseLoadCount()
+	}
+
 	if rc.reportLoad != nil {
-		rc.reportLoad(key, value, ttl, err)
+		rc.reportLoad(rc.Reporter, key, value, ttl, err)
 	}
 
 	return value, err
