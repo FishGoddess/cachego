@@ -290,64 +290,6 @@ func TestNew(t *testing.T) {
 	cache = NewCache(WithLRU(0))
 }
 
-// go test -v -cover=^TestNewReport$
-func TestNewReport(t *testing.T) {
-	cache := NewCache()
-
-	sc1, ok := cache.(*standardCache)
-	if !ok {
-		t.Errorf("cache.(*standardCache) %T not ok", cache)
-	}
-
-	if sc1 == nil {
-		t.Error("sc1 == nil")
-	}
-
-	cache = NewCache(WithReportMissed(func(key string) {}))
-
-	sc2, ok := cache.(*reportableCache)
-	if !ok {
-		t.Errorf("cache.(*reportableCache) %T not ok", cache)
-	}
-
-	if sc2 == nil {
-		t.Error("sc2 == nil")
-	}
-
-	cache = NewCache(WithReportHit(func(key string, value interface{}) {}))
-
-	sc2, ok = cache.(*reportableCache)
-	if !ok {
-		t.Errorf("cache.(*reportableCache) %T not ok", cache)
-	}
-
-	if sc2 == nil {
-		t.Error("sc2 == nil")
-	}
-
-	cache = NewCache(WithReportGC(func(cost time.Duration, cleans int) {}))
-
-	sc2, ok = cache.(*reportableCache)
-	if !ok {
-		t.Errorf("cache.(*reportableCache) %T not ok", cache)
-	}
-
-	if sc2 == nil {
-		t.Error("sc2 == nil")
-	}
-
-	cache = NewCache(WithReportLoad(func(key string, value interface{}, ttl time.Duration, err error) {}))
-
-	sc2, ok = cache.(*reportableCache)
-	if !ok {
-		t.Errorf("cache.(*reportableCache) %T not ok", cache)
-	}
-
-	if sc2 == nil {
-		t.Error("sc2 == nil")
-	}
-}
-
 // go test -v -cover=^TestRunGCTask$
 func TestRunGCTask(t *testing.T) {
 	cache := new(testCache)

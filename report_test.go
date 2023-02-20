@@ -20,21 +20,22 @@ import (
 	"time"
 )
 
-func newTestReportableCache() *reportableCache {
+func newTestReportableCache() (*reportableCache, *Reporter) {
 	conf := newDefaultConfig()
 	conf.maxEntries = maxTestEntries
-	return report(conf, newStandardCache(conf)).(*reportableCache)
+	cache, reporter := Report(newStandardCache(conf))
+	return cache.(*reportableCache), reporter
 }
 
 // go test -v -cover -run=^TestReportableCache$
 func TestReportableCache(t *testing.T) {
-	cache := newTestReportableCache()
+	cache, _ := newTestReportableCache()
 	testCacheImplement(t, cache)
 }
 
 // go test -v -cover -run=^TestReportableCacheReportMissed$
 func TestReportableCacheReportMissed(t *testing.T) {
-	cache := newTestReportableCache()
+	cache, reporter := newTestReportableCache()
 	cache.Set("key", 666, NoTTL)
 
 	checked := false
@@ -56,11 +57,20 @@ func TestReportableCacheReportMissed(t *testing.T) {
 	if !checked {
 		t.Error("reportMissed not checked")
 	}
+
+	if reporter.CountMissed() != 1 {
+		t.Errorf("CountMissed %d is wrong", reporter.CountMissed())
+	}
+
+	missedRate := reporter.MissedRate()
+	if missedRate < 0.499 || missedRate > 0.501 {
+		t.Errorf("missedRate %.3f is wrong", missedRate)
+	}
 }
 
 // go test -v -cover -run=^TestReportableCacheReportHit$
 func TestReportableCacheReportHit(t *testing.T) {
-	cache := newTestReportableCache()
+	cache, reporter := newTestReportableCache()
 	cache.Set("key", 666, NoTTL)
 
 	checked := false
@@ -86,17 +96,27 @@ func TestReportableCacheReportHit(t *testing.T) {
 	if !checked {
 		t.Error("reportHit not checked")
 	}
+
+	if reporter.CountHit() != 1 {
+		t.Errorf("CountHit %d is wrong", reporter.CountHit())
+	}
+
+	hitRate := reporter.HitRate()
+	if hitRate < 0.499 || hitRate > 0.501 {
+		t.Errorf("hitRate %.3f is wrong", hitRate)
+	}
 }
 
 // go test -v -cover -run=^TestReportableCacheReportGC$
 func TestReportableCacheReportGC(t *testing.T) {
-	cache := newTestReportableCache()
+	cache, reporter := newTestReportableCache()
 	cache.Set("key1", 1, time.Millisecond)
 	cache.Set("key2", 2, time.Millisecond)
 	cache.Set("key3", 3, time.Millisecond)
 	cache.Set("key4", 4, time.Second)
 	cache.Set("key5", 5, time.Second)
 
+	gcCount := uint64(0)
 	checked := false
 	cache.reportGC = func(cost time.Duration, cleans int) {
 		if cost <= 0 {
@@ -107,6 +127,7 @@ func TestReportableCacheReportGC(t *testing.T) {
 			t.Errorf("cleans %d is wrong", cleans)
 		}
 
+		gcCount++
 		checked = true
 	}
 
@@ -120,11 +141,15 @@ func TestReportableCacheReportGC(t *testing.T) {
 	if !checked {
 		t.Error("reportHit not checked")
 	}
+
+	if reporter.CountGC() != gcCount {
+		t.Errorf("CountGC %d is wrong", reporter.CountGC())
+	}
 }
 
 // go test -v -cover -run=^TestReportableCacheReportLoad$
 func TestReportableCacheReportLoad(t *testing.T) {
-	cache := newTestReportableCache()
+	cache, _ := newTestReportableCache()
 
 	checked := false
 	cache.reportLoad = func(key string, value interface{}, ttl time.Duration, err error) {
@@ -161,5 +186,26 @@ func TestReportableCacheReportLoad(t *testing.T) {
 
 	if !checked {
 		t.Error("reportLoad not checked")
+	}
+}
+
+// go test -v -cover -run=^TestReporterCacheSize$
+func TestReporterCacheSize(t *testing.T) {
+	cache, reporter := newTestReportableCache()
+	cache.Set("key1", 1, time.Millisecond)
+	cache.Set("key2", 2, time.Millisecond)
+	cache.Set("key3", 3, time.Millisecond)
+	cache.Set("key4", 4, time.Second)
+	cache.Set("key5", 5, time.Second)
+
+	if reporter.CacheSize() != 5 {
+		t.Errorf("CacheSize %d is wrong", reporter.CacheSize())
+	}
+
+	time.Sleep(100 * time.Millisecond)
+	cache.GC()
+
+	if reporter.CacheSize() != 2 {
+		t.Errorf("CacheSize %d is wrong", reporter.CacheSize())
 	}
 }

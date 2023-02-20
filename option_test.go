@@ -15,93 +15,9 @@
 package cachego
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
-
-func isConfigEquals(conf1 *config, conf2 *config) bool {
-	if conf1.cacheType != conf2.cacheType {
-		return false
-	}
-
-	if conf1.shardings != conf2.shardings {
-		return false
-	}
-
-	if conf1.singleflight != conf2.singleflight {
-		return false
-	}
-
-	if conf1.gcDuration != conf2.gcDuration {
-		return false
-	}
-
-	if conf1.maxScans != conf2.maxScans {
-		return false
-	}
-
-	if conf1.maxEntries != conf2.maxEntries {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.now) != fmt.Sprintf("%p", conf2.now) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.hash) != fmt.Sprintf("%p", conf2.hash) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.reportMissed) != fmt.Sprintf("%p", conf2.reportMissed) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.reportHit) != fmt.Sprintf("%p", conf2.reportHit) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.reportGC) != fmt.Sprintf("%p", conf2.reportGC) {
-		return false
-	}
-
-	if fmt.Sprintf("%p", conf1.reportLoad) != fmt.Sprintf("%p", conf2.reportLoad) {
-		return false
-	}
-
-	return true
-}
-
-// go test -v -cover -run=^TestApplyOptions$
-func TestApplyOptions(t *testing.T) {
-	got := &config{
-		shardings:    0,
-		singleflight: true,
-		gcDuration:   0,
-		maxScans:     0,
-		maxEntries:   0,
-	}
-
-	expect := &config{
-		shardings:    1,
-		singleflight: false,
-		gcDuration:   2,
-		maxScans:     3,
-		maxEntries:   4,
-	}
-
-	applyOptions(got, []Option{
-		WithShardings(1),
-		WithDisableSingleflight(),
-		WithGC(2),
-		WithMaxScans(3),
-		WithMaxEntries(4),
-	})
-
-	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
-	}
-}
 
 // go test -v -cover -run=^TestWithLRU$
 func TestWithLRU(t *testing.T) {
@@ -210,15 +126,30 @@ func TestWithHash(t *testing.T) {
 	}
 }
 
+// go test -v -cover -run=^TestWithReporterNow$
+func TestWithReporterNow(t *testing.T) {
+	now := func() int64 {
+		return 0
+	}
+
+	got := &reportConfig{now: nil}
+	expect := &reportConfig{now: now}
+
+	WithReporterNow(now).applyTo(got)
+	if !isReportConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
 // go test -v -cover -run=^TestWithReportMissed$
 func TestWithReportMissed(t *testing.T) {
 	reportMissed := func(key string) {}
 
-	got := &config{reportMissed: nil}
-	expect := &config{reportMissed: reportMissed}
+	got := &reportConfig{reportMissed: nil}
+	expect := &reportConfig{reportMissed: reportMissed}
 
 	WithReportMissed(reportMissed).applyTo(got)
-	if !isConfigEquals(got, expect) {
+	if !isReportConfigEquals(got, expect) {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}
 }
@@ -227,11 +158,11 @@ func TestWithReportMissed(t *testing.T) {
 func TestWithReportHit(t *testing.T) {
 	reportHit := func(key string, value interface{}) {}
 
-	got := &config{reportHit: nil}
-	expect := &config{reportHit: reportHit}
+	got := &reportConfig{reportHit: nil}
+	expect := &reportConfig{reportHit: reportHit}
 
 	WithReportHit(reportHit).applyTo(got)
-	if !isConfigEquals(got, expect) {
+	if !isReportConfigEquals(got, expect) {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}
 }
@@ -240,11 +171,11 @@ func TestWithReportHit(t *testing.T) {
 func TestWithReportGC(t *testing.T) {
 	reportGC := func(cost time.Duration, cleans int) {}
 
-	got := &config{reportGC: nil}
-	expect := &config{reportGC: reportGC}
+	got := &reportConfig{reportGC: nil}
+	expect := &reportConfig{reportGC: reportGC}
 
 	WithReportGC(reportGC).applyTo(got)
-	if !isConfigEquals(got, expect) {
+	if !isReportConfigEquals(got, expect) {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}
 }
@@ -253,11 +184,11 @@ func TestWithReportGC(t *testing.T) {
 func TestWithReportLoad(t *testing.T) {
 	reportLoad := func(key string, value interface{}, ttl time.Duration, err error) {}
 
-	got := &config{reportLoad: nil}
-	expect := &config{reportLoad: reportLoad}
+	got := &reportConfig{reportLoad: nil}
+	expect := &reportConfig{reportLoad: reportLoad}
 
 	WithReportLoad(reportLoad).applyTo(got)
-	if !isConfigEquals(got, expect) {
+	if !isReportConfigEquals(got, expect) {
 		t.Errorf("got %+v != expect %+v", got, expect)
 	}
 }

@@ -18,37 +18,6 @@ import (
 	"time"
 )
 
-type config struct {
-	cacheType    cacheType
-	shardings    int
-	singleflight bool
-	gcDuration   time.Duration
-
-	maxScans   int
-	maxEntries int
-
-	now  func() int64
-	hash func(key string) int
-
-	reportMissed func(key string)
-	reportHit    func(key string, value interface{})
-	reportGC     func(cost time.Duration, cleans int)
-	reportLoad   func(key string, value interface{}, ttl time.Duration, err error)
-}
-
-func newDefaultConfig() *config {
-	return &config{
-		cacheType:    standard,
-		shardings:    0,
-		singleflight: true,
-		gcDuration:   0,
-		maxScans:     10000,
-		maxEntries:   0,
-		now:          now,
-		hash:         hash,
-	}
-}
-
 // Option applies to config and sets some values to config.
 type Option func(conf *config)
 
@@ -139,30 +108,53 @@ func WithHash(hash func(key string) int) Option {
 	}
 }
 
-// WithReportMissed returns an option setting the reportMissed of cache.
-func WithReportMissed(reportMissed func(key string)) Option {
-	return func(conf *config) {
+// ReportOption applies to report config and sets some values to report config.
+type ReportOption func(conf *reportConfig)
+
+func (ro ReportOption) applyTo(conf *reportConfig) {
+	ro(conf)
+}
+
+func applyReportOptions(conf *reportConfig, opts []ReportOption) {
+	for _, opt := range opts {
+		opt.applyTo(conf)
+	}
+}
+
+// WithReporterNow returns an option setting the now function of reporter.
+// A now function should return a nanosecond unix time.
+func WithReporterNow(now func() int64) ReportOption {
+	return func(conf *reportConfig) {
+		if now != nil {
+			conf.now = now
+		}
+	}
+}
+
+// WithReportMissed returns an option setting the reportMissed of report config.
+func WithReportMissed(reportMissed func(key string)) ReportOption {
+	return func(conf *reportConfig) {
 		conf.reportMissed = reportMissed
 	}
 }
 
-// WithReportHit returns an option setting the reportHit of cache.
-func WithReportHit(reportHit func(key string, value interface{})) Option {
-	return func(conf *config) {
+// WithReportHit returns an option setting the reportHit of report config.
+func WithReportHit(reportHit func(key string, value interface{})) ReportOption {
+	return func(conf *reportConfig) {
 		conf.reportHit = reportHit
 	}
 }
 
-// WithReportGC returns an option setting the reportGC of cache.
-func WithReportGC(reportGC func(cost time.Duration, cleans int)) Option {
-	return func(conf *config) {
+// WithReportGC returns an option setting the reportGC of report config.
+func WithReportGC(reportGC func(cost time.Duration, cleans int)) ReportOption {
+	return func(conf *reportConfig) {
 		conf.reportGC = reportGC
 	}
 }
 
-// WithReportLoad returns an option setting the reportLoad of cache.
-func WithReportLoad(reportLoad func(key string, value interface{}, ttl time.Duration, err error)) Option {
-	return func(conf *config) {
+// WithReportLoad returns an option setting the reportLoad of report config.
+func WithReportLoad(reportLoad func(key string, value interface{}, ttl time.Duration, err error)) ReportOption {
+	return func(conf *reportConfig) {
 		conf.reportLoad = reportLoad
 	}
 }

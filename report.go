@@ -15,19 +15,92 @@
 package cachego
 
 import (
+	"sync/atomic"
 	"time"
 )
 
-type reportableCache struct {
-	*config
+type Reporter struct {
 	cache Cache
+
+	missedCount uint64
+	hitCount    uint64
+	gcCount     uint64
 }
 
-func report(conf *config, cache Cache) Cache {
-	return &reportableCache{
-		config: conf,
-		cache:  cache,
+func (r *Reporter) increaseMissedCount() {
+	atomic.AddUint64(&r.missedCount, 1)
+}
+
+func (r *Reporter) increaseHitCount() {
+	atomic.AddUint64(&r.hitCount, 1)
+}
+
+func (r *Reporter) increaseGCCount() {
+	atomic.AddUint64(&r.gcCount, 1)
+}
+
+func (r *Reporter) CountMissed() uint64 {
+	return atomic.LoadUint64(&r.missedCount)
+}
+
+func (r *Reporter) CountHit() uint64 {
+	return atomic.LoadUint64(&r.hitCount)
+}
+
+func (r *Reporter) CountGC() uint64 {
+	return atomic.LoadUint64(&r.gcCount)
+}
+
+func (r *Reporter) CacheSize() int {
+	return r.cache.Size()
+}
+
+func (r *Reporter) HitRate() float64 {
+	hit := r.CountHit()
+	missed := r.CountMissed()
+
+	total := hit + missed
+	if total <= 0 {
+		return 0.0
 	}
+
+	return float64(hit) / float64(total)
+}
+
+func (r *Reporter) MissedRate() float64 {
+	hit := r.CountHit()
+	missed := r.CountMissed()
+
+	total := hit + missed
+	if total <= 0 {
+		return 0.0
+	}
+
+	return float64(missed) / float64(total)
+}
+
+type reportableCache struct {
+	*reportConfig
+	*Reporter
+}
+
+func Report(cache Cache, opts ...ReportOption) (Cache, *Reporter) {
+	conf := newDefaultReportConfig()
+	applyReportOptions(conf, opts)
+
+	reporter := &Reporter{
+		cache:       cache,
+		hitCount:    0,
+		missedCount: 0,
+		gcCount:     0,
+	}
+
+	cache = &reportableCache{
+		reportConfig: conf,
+		Reporter:     reporter,
+	}
+
+	return cache, reporter
 }
 
 // Get gets the value of key from cache and returns value if found.
@@ -35,10 +108,14 @@ func (rc *reportableCache) Get(key string) (value interface{}, found bool) {
 	value, found = rc.cache.Get(key)
 
 	if found {
+		rc.increaseHitCount()
+
 		if rc.reportHit != nil {
 			rc.reportHit(key, value)
 		}
 	} else {
+		rc.increaseMissedCount()
+
 		if rc.reportMissed != nil {
 			rc.reportMissed(key)
 		}
@@ -68,6 +145,8 @@ func (rc *reportableCache) Size() (size int) {
 // GC cleans the expired keys in cache and returns the exact count cleaned.
 // See Cache interface.
 func (rc *reportableCache) GC() (cleans int) {
+	rc.increaseGCCount()
+
 	if rc.reportGC == nil {
 		return rc.cache.GC()
 	}

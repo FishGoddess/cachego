@@ -99,10 +99,6 @@ func (c *cache) setup(conf *config, cache Cache) {
 	c.Loader = NewLoader(cache, conf.singleflight)
 }
 
-func shouldReport(conf *config) bool {
-	return conf.reportMissed != nil || conf.reportHit != nil || conf.reportGC != nil || conf.reportLoad != nil
-}
-
 // RunGCTask runs a gc task in a new goroutine and returns a cancel function to cancel the task.
 // However, you don't need to call it manually for most time, instead, use options is a better choice.
 // Making it a public function is for more customizations in some situations.
@@ -138,11 +134,6 @@ func NewCache(opts ...Option) (cache Cache) {
 		cache = newShardingCache(conf, newCache)
 	} else {
 		cache = newCache(conf)
-	}
-
-	// Wrap cache with report functions if it needs.
-	if shouldReport(conf) {
-		cache = report(conf, cache)
 	}
 
 	if conf.gcDuration > 0 {
