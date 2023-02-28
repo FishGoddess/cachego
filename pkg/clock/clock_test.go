@@ -43,19 +43,26 @@ func BenchmarkClockNow(b *testing.B) {
 	}
 }
 
+// go test -v -cover -run=^TestNew$
+func TestNew(t *testing.T) {
+	var clocks []*Clock
+
+	for i := 0; i < 100; i++ {
+		clocks = append(clocks, New())
+	}
+
+	for i := 0; i < 100; i++ {
+		if clocks[i] != clock {
+			t.Errorf("clocks[i] %p != clock %p", clocks[i], clock)
+		}
+	}
+}
+
 // go test -v -cover -run=^TestClock$
 func TestClock(t *testing.T) {
 	testClock := New()
 
 	for i := 0; i < 100; i++ {
-		testClock = New()
-
-		if testClock != clock {
-			t.Errorf("testClock %p != clock %p", testClock, clock)
-		}
-	}
-
-	for i := 0; i < 10; i++ {
 		now := testClock.Now()
 		t.Log(now)
 

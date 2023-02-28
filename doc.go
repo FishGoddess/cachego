@@ -393,6 +393,22 @@ Package cachego provides an easy way to use foundation for your caching operatio
 
 9. task:
 
+	var (
+		contextKey = struct{}{}
+	)
+
+	func beforePrint(ctx context.Context) {
+		fmt.Println("before:", ctx.Value(contextKey))
+	}
+
+	func afterPrint(ctx context.Context) {
+		fmt.Println("after:", ctx.Value(contextKey))
+	}
+
+	func printContextValue(ctx context.Context) {
+		fmt.Println("context value:", ctx.Value(contextKey))
+	}
+
 	// Create a context to stop the task.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -451,4 +467,4 @@ Package cachego provides an easy way to use foundation for your caching operatio
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.4.5-alpha"
+const Version = "v0.4.6"
