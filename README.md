@@ -7,7 +7,7 @@
 
 **cachego** 是一个拥有分片机制的轻量级内存缓存库，API 友好，支持多种数据淘汰机制，可以应用于所有的 [GoLang](https://golang.org) 应用程序中。
 
-> 目前 v0.3.x 版本已经在多个线上服务中运行稳定，服务日常请求过万 qps，最高抵御过 96w/s qps 的冲击，欢迎使用！👏🏻
+> 目前 v0.3.x 版本已经在多个线上服务中运行稳定，服务日常请求过万 qps，瞬时最高抵御过 96w/s qps 的冲击，欢迎使用！👏🏻
 
 [Read me in English](./README.en.md).
 
@@ -46,15 +46,10 @@ import (
 
 func main() {
 	// Use NewCache function to create a cache.
-	// You can use WithLRU to specify the type of cache to lru.
-	// Also, try WithLFU if you want to use lfu to evict data.
-	cache := cachego.NewCache(cachego.WithLRU(100))
-	cache = cachego.NewCache(cachego.WithLFU(100))
-
 	// By default, it creates a standard cache which evicts entries randomly.
 	// Use WithShardings to shard cache to several parts for higher performance.
-	cache = cachego.NewCache(cachego.WithShardings(64))
-	cache = cachego.NewCache()
+	// Use WithGC to clean expired entries every 10 minutes.
+	cache := cachego.NewCache(cachego.WithGC(10*time.Minute), cachego.WithShardings(64))
 
 	// Set an entry to cache with ttl.
 	cache.Set("key", 123, time.Second)
@@ -85,12 +80,18 @@ func main() {
 	value, ok = cache.Get("key")
 	if !ok {
 		// Loaded entry will be set to cache and returned.
+		// By default, it will use singleflight.
 		value, _ = cache.Load("key", time.Second, func() (value interface{}, err error) {
 			return 666, nil
 		})
 	}
 
 	fmt.Println(value) // 666
+
+	// You can use WithLRU to specify the type of cache to lru.
+	// Also, try WithLFU if you want to use lfu to evict data.
+	cache = cachego.NewCache(cachego.WithLRU(100))
+	cache = cachego.NewCache(cachego.WithLFU(100))
 }
 ```
 

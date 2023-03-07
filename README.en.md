@@ -47,15 +47,10 @@ import (
 
 func main() {
 	// Use NewCache function to create a cache.
-	// You can use WithLRU to specify the type of cache to lru.
-	// Also, try WithLFU if you want to use lfu to evict data.
-	cache := cachego.NewCache(cachego.WithLRU(100))
-	cache = cachego.NewCache(cachego.WithLFU(100))
-
 	// By default, it creates a standard cache which evicts entries randomly.
 	// Use WithShardings to shard cache to several parts for higher performance.
-	cache = cachego.NewCache(cachego.WithShardings(64))
-	cache = cachego.NewCache()
+	// Use WithGC to clean expired entries every 10 minutes.
+	cache := cachego.NewCache(cachego.WithGC(10*time.Minute), cachego.WithShardings(64))
 
 	// Set an entry to cache with ttl.
 	cache.Set("key", 123, time.Second)
@@ -86,12 +81,18 @@ func main() {
 	value, ok = cache.Get("key")
 	if !ok {
 		// Loaded entry will be set to cache and returned.
+		// By default, it will use singleflight.
 		value, _ = cache.Load("key", time.Second, func() (value interface{}, err error) {
 			return 666, nil
 		})
 	}
 
 	fmt.Println(value) // 666
+
+	// You can use WithLRU to specify the type of cache to lru.
+	// Also, try WithLFU if you want to use lfu to evict data.
+	cache = cachego.NewCache(cachego.WithLRU(100))
+	cache = cachego.NewCache(cachego.WithLFU(100))
 }
 ```
 
