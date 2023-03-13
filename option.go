@@ -31,6 +31,13 @@ func applyOptions(conf *config, opts []Option) {
 	}
 }
 
+// WithCacheName returns an option setting the cacheName of config.
+func WithCacheName(cacheName string) Option {
+	return func(conf *config) {
+		conf.cacheName = cacheName
+	}
+}
+
 // WithLRU returns an option setting the type of cache to lru.
 // Notice that lru cache must have max entries limit, so you have to specify a maxEntries.
 func WithLRU(maxEntries int) Option {

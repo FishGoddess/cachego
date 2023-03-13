@@ -65,6 +65,10 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	cache = cachego.NewCache(cachego.WithLRU(100))
 	cache = cachego.NewCache(cachego.WithLFU(100))
 
+	// Use NewCacheWithReport to create a cache with report.
+	cache, reporter := cachego.NewCacheWithReport(cachego.WithCacheName("test"))
+	fmt.Println(reporter.CacheName())
+
 2. ttl:
 
 	cache := cachego.NewCache()
@@ -392,6 +396,11 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	fmt.Println("MissedRate:", reporter.MissedRate())
 	fmt.Println("HitRate:", reporter.HitRate())
 
+	// Sometimes you may have several caches in one service.
+	// You can set each name by WithCacheName and get the name from reporter.
+	cachego.WithCacheName("test")
+	reporter.CacheName()
+
 9. task:
 
 	var (
@@ -468,4 +477,4 @@ Package cachego provides an easy way to use foundation for your caching operatio
 package cachego // import "github.com/FishGoddess/cachego"
 
 // Version is the version string representation of cachego.
-const Version = "v0.4.7"
+const Version = "v0.4.8"

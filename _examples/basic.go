@@ -69,4 +69,8 @@ func main() {
 	// Also, try WithLFU if you want to use lfu to evict data.
 	cache = cachego.NewCache(cachego.WithLRU(100))
 	cache = cachego.NewCache(cachego.WithLFU(100))
+
+	// Use NewCacheWithReport to create a cache with report.
+	cache, reporter := cachego.NewCacheWithReport(cachego.WithCacheName("test"))
+	fmt.Println(reporter.CacheName())
 }

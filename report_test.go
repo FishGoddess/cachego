@@ -20,8 +20,13 @@ import (
 	"time"
 )
 
+const (
+	testCacheName = "test"
+)
+
 func newTestReportableCache() (*reportableCache, *Reporter) {
 	conf := newDefaultConfig()
+	conf.cacheName = testCacheName
 	conf.maxEntries = maxTestEntries
 	cache, reporter := report(conf, newStandardCache(conf))
 	return cache.(*reportableCache), reporter
@@ -192,6 +197,14 @@ func TestReportableCacheReportLoad(t *testing.T) {
 
 	if reporter.CountLoad() != loadCount {
 		t.Errorf("CountLoad %d is wrong", reporter.CountLoad())
+	}
+}
+
+// go test -v -cover -run=^TestReporterCacheName$
+func TestReporterCacheName(t *testing.T) {
+	_, reporter := newTestReportableCache()
+	if reporter.CacheName() != testCacheName {
+		t.Errorf("CacheName %s is wrong", reporter.CacheName())
 	}
 }
 

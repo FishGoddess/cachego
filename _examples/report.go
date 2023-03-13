@@ -84,4 +84,9 @@ func main() {
 	fmt.Println("CacheSize:", reporter.CacheSize())
 	fmt.Println("MissedRate:", reporter.MissedRate())
 	fmt.Println("HitRate:", reporter.HitRate())
+
+	// Sometimes you may have several caches in one service.
+	// You can set each name by WithCacheName and get the name from reporter.
+	cachego.WithCacheName("test")
+	reporter.CacheName()
 }

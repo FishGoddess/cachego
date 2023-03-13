@@ -21,6 +21,7 @@ import (
 
 // Reporter stores some values for reporting.
 type Reporter struct {
+	conf  *config
 	cache Cache
 
 	missedCount uint64
@@ -43,6 +44,12 @@ func (r *Reporter) increaseGCCount() {
 
 func (r *Reporter) increaseLoadCount() {
 	atomic.AddUint64(&r.loadCount, 1)
+}
+
+// CacheName returns the name of cache.
+// You can use WithCacheName to set cache's name.
+func (r *Reporter) CacheName() string {
+	return r.conf.cacheName
 }
 
 // CountMissed returns the missed count.
@@ -103,6 +110,7 @@ type reportableCache struct {
 
 func report(conf *config, cache Cache) (Cache, *Reporter) {
 	reporter := &Reporter{
+		conf:        conf,
 		cache:       cache,
 		hitCount:    0,
 		missedCount: 0,

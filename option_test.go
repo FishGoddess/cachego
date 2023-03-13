@@ -19,6 +19,17 @@ import (
 	"time"
 )
 
+// go test -v -cover -run=^TestWithCacheName$
+func TestWithCacheName(t *testing.T) {
+	got := &config{cacheName: ""}
+	expect := &config{cacheName: "-"}
+
+	WithCacheName("-").applyTo(got)
+	if !isConfigEquals(got, expect) {
+		t.Errorf("got %+v != expect %+v", got, expect)
+	}
+}
+
 // go test -v -cover -run=^TestWithLRU$
 func TestWithLRU(t *testing.T) {
 	got := &config{cacheType: standard, maxEntries: 0}

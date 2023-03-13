@@ -87,7 +87,7 @@ func (c *Clock) start() {
 			atomic.AddInt64(&c.now, int64(duration))
 		}
 
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(duration)
 		atomic.StoreInt64(&c.now, time.Now().UnixNano())
 	}
 }

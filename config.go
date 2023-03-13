@@ -17,6 +17,7 @@ package cachego
 import "time"
 
 type config struct {
+	cacheName    string
 	cacheType    cacheType
 	shardings    int
 	singleflight bool
@@ -41,6 +42,7 @@ type config struct {
 
 func newDefaultConfig() *config {
 	return &config{
+		cacheName:    "",
 		cacheType:    standard,
 		shardings:    0,
 		singleflight: true,
