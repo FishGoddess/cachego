@@ -54,7 +54,7 @@ func (r *Reporter) CacheName() string {
 
 // CacheShardings returns the shardings of cache.
 // You can use WithShardings to set cache's shardings.
-// Notice that cache is non-sharding if shardings is 0.
+// Zero shardings means cache is non-sharding.
 func (r *Reporter) CacheShardings() int {
 	return r.conf.shardings
 }
