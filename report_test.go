@@ -21,13 +21,16 @@ import (
 )
 
 const (
-	testCacheName = "test"
+	testCacheName      = "test"
+	testCacheShardings = 16
 )
 
 func newTestReportableCache() (*reportableCache, *Reporter) {
 	conf := newDefaultConfig()
 	conf.cacheName = testCacheName
+	conf.shardings = testCacheShardings
 	conf.maxEntries = maxTestEntries
+
 	cache, reporter := report(conf, newStandardCache(conf))
 	return cache.(*reportableCache), reporter
 }
@@ -203,8 +206,24 @@ func TestReportableCacheReportLoad(t *testing.T) {
 // go test -v -cover -run=^TestReporterCacheName$
 func TestReporterCacheName(t *testing.T) {
 	_, reporter := newTestReportableCache()
+	if reporter.CacheName() != reporter.conf.cacheName {
+		t.Errorf("CacheName %s is wrong compared with conf", reporter.CacheName())
+	}
+
 	if reporter.CacheName() != testCacheName {
 		t.Errorf("CacheName %s is wrong", reporter.CacheName())
+	}
+}
+
+// go test -v -cover -run=^TestReporterCacheShardings$
+func TestReporterCacheShardings(t *testing.T) {
+	_, reporter := newTestReportableCache()
+	if reporter.CacheShardings() != reporter.conf.shardings {
+		t.Errorf("CacheShardings %d is wrong compared with conf", reporter.CacheShardings())
+	}
+
+	if reporter.CacheShardings() != testCacheShardings {
+		t.Errorf("CacheShardings %d is wrong", reporter.CacheShardings())
 	}
 }
 

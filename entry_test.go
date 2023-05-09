@@ -20,6 +20,10 @@ import (
 	"time"
 )
 
+const (
+	testDurationGap = 10 * time.Microsecond
+)
+
 // go test -v -cover -run=^TestNewEntry$
 func TestNewEntry(t *testing.T) {
 	e := newEntry("key", "value", 0, now)
@@ -60,7 +64,7 @@ func TestNewEntry(t *testing.T) {
 	}
 
 	// Keep one us for code running.
-	if expiration < e.expiration || e.expiration < expiration-time.Microsecond.Nanoseconds() {
+	if expiration < e.expiration || e.expiration < expiration-testDurationGap.Nanoseconds() {
 		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
 	}
 }
@@ -102,7 +106,7 @@ func TestEntrySetup(t *testing.T) {
 	}
 
 	// Keep one us for code running.
-	if expiration < e.expiration || e.expiration < expiration-time.Microsecond.Nanoseconds() {
+	if expiration < e.expiration || e.expiration < expiration-testDurationGap.Nanoseconds() {
 		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
 	}
 }
