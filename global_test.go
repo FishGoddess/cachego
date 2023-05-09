@@ -42,7 +42,7 @@ func TestNow(t *testing.T) {
 	got := now()
 	expect := time.Now().UnixNano()
 
-	if got > expect || got < expect-time.Microsecond.Nanoseconds() {
+	if got > expect || got < expect-testDurationGap.Nanoseconds() {
 		t.Errorf("got %d != expect %d", got, expect)
 	}
 }

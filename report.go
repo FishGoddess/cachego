@@ -52,6 +52,13 @@ func (r *Reporter) CacheName() string {
 	return r.conf.cacheName
 }
 
+// CacheShardings returns the shardings of cache.
+// You can use WithShardings to set cache's shardings.
+// Notice that cache is non-sharding if shardings is 0.
+func (r *Reporter) CacheShardings() int {
+	return r.conf.shardings
+}
+
 // CountMissed returns the missed count.
 func (r *Reporter) CountMissed() uint64 {
 	return atomic.LoadUint64(&r.missedCount)
