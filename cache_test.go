@@ -27,6 +27,18 @@ const (
 
 // go test -v -cover -run=^TestCacheType$
 func TestCacheType(t *testing.T) {
+	if standard.String() != string(standard) {
+		t.Errorf("standard.String() %s is wrong", standard.String())
+	}
+
+	if lru.String() != string(lru) {
+		t.Errorf("lru.String() %s is wrong", lru.String())
+	}
+
+	if lfu.String() != string(lfu) {
+		t.Errorf("lfu.String() %s is wrong", lfu.String())
+	}
+
 	if !standard.IsStandard() {
 		t.Error("!standard.IsStandard()")
 	}
