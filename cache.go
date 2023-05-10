@@ -52,6 +52,11 @@ var (
 // CacheType is the type of cache.
 type CacheType string
 
+// String returns the cache type in string form.
+func (ct CacheType) String() string {
+	return string(ct)
+}
+
 // IsStandard returns if cache type is standard.
 func (ct CacheType) IsStandard() bool {
 	return ct == standard
