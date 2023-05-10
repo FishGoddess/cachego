@@ -28,30 +28,44 @@ const (
 )
 
 const (
-	_ cacheType = iota
-
 	// standard cache is a simple cache with locked map.
 	// It evicts entries randomly if cache size reaches to max entries.
-	standard
+	standard CacheType = "standard"
 
 	// lru cache is a cache using lru to evict entries.
 	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU).
-	lru
+	lru CacheType = "lru"
 
 	// lfu cache is a cache using lfu to evict entries.
 	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#Least-frequently_used_(LFU).
-	lfu
+	lfu CacheType = "lfu"
 )
 
 var (
-	newCaches = map[cacheType]func(conf *config) Cache{
+	newCaches = map[CacheType]func(conf *config) Cache{
 		standard: newStandardCache,
 		lru:      newLRUCache,
 		lfu:      newLFUCache,
 	}
 )
 
-type cacheType = uint8
+// CacheType is the type of cache.
+type CacheType string
+
+// IsStandard returns if cache type is standard.
+func (ct CacheType) IsStandard() bool {
+	return ct == standard
+}
+
+// IsLRU returns if cache type is lru.
+func (ct CacheType) IsLRU() bool {
+	return ct == lru
+}
+
+// IsLFU returns if cache type is lfu.
+func (ct CacheType) IsLFU() bool {
+	return ct == lfu
+}
 
 // Cache is the core interface of cachego.
 // We provide some implements including standard cache and sharding cache.

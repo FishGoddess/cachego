@@ -52,6 +52,12 @@ func (r *Reporter) CacheName() string {
 	return r.conf.cacheName
 }
 
+// CacheType returns the type of cache.
+// See CacheType.
+func (r *Reporter) CacheType() CacheType {
+	return r.conf.cacheType
+}
+
 // CacheShardings returns the shardings of cache.
 // You can use WithShardings to set cache's shardings.
 // Zero shardings means cache is non-sharding.

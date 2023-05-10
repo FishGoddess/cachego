@@ -25,6 +25,21 @@ const (
 	maxTestEntries = 10
 )
 
+// go test -v -cover -run=^TestCacheType$
+func TestCacheType(t *testing.T) {
+	if !standard.IsStandard() {
+		t.Error("!standard.IsStandard()")
+	}
+
+	if !lru.IsLRU() {
+		t.Error("!standard.IsLRU()")
+	}
+
+	if !lfu.IsLFU() {
+		t.Error("!standard.IsLFU()")
+	}
+}
+
 type testCache struct {
 	cache
 	count int32
