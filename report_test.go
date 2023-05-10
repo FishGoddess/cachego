@@ -22,12 +22,14 @@ import (
 
 const (
 	testCacheName      = "test"
+	testCacheType      = lru
 	testCacheShardings = 16
 )
 
 func newTestReportableCache() (*reportableCache, *Reporter) {
 	conf := newDefaultConfig()
 	conf.cacheName = testCacheName
+	conf.cacheType = testCacheType
 	conf.shardings = testCacheShardings
 	conf.maxEntries = maxTestEntries
 
@@ -212,6 +214,18 @@ func TestReporterCacheName(t *testing.T) {
 
 	if reporter.CacheName() != testCacheName {
 		t.Errorf("CacheName %s is wrong", reporter.CacheName())
+	}
+}
+
+// go test -v -cover -run=^TestReporterCacheType$
+func TestReporterCacheType(t *testing.T) {
+	_, reporter := newTestReportableCache()
+	if reporter.CacheType() != reporter.conf.cacheType {
+		t.Errorf("CacheType %s is wrong compared with conf", reporter.CacheType())
+	}
+
+	if reporter.CacheType() != testCacheType {
+		t.Errorf("CacheType %s is wrong", reporter.CacheType())
 	}
 }
 

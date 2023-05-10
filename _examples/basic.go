@@ -73,4 +73,5 @@ func main() {
 	// Use NewCacheWithReport to create a cache with report.
 	cache, reporter := cachego.NewCacheWithReport(cachego.WithCacheName("test"))
 	fmt.Println(reporter.CacheName())
+	fmt.Println(reporter.CacheType())
 }

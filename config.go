@@ -18,7 +18,7 @@ import "time"
 
 type config struct {
 	cacheName    string
-	cacheType    cacheType
+	cacheType    CacheType
 	shardings    int
 	singleflight bool
 	gcDuration   time.Duration

@@ -40,16 +40,21 @@ func reportLoad(reporter *cachego.Reporter, key string, value interface{}, ttl t
 }
 
 func main() {
-	// We provide some reporting points for monitor cache.
-	// ReportMissed reports the missed key getting from cache.
-	// ReportHit reports the hit entry getting from cache.
-	// ReportGC reports the status of cache gc.
-	// ReportLoad reports the result of loading.
-	// Use NewCacheWithReport to create a cache with report.
+	// We provide some ways to report the status of cache.
+	// Use NewCacheWithReport to create a cache with reporting features.
 	cache, reporter := cachego.NewCacheWithReport(
+		// Sometimes you may have several caches in one service.
+		// You can set each name by WithCacheName and get the name from reporter.
+		cachego.WithCacheName("test"),
+
+		// For testing...
 		cachego.WithMaxEntries(3),
 		cachego.WithGC(100*time.Millisecond),
 
+		// ReportMissed reports the missed key getting from cache.
+		// ReportHit reports the hit entry getting from cache.
+		// ReportGC reports the status of cache gc.
+		// ReportLoad reports the result of loading.
 		cachego.WithReportMissed(reportMissed),
 		cachego.WithReportHit(reportHit),
 		cachego.WithReportGC(reportGC),
@@ -76,7 +81,9 @@ func main() {
 
 	fmt.Println(value, err)
 
-	// These are some methods of reporter.
+	// These are some useful methods of reporter.
+	fmt.Println("CacheName:", reporter.CacheName())
+	fmt.Println("CacheType:", reporter.CacheType())
 	fmt.Println("CountMissed:", reporter.CountMissed())
 	fmt.Println("CountHit:", reporter.CountHit())
 	fmt.Println("CountGC:", reporter.CountGC())
@@ -84,9 +91,4 @@ func main() {
 	fmt.Println("CacheSize:", reporter.CacheSize())
 	fmt.Println("MissedRate:", reporter.MissedRate())
 	fmt.Println("HitRate:", reporter.HitRate())
-
-	// Sometimes you may have several caches in one service.
-	// You can set each name by WithCacheName and get the name from reporter.
-	cachego.WithCacheName("test")
-	reporter.CacheName()
 }
