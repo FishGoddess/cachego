@@ -65,6 +65,18 @@ func (r *Reporter) CacheShardings() int {
 	return r.conf.shardings
 }
 
+// CacheGC returns the gc duration of cache.
+// You can use WithGC to set cache's gc duration.
+// Zero duration means cache disables gc.
+func (r *Reporter) CacheGC() time.Duration {
+	return r.conf.gcDuration
+}
+
+// CacheSize returns the size of cache.
+func (r *Reporter) CacheSize() int {
+	return r.cache.Size()
+}
+
 // CountMissed returns the missed count.
 func (r *Reporter) CountMissed() uint64 {
 	return atomic.LoadUint64(&r.missedCount)
@@ -83,11 +95,6 @@ func (r *Reporter) CountGC() uint64 {
 // CountLoad returns the load count.
 func (r *Reporter) CountLoad() uint64 {
 	return atomic.LoadUint64(&r.loadCount)
-}
-
-// CacheSize returns the size of cache.
-func (r *Reporter) CacheSize() int {
-	return r.cache.Size()
 }
 
 // MissedRate returns the missed rate.
