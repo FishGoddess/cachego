@@ -21,9 +21,10 @@ import (
 )
 
 const (
-	testCacheName      = "test"
-	testCacheType      = lru
-	testCacheShardings = 16
+	testCacheName       = "test"
+	testCacheType       = lru
+	testCacheShardings  = 16
+	testCacheGCDuration = 10 * time.Minute
 )
 
 func newTestReportableCache() (*reportableCache, *Reporter) {
@@ -31,6 +32,7 @@ func newTestReportableCache() (*reportableCache, *Reporter) {
 	conf.cacheName = testCacheName
 	conf.cacheType = testCacheType
 	conf.shardings = testCacheShardings
+	conf.gcDuration = testCacheGCDuration
 	conf.maxEntries = maxTestEntries
 
 	cache, reporter := report(conf, newStandardCache(conf))
@@ -238,6 +240,18 @@ func TestReporterCacheShardings(t *testing.T) {
 
 	if reporter.CacheShardings() != testCacheShardings {
 		t.Errorf("CacheShardings %d is wrong", reporter.CacheShardings())
+	}
+}
+
+// go test -v -cover -run=^TestReporterCacheGC$
+func TestReporterCacheGC(t *testing.T) {
+	_, reporter := newTestReportableCache()
+	if reporter.CacheGC() != reporter.conf.gcDuration {
+		t.Errorf("CacheGC %d is wrong compared with conf", reporter.CacheGC())
+	}
+
+	if reporter.CacheGC() != testCacheGCDuration {
+		t.Errorf("CacheGC %d is wrong", reporter.CacheGC())
 	}
 }
 
