@@ -157,6 +157,8 @@ better performance in most time.
 
 Please open an _**issue**_ if you find something is not working as expected.
 
+[![Star History Chart](https://api.star-history.com/svg?repos=fishgoddess/cachego&type=Date)](https://star-history.com/#fishgoddess/cachego&Date)
+
 At last, I want to thank JetBrains for **free JetBrains Open Source license(s)**, because `cachego` is developed with
 Idea / GoLand under it.
 
