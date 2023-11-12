@@ -155,6 +155,4 @@ BenchmarkGoCacheSet-12                   4921483               249.0 ns/op      
 
 如果您觉得 cachego 缺少您需要的功能，请不要犹豫，马上参与进来，发起一个 _**issue**_。
 
-最后，我想感谢 JetBrains 公司的 **free JetBrains Open Source license(s)**，因为 `cachego` 是用该计划下的 Idea / GoLand 完成开发的。
-
-<a href="https://www.jetbrains.com/?from=cachego" target="_blank"><img src="./_icons/jetbrains.png" width="250"/></a>
+[![Star History Chart](https://api.star-history.com/svg?repos=fishgoddess/cachego&type=Date)](https://star-history.com/#fishgoddess/cachego&Date)
