@@ -29,43 +29,43 @@ func TestNewEntry(t *testing.T) {
 	e := newEntry("key", "value", 0, now)
 
 	if e.key != "key" {
-		t.Errorf("e.key %s is wrong", e.key)
+		t.Fatalf("e.key %s is wrong", e.key)
 	}
 
 	if e.value.(string) != "value" {
-		t.Errorf("e.value %+v is wrong", e.value)
+		t.Fatalf("e.value %+v is wrong", e.value)
 	}
 
 	if e.expiration != 0 {
-		t.Errorf("e.expiration %+v != 0", e.expiration)
+		t.Fatalf("e.expiration %+v != 0", e.expiration)
 	}
 
 	if fmt.Sprintf("%p", e.now) != fmt.Sprintf("%p", now) {
-		t.Errorf("e.now %p is wrong", e.now)
+		t.Fatalf("e.now %p is wrong", e.now)
 	}
 
 	e = newEntry("k", "v", time.Second, now)
 	expiration := time.Now().Add(time.Second).UnixNano()
 
 	if e.key != "k" {
-		t.Errorf("e.key %s is wrong", e.key)
+		t.Fatalf("e.key %s is wrong", e.key)
 	}
 
 	if e.value.(string) != "v" {
-		t.Errorf("e.value %+v is wrong", e.value)
+		t.Fatalf("e.value %+v is wrong", e.value)
 	}
 
 	if e.expiration == 0 {
-		t.Error("e.expiration == 0")
+		t.Fatal("e.expiration == 0")
 	}
 
 	if fmt.Sprintf("%p", e.now) != fmt.Sprintf("%p", now) {
-		t.Errorf("e.now %p is wrong", e.now)
+		t.Fatalf("e.now %p is wrong", e.now)
 	}
 
 	// Keep one us for code running.
 	if expiration < e.expiration || e.expiration < expiration-testDurationGap.Nanoseconds() {
-		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
+		t.Fatalf("e.expiration %d != expiration %d", e.expiration, expiration)
 	}
 }
 
@@ -74,15 +74,15 @@ func TestEntrySetup(t *testing.T) {
 	e := newEntry("key", "value", 0, now)
 
 	if e.key != "key" {
-		t.Errorf("e.key %s is wrong", e.key)
+		t.Fatalf("e.key %s is wrong", e.key)
 	}
 
 	if e.value.(string) != "value" {
-		t.Errorf("e.value %+v is wrong", e.value)
+		t.Fatalf("e.value %+v is wrong", e.value)
 	}
 
 	if e.expiration != 0 {
-		t.Errorf("e.expiration %+v != 0", e.expiration)
+		t.Fatalf("e.expiration %+v != 0", e.expiration)
 	}
 
 	ee := e
@@ -90,24 +90,24 @@ func TestEntrySetup(t *testing.T) {
 	expiration := time.Now().Add(time.Second).UnixNano()
 
 	if ee != e {
-		t.Errorf("ee %p != e %p", ee, e)
+		t.Fatalf("ee %p != e %p", ee, e)
 	}
 
 	if e.key != "k" {
-		t.Errorf("e.key %s is wrong", e.key)
+		t.Fatalf("e.key %s is wrong", e.key)
 	}
 
 	if e.value.(string) != "v" {
-		t.Errorf("e.value %+v is wrong", e.value)
+		t.Fatalf("e.value %+v is wrong", e.value)
 	}
 
 	if e.expiration == 0 {
-		t.Error("e.expiration == 0")
+		t.Fatal("e.expiration == 0")
 	}
 
 	// Keep one us for code running.
 	if expiration < e.expiration || e.expiration < expiration-testDurationGap.Nanoseconds() {
-		t.Errorf("e.expiration %d != expiration %d", e.expiration, expiration)
+		t.Fatalf("e.expiration %d != expiration %d", e.expiration, expiration)
 	}
 }
 
@@ -116,12 +116,12 @@ func TestEntryExpired(t *testing.T) {
 	e := newEntry("", nil, time.Millisecond, now)
 
 	if e.expired(0) {
-		t.Error("e should be unexpired!")
+		t.Fatal("e should be unexpired!")
 	}
 
 	time.Sleep(2 * time.Millisecond)
 
 	if !e.expired(0) {
-		t.Error("e should be expired!")
+		t.Fatal("e should be expired!")
 	}
 }

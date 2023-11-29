@@ -33,7 +33,7 @@ func BenchmarkHash(b *testing.B) {
 func TestHash(t *testing.T) {
 	hash := hash("test")
 	if hash < 0 {
-		t.Errorf("hash %d <= 0", hash)
+		t.Fatalf("hash %d <= 0", hash)
 	}
 }
 
@@ -43,7 +43,7 @@ func TestNow(t *testing.T) {
 	expect := time.Now().UnixNano()
 
 	if got > expect || got < expect-testDurationGap.Nanoseconds() {
-		t.Errorf("got %d != expect %d", got, expect)
+		t.Fatalf("got %d != expect %d", got, expect)
 	}
 }
 
@@ -53,17 +53,17 @@ func TestSetMapInitialCap(t *testing.T) {
 
 	SetMapInitialCap(-2)
 	if mapInitialCap != oldInitialCap {
-		t.Errorf("mapInitialCap %d is wrong", mapInitialCap)
+		t.Fatalf("mapInitialCap %d is wrong", mapInitialCap)
 	}
 
 	SetMapInitialCap(0)
 	if mapInitialCap != oldInitialCap {
-		t.Errorf("mapInitialCap %d is wrong", mapInitialCap)
+		t.Fatalf("mapInitialCap %d is wrong", mapInitialCap)
 	}
 
 	SetMapInitialCap(2)
 	if mapInitialCap != 2 {
-		t.Errorf("mapInitialCap %d is wrong", mapInitialCap)
+		t.Fatalf("mapInitialCap %d is wrong", mapInitialCap)
 	}
 }
 
@@ -73,16 +73,16 @@ func TestSetSliceInitialCap(t *testing.T) {
 
 	SetSliceInitialCap(-2)
 	if sliceInitialCap != oldInitialCap {
-		t.Errorf("sliceInitialCap %d is wrong", sliceInitialCap)
+		t.Fatalf("sliceInitialCap %d is wrong", sliceInitialCap)
 	}
 
 	SetSliceInitialCap(0)
 	if sliceInitialCap != oldInitialCap {
-		t.Errorf("sliceInitialCap %d is wrong", sliceInitialCap)
+		t.Fatalf("sliceInitialCap %d is wrong", sliceInitialCap)
 	}
 
 	SetSliceInitialCap(2)
 	if sliceInitialCap != 2 {
-		t.Errorf("sliceInitialCap %d is wrong", sliceInitialCap)
+		t.Fatalf("sliceInitialCap %d is wrong", sliceInitialCap)
 	}
 }

@@ -39,11 +39,11 @@ func TestTickerTaskRun(t *testing.T) {
 	beforeFn := func(ctx context.Context) {
 		value, ok := ctx.Value(before.key).(string)
 		if !ok {
-			t.Errorf("ctx.Value(before.key).(string) %+v failed", ctx.Value(before.key))
+			t.Fatalf("ctx.Value(before.key).(string) %+v failed", ctx.Value(before.key))
 		}
 
 		if value != before.value {
-			t.Errorf("value %s != before.value %s", value, before.value)
+			t.Fatalf("value %s != before.value %s", value, before.value)
 		}
 
 		result.WriteString(value)
@@ -52,11 +52,11 @@ func TestTickerTaskRun(t *testing.T) {
 	mainFn := func(ctx context.Context) {
 		value, ok := ctx.Value(fn.key).(string)
 		if !ok {
-			t.Errorf("ctx.Value(fn.key).(string) %+v failed", ctx.Value(fn.key))
+			t.Fatalf("ctx.Value(fn.key).(string) %+v failed", ctx.Value(fn.key))
 		}
 
 		if value != fn.value {
-			t.Errorf("value %s != fn.value %s", value, fn.value)
+			t.Fatalf("value %s != fn.value %s", value, fn.value)
 		}
 
 		atomic.AddInt64(&loop, 1)
@@ -66,11 +66,11 @@ func TestTickerTaskRun(t *testing.T) {
 	afterFn := func(ctx context.Context) {
 		value, ok := ctx.Value(after.key).(string)
 		if !ok {
-			t.Errorf("ctx.Value(after.key).(string) %+v failed", ctx.Value(after.key))
+			t.Fatalf("ctx.Value(after.key).(string) %+v failed", ctx.Value(after.key))
 		}
 
 		if value != after.value {
-			t.Errorf("value %s != after.value %s", value, after.value)
+			t.Fatalf("value %s != after.value %s", value, after.value)
 		}
 
 		result.WriteString(value)
@@ -96,6 +96,6 @@ func TestTickerTaskRun(t *testing.T) {
 	expect.WriteString(after.value)
 
 	if result.String() != expect.String() {
-		t.Errorf("result %s != expect %s", result.String(), expect.String())
+		t.Fatalf("result %s != expect %s", result.String(), expect.String())
 	}
 }

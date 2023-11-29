@@ -53,7 +53,7 @@ func TestNew(t *testing.T) {
 
 	for i := 0; i < 100; i++ {
 		if clocks[i] != clock {
-			t.Errorf("clocks[i] %p != clock %p", clocks[i], clock)
+			t.Fatalf("clocks[i] %p != clock %p", clocks[i], clock)
 		}
 	}
 }
@@ -68,7 +68,7 @@ func TestClock(t *testing.T) {
 
 		expect := time.Now().UnixNano()
 		if math.Abs(float64(expect-now)) > float64(duration)*1.5 {
-			t.Errorf("now %d is wrong with expect %d", now, expect)
+			t.Fatalf("now %d is wrong with expect %d", now, expect)
 		}
 
 		time.Sleep(time.Duration(rand.Int63n(int64(duration))))

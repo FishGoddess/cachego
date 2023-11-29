@@ -53,11 +53,11 @@ func TestReportableCacheReportMissed(t *testing.T) {
 	checked := false
 	cache.reportMissed = func(reporter *Reporter, key string) {
 		if key == "key" {
-			t.Error("key == \"key\"")
+			t.Fatal("key == \"key\"")
 		}
 
 		if key != "missed" {
-			t.Errorf("key %s != \"missed\"", key)
+			t.Fatalf("key %s != \"missed\"", key)
 		}
 
 		checked = true
@@ -67,16 +67,16 @@ func TestReportableCacheReportMissed(t *testing.T) {
 	cache.Get("missed")
 
 	if !checked {
-		t.Error("reportMissed not checked")
+		t.Fatal("reportMissed not checked")
 	}
 
 	if reporter.CountMissed() != 1 {
-		t.Errorf("CountMissed %d is wrong", reporter.CountMissed())
+		t.Fatalf("CountMissed %d is wrong", reporter.CountMissed())
 	}
 
 	missedRate := reporter.MissedRate()
 	if missedRate < 0.499 || missedRate > 0.501 {
-		t.Errorf("missedRate %.3f is wrong", missedRate)
+		t.Fatalf("missedRate %.3f is wrong", missedRate)
 	}
 }
 
@@ -88,15 +88,15 @@ func TestReportableCacheReportHit(t *testing.T) {
 	checked := false
 	cache.reportHit = func(reporter *Reporter, key string, value interface{}) {
 		if key == "missed" {
-			t.Error("key == \"missed\"")
+			t.Fatal("key == \"missed\"")
 		}
 
 		if key != "key" {
-			t.Errorf("key %s != \"key\"", key)
+			t.Fatalf("key %s != \"key\"", key)
 		}
 
 		if value.(int) != 666 {
-			t.Errorf("value.(int) %d is wrong", value.(int))
+			t.Fatalf("value.(int) %d is wrong", value.(int))
 		}
 
 		checked = true
@@ -106,16 +106,16 @@ func TestReportableCacheReportHit(t *testing.T) {
 	cache.Get("missed")
 
 	if !checked {
-		t.Error("reportHit not checked")
+		t.Fatal("reportHit not checked")
 	}
 
 	if reporter.CountHit() != 1 {
-		t.Errorf("CountHit %d is wrong", reporter.CountHit())
+		t.Fatalf("CountHit %d is wrong", reporter.CountHit())
 	}
 
 	hitRate := reporter.HitRate()
 	if hitRate < 0.499 || hitRate > 0.501 {
-		t.Errorf("hitRate %.3f is wrong", hitRate)
+		t.Fatalf("hitRate %.3f is wrong", hitRate)
 	}
 }
 
@@ -132,11 +132,11 @@ func TestReportableCacheReportGC(t *testing.T) {
 	checked := false
 	cache.reportGC = func(reporter *Reporter, cost time.Duration, cleans int) {
 		if cost <= 0 {
-			t.Errorf("cost %d <= 0", cost)
+			t.Fatalf("cost %d <= 0", cost)
 		}
 
 		if cleans != 3 {
-			t.Errorf("cleans %d is wrong", cleans)
+			t.Fatalf("cleans %d is wrong", cleans)
 		}
 
 		gcCount++
@@ -147,15 +147,15 @@ func TestReportableCacheReportGC(t *testing.T) {
 
 	cleans := cache.GC()
 	if cleans != 3 {
-		t.Errorf("cleans %d is wrong", cleans)
+		t.Fatalf("cleans %d is wrong", cleans)
 	}
 
 	if !checked {
-		t.Error("reportHit not checked")
+		t.Fatal("reportHit not checked")
 	}
 
 	if reporter.CountGC() != gcCount {
-		t.Errorf("CountGC %d is wrong", reporter.CountGC())
+		t.Fatalf("CountGC %d is wrong", reporter.CountGC())
 	}
 }
 
@@ -167,19 +167,19 @@ func TestReportableCacheReportLoad(t *testing.T) {
 	checked := false
 	cache.reportLoad = func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error) {
 		if key != "load" {
-			t.Errorf("key %s is wrong", key)
+			t.Fatalf("key %s is wrong", key)
 		}
 
 		if value.(int) != 999 {
-			t.Errorf("value.(int) %d is wrong", value.(int))
+			t.Fatalf("value.(int) %d is wrong", value.(int))
 		}
 
 		if ttl != time.Second {
-			t.Errorf("ttl %s is wrong", ttl)
+			t.Fatalf("ttl %s is wrong", ttl)
 		}
 
 		if err != io.EOF {
-			t.Errorf("err %+v is wrong", err)
+			t.Fatalf("err %+v is wrong", err)
 		}
 
 		loadCount++
@@ -191,19 +191,19 @@ func TestReportableCacheReportLoad(t *testing.T) {
 	})
 
 	if value.(int) != 999 {
-		t.Errorf("value.(int) %d is wrong", value.(int))
+		t.Fatalf("value.(int) %d is wrong", value.(int))
 	}
 
 	if err != io.EOF {
-		t.Errorf("err %+v is wrong", err)
+		t.Fatalf("err %+v is wrong", err)
 	}
 
 	if !checked {
-		t.Error("reportLoad not checked")
+		t.Fatal("reportLoad not checked")
 	}
 
 	if reporter.CountLoad() != loadCount {
-		t.Errorf("CountLoad %d is wrong", reporter.CountLoad())
+		t.Fatalf("CountLoad %d is wrong", reporter.CountLoad())
 	}
 }
 
@@ -211,11 +211,11 @@ func TestReportableCacheReportLoad(t *testing.T) {
 func TestReporterCacheName(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheName() != reporter.conf.cacheName {
-		t.Errorf("CacheName %s is wrong compared with conf", reporter.CacheName())
+		t.Fatalf("CacheName %s is wrong compared with conf", reporter.CacheName())
 	}
 
 	if reporter.CacheName() != testCacheName {
-		t.Errorf("CacheName %s is wrong", reporter.CacheName())
+		t.Fatalf("CacheName %s is wrong", reporter.CacheName())
 	}
 }
 
@@ -223,11 +223,11 @@ func TestReporterCacheName(t *testing.T) {
 func TestReporterCacheType(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheType() != reporter.conf.cacheType {
-		t.Errorf("CacheType %s is wrong compared with conf", reporter.CacheType())
+		t.Fatalf("CacheType %s is wrong compared with conf", reporter.CacheType())
 	}
 
 	if reporter.CacheType() != testCacheType {
-		t.Errorf("CacheType %s is wrong", reporter.CacheType())
+		t.Fatalf("CacheType %s is wrong", reporter.CacheType())
 	}
 }
 
@@ -235,11 +235,11 @@ func TestReporterCacheType(t *testing.T) {
 func TestReporterCacheShardings(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheShardings() != reporter.conf.shardings {
-		t.Errorf("CacheShardings %d is wrong compared with conf", reporter.CacheShardings())
+		t.Fatalf("CacheShardings %d is wrong compared with conf", reporter.CacheShardings())
 	}
 
 	if reporter.CacheShardings() != testCacheShardings {
-		t.Errorf("CacheShardings %d is wrong", reporter.CacheShardings())
+		t.Fatalf("CacheShardings %d is wrong", reporter.CacheShardings())
 	}
 }
 
@@ -247,11 +247,11 @@ func TestReporterCacheShardings(t *testing.T) {
 func TestReporterCacheGC(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheGC() != reporter.conf.gcDuration {
-		t.Errorf("CacheGC %d is wrong compared with conf", reporter.CacheGC())
+		t.Fatalf("CacheGC %d is wrong compared with conf", reporter.CacheGC())
 	}
 
 	if reporter.CacheGC() != testCacheGCDuration {
-		t.Errorf("CacheGC %d is wrong", reporter.CacheGC())
+		t.Fatalf("CacheGC %d is wrong", reporter.CacheGC())
 	}
 }
 
@@ -265,13 +265,13 @@ func TestReporterCacheSize(t *testing.T) {
 	cache.Set("key5", 5, time.Second)
 
 	if reporter.CacheSize() != 5 {
-		t.Errorf("CacheSize %d is wrong", reporter.CacheSize())
+		t.Fatalf("CacheSize %d is wrong", reporter.CacheSize())
 	}
 
 	time.Sleep(100 * time.Millisecond)
 	cache.GC()
 
 	if reporter.CacheSize() != 2 {
-		t.Errorf("CacheSize %d is wrong", reporter.CacheSize())
+		t.Fatalf("CacheSize %d is wrong", reporter.CacheSize())
 	}
 }

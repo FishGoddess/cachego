@@ -42,12 +42,12 @@ func testGroupCall(t *testing.T, group *Group, concurrency int) {
 			})
 
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 
 			r := atomic.LoadInt64(&rightResult)
 			if result != r {
-				t.Errorf("result %d != rightResult %d", result, r)
+				t.Fatalf("result %d != rightResult %d", result, r)
 			}
 		}(int64(i))
 	}
@@ -96,21 +96,21 @@ func TestGroupDelete(t *testing.T) {
 
 	call := group.calls["key"]
 	if call.deleted {
-		t.Error("call.deleted is wrong")
+		t.Fatal("call.deleted is wrong")
 	}
 
 	group.Delete("key")
 
 	if !call.deleted {
-		t.Error("call.deleted is wrong")
+		t.Fatal("call.deleted is wrong")
 	}
 
 	if _, ok := group.calls["key"]; ok {
-		t.Error("group.calls[\"key\"] is ok")
+		t.Fatal("group.calls[\"key\"] is ok")
 	}
 
 	if len(group.calls) != 0 {
-		t.Errorf("len(group.calls) %d is wrong", len(group.calls))
+		t.Fatalf("len(group.calls) %d is wrong", len(group.calls))
 	}
 }
 
@@ -139,7 +139,7 @@ func TestGroupReset(t *testing.T) {
 
 		call := group.calls[key]
 		if call.deleted {
-			t.Errorf("key %s call.deleted is wrong", key)
+			t.Fatalf("key %s call.deleted is wrong", key)
 		}
 
 		calls = append(calls, call)
@@ -149,16 +149,16 @@ func TestGroupReset(t *testing.T) {
 
 	for i, call := range calls {
 		if !call.deleted {
-			t.Errorf("i %d call.deleted is wrong", i)
+			t.Fatalf("i %d call.deleted is wrong", i)
 		}
 
 		key := strconv.Itoa(i)
 		if _, ok := group.calls[key]; ok {
-			t.Errorf("group.calls[%s] is ok", key)
+			t.Fatalf("group.calls[%s] is ok", key)
 		}
 	}
 
 	if len(group.calls) != 0 {
-		t.Errorf("len(group.calls) %d is wrong", len(group.calls))
+		t.Fatalf("len(group.calls) %d is wrong", len(group.calls))
 	}
 }

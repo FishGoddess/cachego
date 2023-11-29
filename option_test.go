@@ -26,7 +26,7 @@ func TestWithCacheName(t *testing.T) {
 
 	WithCacheName("-").applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -37,7 +37,7 @@ func TestWithLRU(t *testing.T) {
 
 	WithLRU(666).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -48,7 +48,7 @@ func TestWithLFU(t *testing.T) {
 
 	WithLFU(999).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -59,7 +59,7 @@ func TestWithShardings(t *testing.T) {
 
 	WithShardings(1024).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -70,7 +70,7 @@ func TestWithDisableSingleflight(t *testing.T) {
 
 	WithDisableSingleflight().applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -81,7 +81,7 @@ func TestWithGC(t *testing.T) {
 
 	WithGC(1024).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -92,7 +92,7 @@ func TestWithMaxScans(t *testing.T) {
 
 	WithMaxScans(1024).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -103,7 +103,7 @@ func TestWithMaxEntries(t *testing.T) {
 
 	WithMaxEntries(1024).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -118,7 +118,7 @@ func TestWithNow(t *testing.T) {
 
 	WithNow(now).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -133,7 +133,7 @@ func TestWithHash(t *testing.T) {
 
 	WithHash(hash).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -144,7 +144,7 @@ func TestWithRecordMissed(t *testing.T) {
 
 	WithRecordMissed(true).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -155,7 +155,7 @@ func TestWithRecordHit(t *testing.T) {
 
 	WithRecordHit(true).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -166,7 +166,7 @@ func TestWithRecordGC(t *testing.T) {
 
 	WithRecordGC(true).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -177,7 +177,7 @@ func TestWithRecordLoad(t *testing.T) {
 
 	WithRecordLoad(true).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -190,7 +190,7 @@ func TestWithReportMissed(t *testing.T) {
 
 	WithReportMissed(reportMissed).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -203,7 +203,7 @@ func TestWithReportHit(t *testing.T) {
 
 	WithReportHit(reportHit).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -216,7 +216,7 @@ func TestWithReportGC(t *testing.T) {
 
 	WithReportGC(reportGC).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }
 
@@ -229,6 +229,6 @@ func TestWithReportLoad(t *testing.T) {
 
 	WithReportLoad(reportLoad).applyTo(got)
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }

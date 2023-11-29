@@ -43,19 +43,19 @@ func TestLRUCacheEvict(t *testing.T) {
 		evictedValue := cache.Set(data, data, time.Duration(i)*time.Second)
 
 		if i >= cache.maxEntries && evictedValue == nil {
-			t.Errorf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
+			t.Fatalf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
 		}
 	}
 
 	if cache.Size() != cache.maxEntries {
-		t.Errorf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
+		t.Fatalf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
 	}
 
 	for i := cache.maxEntries*10 - cache.maxEntries; i < cache.maxEntries*10; i++ {
 		data := strconv.Itoa(i)
 		value, ok := cache.Get(data)
 		if !ok || value.(string) != data {
-			t.Errorf("!ok %+v || value.(string) %s != data %s", !ok, value.(string), data)
+			t.Fatalf("!ok %+v || value.(string) %s != data %s", !ok, value.(string), data)
 		}
 	}
 
@@ -66,7 +66,7 @@ func TestLRUCacheEvict(t *testing.T) {
 		data := strconv.Itoa(i)
 
 		if entry.key != data || entry.value.(string) != data {
-			t.Errorf("entry.key %s != data %s || entry.value.(string) %s != data %s", entry.key, data, entry.value.(string), data)
+			t.Fatalf("entry.key %s != data %s || entry.value.(string) %s != data %s", entry.key, data, entry.value.(string), data)
 		}
 
 		element = element.Prev()
@@ -124,7 +124,7 @@ func TestLRUCacheEvictSimulate(t *testing.T) {
 
 	expect := strings.Join(expectKeys, "")
 	if strings.Compare(got.String(), expect) != 0 {
-		t.Errorf("got %s != expect %s", got.String(), expect)
+		t.Fatalf("got %s != expect %s", got.String(), expect)
 	}
 
 	for i := 0; i < maxTestEntries; i++ {
@@ -132,7 +132,7 @@ func TestLRUCacheEvictSimulate(t *testing.T) {
 		evictedValue := cache.Set(data, data, NoTTL)
 
 		if evictedValue.(string) != expectKeys[i] {
-			t.Errorf("evictedValue.(string) %s != expectKeys[i] %s", evictedValue.(string), expectKeys[i])
+			t.Fatalf("evictedValue.(string) %s != expectKeys[i] %s", evictedValue.(string), expectKeys[i])
 		}
 	}
 }

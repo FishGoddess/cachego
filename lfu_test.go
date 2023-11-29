@@ -43,12 +43,12 @@ func TestLFUCacheEvict(t *testing.T) {
 		evictedValue := cache.Set(data, data, time.Duration(i)*time.Second)
 
 		if i >= cache.maxEntries && evictedValue == nil {
-			t.Errorf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
+			t.Fatalf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
 		}
 	}
 
 	if cache.Size() != cache.maxEntries {
-		t.Errorf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
+		t.Fatalf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
 	}
 
 	for i := cache.maxEntries*10 - cache.maxEntries; i < cache.maxEntries*10; i++ {
@@ -63,7 +63,7 @@ func TestLFUCacheEvict(t *testing.T) {
 		data := strconv.Itoa(i)
 		value, ok := cache.Get(data)
 		if !ok || value.(string) != data {
-			t.Errorf("!ok %+v || value.(string) %s != data %s", !ok, value.(string), data)
+			t.Fatalf("!ok %+v || value.(string) %s != data %s", !ok, value.(string), data)
 		}
 	}
 
@@ -74,7 +74,7 @@ func TestLFUCacheEvict(t *testing.T) {
 		data := strconv.Itoa(i)
 
 		if entry.key != data || entry.value.(string) != data {
-			t.Errorf("entry.key %s != data %s || entry.value.(string) %s != data %s", entry.key, data, entry.value.(string), data)
+			t.Fatalf("entry.key %s != data %s || entry.value.(string) %s != data %s", entry.key, data, entry.value.(string), data)
 		}
 
 		i++
@@ -110,7 +110,7 @@ func TestLFUCacheEvictSimulate(t *testing.T) {
 
 		i, err := strconv.ParseInt(key, 10, 64)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		counts[i].key = key
@@ -144,7 +144,7 @@ func TestLFUCacheEvictSimulate(t *testing.T) {
 
 				// Count doesn't equal means something wrong happens.
 				if count.count != counts[i].count {
-					t.Errorf("evictedValue.(string) %s != counts[i].key %s", evictedValue.(string), counts[i].key)
+					t.Fatalf("evictedValue.(string) %s != counts[i].key %s", evictedValue.(string), counts[i].key)
 				}
 
 				found = true
@@ -152,7 +152,7 @@ func TestLFUCacheEvictSimulate(t *testing.T) {
 			}
 
 			if !found {
-				t.Errorf("evictedValue %s not found in counts %+v", evictedValue.(string), counts)
+				t.Fatalf("evictedValue %s not found in counts %+v", evictedValue.(string), counts)
 			}
 		}
 	}
@@ -162,11 +162,11 @@ func TestLFUCacheEvictSimulate(t *testing.T) {
 		item := cache.itemHeap.Pop()
 
 		if item.Value.(*entry).key != expect[index] {
-			t.Errorf("item.Value.(*entry).key %s != expect[index] %s", item.Value.(*entry).key, expect[index])
+			t.Fatalf("item.Value.(*entry).key %s != expect[index] %s", item.Value.(*entry).key, expect[index])
 		}
 
 		if item.Weight() != uint64(maxKeys+index) {
-			t.Errorf("item.Weight() %d != uint64(maxKeys + index) %d", item.Weight(), uint64(maxKeys+index))
+			t.Fatalf("item.Weight() %d != uint64(maxKeys + index) %d", item.Weight(), uint64(maxKeys+index))
 		}
 
 		index++
