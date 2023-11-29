@@ -71,22 +71,22 @@ func TestNewLoader(t *testing.T) {
 
 	loader1, ok := l.(*loader)
 	if !ok {
-		t.Errorf("l.(*loader) %T not ok", l)
+		t.Fatalf("l.(*loader) %T not ok", l)
 	}
 
 	if loader1.group != nil {
-		t.Errorf("loader1.group %+v != nil", loader1.group)
+		t.Fatalf("loader1.group %+v != nil", loader1.group)
 	}
 
 	l = NewLoader(nil, true)
 
 	loader2, ok := l.(*loader)
 	if !ok {
-		t.Errorf("l.(*loader) %T not ok", l)
+		t.Fatalf("l.(*loader) %T not ok", l)
 	}
 
 	if loader2.group == nil {
-		t.Error("loader2.group == nil")
+		t.Fatal("loader2.group == nil")
 	}
 }
 
@@ -104,16 +104,16 @@ func TestLoaderLoad(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		if value.(string) != str {
-			t.Errorf("value.(string) %s != str %s", value.(string), str)
+			t.Fatalf("value.(string) %s != str %s", value.(string), str)
 		}
 	}
 
 	if loadCount != 100 {
-		t.Errorf("loadCount %d != 100", loadCount)
+		t.Fatalf("loadCount %d != 100", loadCount)
 	}
 
 	cache = newTestLoadCache(true)
@@ -135,13 +135,13 @@ func TestLoaderLoad(t *testing.T) {
 			})
 
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 		}(i)
 	}
 
 	wg.Wait()
 	if loadCount != 1 {
-		t.Errorf("loadCount %d != 1", loadCount)
+		t.Fatalf("loadCount %d != 1", loadCount)
 	}
 }

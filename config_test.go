@@ -126,6 +126,6 @@ func TestApplyOptions(t *testing.T) {
 	})
 
 	if !isConfigEquals(got, expect) {
-		t.Errorf("got %+v != expect %+v", got, expect)
+		t.Fatalf("got %+v != expect %+v", got, expect)
 	}
 }

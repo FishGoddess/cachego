@@ -41,11 +41,11 @@ func TestStandardCacheEvict(t *testing.T) {
 		evictedValue := cache.Set(data, data, time.Duration(i)*time.Second)
 
 		if i >= cache.maxEntries && evictedValue == nil {
-			t.Errorf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
+			t.Fatalf("i %d >= cache.maxEntries %d && evictedValue == nil", i, cache.maxEntries)
 		}
 	}
 
 	if cache.Size() != cache.maxEntries {
-		t.Errorf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
+		t.Fatalf("cache.Size() %d != cache.maxEntries %d", cache.Size(), cache.maxEntries)
 	}
 }

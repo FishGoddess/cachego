@@ -28,27 +28,27 @@ const (
 // go test -v -cover -run=^TestCacheType$
 func TestCacheType(t *testing.T) {
 	if standard.String() != string(standard) {
-		t.Errorf("standard.String() %s is wrong", standard.String())
+		t.Fatalf("standard.String() %s is wrong", standard.String())
 	}
 
 	if lru.String() != string(lru) {
-		t.Errorf("lru.String() %s is wrong", lru.String())
+		t.Fatalf("lru.String() %s is wrong", lru.String())
 	}
 
 	if lfu.String() != string(lfu) {
-		t.Errorf("lfu.String() %s is wrong", lfu.String())
+		t.Fatalf("lfu.String() %s is wrong", lfu.String())
 	}
 
 	if !standard.IsStandard() {
-		t.Error("!standard.IsStandard()")
+		t.Fatal("!standard.IsStandard()")
 	}
 
 	if !lru.IsLRU() {
-		t.Error("!standard.IsLRU()")
+		t.Fatal("!standard.IsLRU()")
 	}
 
 	if !lfu.IsLFU() {
-		t.Error("!standard.IsLFU()")
+		t.Fatal("!standard.IsLFU()")
 	}
 }
 
@@ -87,82 +87,82 @@ func (tc *testCache) Reset() {}
 func testCacheGet(t *testing.T, cache Cache) {
 	value, found := cache.Get("key")
 	if found {
-		t.Errorf("get %+v should be not found", value)
+		t.Fatalf("get %+v should be not found", value)
 	}
 
 	cache.Set("key", "value", time.Millisecond)
 
 	value, found = cache.Get("key")
 	if !found {
-		t.Error("get should be found")
+		t.Fatal("get should be found")
 	}
 
 	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
+		t.Fatalf("value %+v is wrong", value)
 	}
 
 	time.Sleep(2 * time.Millisecond)
 
 	value, found = cache.Get("key")
 	if found {
-		t.Errorf("get %+v should be not found", value)
+		t.Fatalf("get %+v should be not found", value)
 	}
 }
 
 func testCacheSet(t *testing.T, cache Cache) {
 	value, found := cache.Get("key")
 	if found {
-		t.Errorf("get %+v should be not found", value)
+		t.Fatalf("get %+v should be not found", value)
 	}
 
 	cache.Set("key", "value", time.Millisecond)
 
 	value, found = cache.Get("key")
 	if !found {
-		t.Error("get should be found")
+		t.Fatal("get should be found")
 	}
 
 	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
+		t.Fatalf("value %+v is wrong", value)
 	}
 
 	time.Sleep(2 * time.Millisecond)
 
 	value, found = cache.Get("key")
 	if found {
-		t.Errorf("get %+v should be not found", value)
+		t.Fatalf("get %+v should be not found", value)
 	}
 
 	cache.Set("key", "value", NoTTL)
 
 	value, found = cache.Get("key")
 	if !found {
-		t.Error("get should be found")
+		t.Fatal("get should be found")
 	}
 
 	if value.(string) != "value" {
-		t.Errorf("value %+v is wrong", value)
+		t.Fatalf("value %+v is wrong", value)
 	}
 
 	time.Sleep(2 * time.Millisecond)
 
 	value, found = cache.Get("key")
 	if !found {
-		t.Error("get should be found")
+		t.Fatal("get should be found")
 	}
 }
 
 func testCacheRemove(t *testing.T, cache Cache) {
 	removedValue := cache.Remove("key")
 	if removedValue != nil {
-		t.Errorf("removedValue %+v is wrong", removedValue)
+		t.Fatalf("removedValue %+v is wrong", removedValue)
 	}
 
 	cache.Set("key", "value", NoTTL)
 
 	removedValue = cache.Remove("key")
 	if removedValue.(string) != "value" {
-		t.Errorf("removedValue %+v is wrong", removedValue)
+		t.Fatalf("removedValue %+v is wrong", removedValue)
 	}
 
 	cache.Set("key", "value", time.Millisecond)
@@ -170,14 +170,14 @@ func testCacheRemove(t *testing.T, cache Cache) {
 
 	removedValue = cache.Remove("key")
 	if removedValue == nil {
-		t.Error("removedValue == nil")
+		t.Fatal("removedValue == nil")
 	}
 }
 
 func testCacheSize(t *testing.T, cache Cache) {
 	size := cache.Size()
 	if size != 0 {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 
 	for i := int64(0); i < maxTestEntries; i++ {
@@ -186,14 +186,14 @@ func testCacheSize(t *testing.T, cache Cache) {
 
 	size = cache.Size()
 	if size != maxTestEntries {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 }
 
 func testCacheGC(t *testing.T, cache Cache) {
 	size := cache.Size()
 	if size != 0 {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 
 	for i := int64(0); i < maxTestEntries; i++ {
@@ -206,14 +206,14 @@ func testCacheGC(t *testing.T, cache Cache) {
 
 	size = cache.Size()
 	if size != maxTestEntries {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 
 	cache.GC()
 
 	size = cache.Size()
 	if size != maxTestEntries {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 
 	time.Sleep(2 * time.Millisecond)
@@ -222,7 +222,7 @@ func testCacheGC(t *testing.T, cache Cache) {
 
 	size = cache.Size()
 	if size != maxTestEntries/2 {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 }
 
@@ -234,17 +234,17 @@ func testCacheReset(t *testing.T, cache Cache) {
 	for i := int64(0); i < maxTestEntries; i++ {
 		value, found := cache.Get(strconv.FormatInt(i, 10))
 		if !found {
-			t.Errorf("get %d should be found", i)
+			t.Fatalf("get %d should be found", i)
 		}
 
 		if value.(int64) != i {
-			t.Errorf("value %+v is wrong", value)
+			t.Fatalf("value %+v is wrong", value)
 		}
 	}
 
 	size := cache.Size()
 	if size != maxTestEntries {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 
 	cache.Reset()
@@ -252,13 +252,13 @@ func testCacheReset(t *testing.T, cache Cache) {
 	for i := int64(0); i < maxTestEntries; i++ {
 		value, found := cache.Get(strconv.FormatInt(i, 10))
 		if found {
-			t.Errorf("get %d, %+v should be not found", i, value)
+			t.Fatalf("get %d, %+v should be not found", i, value)
 		}
 	}
 
 	size = cache.Size()
 	if size != 0 {
-		t.Errorf("size %d is wrong", size)
+		t.Fatalf("size %d is wrong", size)
 	}
 }
 
@@ -279,38 +279,38 @@ func TestNewCache(t *testing.T) {
 
 	sc1, ok := cache.(*standardCache)
 	if !ok {
-		t.Errorf("cache.(*standardCache) %T not ok", cache)
+		t.Fatalf("cache.(*standardCache) %T not ok", cache)
 	}
 
 	if sc1 == nil {
-		t.Error("sc1 == nil")
+		t.Fatal("sc1 == nil")
 	}
 
 	cache = NewCache(WithLRU(16))
 
 	sc2, ok := cache.(*lruCache)
 	if !ok {
-		t.Errorf("cache.(*lruCache) %T not ok", cache)
+		t.Fatalf("cache.(*lruCache) %T not ok", cache)
 	}
 
 	if sc2 == nil {
-		t.Error("sc2 == nil")
+		t.Fatal("sc2 == nil")
 	}
 
 	cache = NewCache(WithShardings(64))
 
 	sc, ok := cache.(*shardingCache)
 	if !ok {
-		t.Errorf("cache.(*shardingCache) %T not ok", cache)
+		t.Fatalf("cache.(*shardingCache) %T not ok", cache)
 	}
 
 	if sc == nil {
-		t.Error("sc == nil")
+		t.Fatal("sc == nil")
 	}
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("new should panic")
+			t.Fatal("new should panic")
 		}
 	}()
 
@@ -323,15 +323,15 @@ func TestNewCacheWithReport(t *testing.T) {
 
 	sc1, ok := cache.(*reportableCache)
 	if !ok {
-		t.Errorf("cache.(*reportableCache) %T not ok", cache)
+		t.Fatalf("cache.(*reportableCache) %T not ok", cache)
 	}
 
 	if sc1 == nil {
-		t.Error("sc1 == nil")
+		t.Fatal("sc1 == nil")
 	}
 
 	if reporter == nil {
-		t.Error("reporter == nil")
+		t.Fatal("reporter == nil")
 	}
 }
 
@@ -341,7 +341,7 @@ func TestRunGCTask(t *testing.T) {
 
 	count := cache.currentCount()
 	if count != 0 {
-		t.Errorf("cache.currentCount() %d is wrong", count)
+		t.Fatalf("cache.currentCount() %d is wrong", count)
 	}
 
 	cancel := RunGCTask(cache, 10*time.Millisecond)
@@ -350,7 +350,7 @@ func TestRunGCTask(t *testing.T) {
 
 	count = cache.currentCount()
 	if count != 10 {
-		t.Errorf("cache.currentCount() %d is wrong", count)
+		t.Fatalf("cache.currentCount() %d is wrong", count)
 	}
 
 	time.Sleep(80 * time.Millisecond)
@@ -358,13 +358,13 @@ func TestRunGCTask(t *testing.T) {
 
 	count = cache.currentCount()
 	if count != 18 {
-		t.Errorf("cache.currentCount() %d is wrong", count)
+		t.Fatalf("cache.currentCount() %d is wrong", count)
 	}
 
 	time.Sleep(time.Second)
 
 	count = cache.currentCount()
 	if count != 18 {
-		t.Errorf("cache.currentCount() %d is wrong", count)
+		t.Fatalf("cache.currentCount() %d is wrong", count)
 	}
 }

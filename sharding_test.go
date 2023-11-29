@@ -39,7 +39,7 @@ func TestShardingCache(t *testing.T) {
 func TestShardingCacheIndex(t *testing.T) {
 	cache := newTestShardingCache()
 	if len(cache.caches) != testShardings {
-		t.Errorf("len(cache.caches) %d is wrong", len(cache.caches))
+		t.Fatalf("len(cache.caches) %d is wrong", len(cache.caches))
 	}
 
 	for i := 0; i < 100; i++ {
@@ -49,7 +49,7 @@ func TestShardingCacheIndex(t *testing.T) {
 
 	for i := range cache.caches {
 		if cache.caches[i].Size() <= 0 {
-			t.Errorf("cache.caches[i].Size() %d <= 0", cache.caches[i].Size())
+			t.Fatalf("cache.caches[i].Size() %d <= 0", cache.caches[i].Size())
 		}
 	}
 }
