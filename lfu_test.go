@@ -25,6 +25,7 @@ import (
 func newTestLFUCache() *lfuCache {
 	conf := newDefaultConfig()
 	conf.maxEntries = maxTestEntries
+
 	return newLFUCache(conf).(*lfuCache)
 }
 
@@ -54,6 +55,7 @@ func TestLFUCacheEvict(t *testing.T) {
 	for i := cache.maxEntries*10 - cache.maxEntries; i < cache.maxEntries*10; i++ {
 		for j := 0; j < i; j++ {
 			data := strconv.Itoa(i)
+
 			cache.Set(data, data, time.Duration(i)*time.Second)
 			cache.Get(data)
 		}
@@ -61,6 +63,7 @@ func TestLFUCacheEvict(t *testing.T) {
 
 	for i := cache.maxEntries*10 - cache.maxEntries; i < cache.maxEntries*10; i++ {
 		data := strconv.Itoa(i)
+
 		value, ok := cache.Get(data)
 		if !ok || value.(string) != data {
 			t.Fatalf("!ok %+v || value.(string) %s != data %s", !ok, value.(string), data)
@@ -68,6 +71,7 @@ func TestLFUCacheEvict(t *testing.T) {
 	}
 
 	i := cache.maxEntries*10 - cache.maxEntries
+
 	for cache.itemHeap.Size() > 0 {
 		item := cache.itemHeap.Pop()
 		entry := item.Value.(*entry)

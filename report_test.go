@@ -130,6 +130,7 @@ func TestReportableCacheReportGC(t *testing.T) {
 
 	gcCount := uint64(0)
 	checked := false
+
 	cache.reportGC = func(reporter *Reporter, cost time.Duration, cleans int) {
 		if cost <= 0 {
 			t.Fatalf("cost %d <= 0", cost)
@@ -165,6 +166,7 @@ func TestReportableCacheReportLoad(t *testing.T) {
 
 	loadCount := uint64(0)
 	checked := false
+
 	cache.reportLoad = func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error) {
 		if key != "load" {
 			t.Fatalf("key %s is wrong", key)

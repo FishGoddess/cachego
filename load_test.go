@@ -26,13 +26,14 @@ type testLoadCache struct {
 	value interface{}
 	ttl   time.Duration
 
-	loader Loader
+	loader *Loader
 }
 
 func newTestLoadCache(singleflight bool) Cache {
-	cache := new(testLoadCache)
-	loader := NewLoader(cache, singleflight)
-	cache.loader = loader
+	cache := &testLoadCache{
+		loader: NewLoader(singleflight),
+	}
+
 	return cache
 }
 
@@ -44,6 +45,7 @@ func (tlc *testLoadCache) Set(key string, value interface{}, ttl time.Duration) 
 	tlc.key = key
 	tlc.value = value
 	tlc.ttl = ttl
+
 	return nil
 }
 
@@ -67,26 +69,14 @@ func (tlc *testLoadCache) Load(key string, ttl time.Duration, load func() (value
 
 // go test -v -cover -run=^TestNewLoader$
 func TestNewLoader(t *testing.T) {
-	l := NewLoader(nil, false)
-
-	loader1, ok := l.(*loader)
-	if !ok {
-		t.Fatalf("l.(*loader) %T not ok", l)
+	loader := NewLoader(false)
+	if loader.group != nil {
+		t.Fatalf("loader.group %+v != nil", loader.group)
 	}
 
-	if loader1.group != nil {
-		t.Fatalf("loader1.group %+v != nil", loader1.group)
-	}
-
-	l = NewLoader(nil, true)
-
-	loader2, ok := l.(*loader)
-	if !ok {
-		t.Fatalf("l.(*loader) %T not ok", l)
-	}
-
-	if loader2.group == nil {
-		t.Fatal("loader2.group == nil")
+	loader = NewLoader(true)
+	if loader.group == nil {
+		t.Fatal("loader.group == nil")
 	}
 }
 
@@ -119,7 +109,10 @@ func TestLoaderLoad(t *testing.T) {
 	cache = newTestLoadCache(true)
 	loadCount = 0
 
+	var errs []error
+	var lock sync.Mutex
 	var wg sync.WaitGroup
+
 	for i := int64(0); i < 100; i++ {
 		wg.Add(1)
 
@@ -131,16 +124,26 @@ func TestLoaderLoad(t *testing.T) {
 			_, err := cache.Load("key", time.Duration(i), func() (value interface{}, err error) {
 				time.Sleep(time.Second)
 				loadCount++
+
 				return str, nil
 			})
 
 			if err != nil {
-				t.Fatal(err)
+				lock.Lock()
+				errs = append(errs, err)
+				lock.Unlock()
 			}
 		}(i)
 	}
 
 	wg.Wait()
+
+	for _, err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	if loadCount != 1 {
 		t.Fatalf("loadCount %d != 1", loadCount)
 	}

@@ -26,6 +26,7 @@ const (
 func newTestShardingCache() *shardingCache {
 	conf := newDefaultConfig()
 	conf.shardings = testShardings
+
 	return newShardingCache(conf, newStandardCache).(*shardingCache)
 }
 
@@ -38,6 +39,7 @@ func TestShardingCache(t *testing.T) {
 // go test -v -cover -run=^TestShardingCacheIndex$
 func TestShardingCacheIndex(t *testing.T) {
 	cache := newTestShardingCache()
+
 	if len(cache.caches) != testShardings {
 		t.Fatalf("len(cache.caches) %d is wrong", len(cache.caches))
 	}

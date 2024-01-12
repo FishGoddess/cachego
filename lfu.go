@@ -15,16 +15,20 @@
 package cachego
 
 import (
+	"sync"
 	"time"
 
 	"github.com/FishGoddess/cachego/pkg/heap"
 )
 
 type lfuCache struct {
-	cache
+	*config
 
 	itemMap  map[string]*heap.Item
 	itemHeap *heap.Heap
+	lock     sync.RWMutex
+
+	loader *Loader
 }
 
 func newLFUCache(conf *config) Cache {
@@ -33,11 +37,12 @@ func newLFUCache(conf *config) Cache {
 	}
 
 	cache := &lfuCache{
+		config:   conf,
 		itemMap:  make(map[string]*heap.Item, mapInitialCap),
 		itemHeap: heap.New(sliceInitialCap),
+		loader:   NewLoader(conf.singleflight),
 	}
 
-	cache.setup(conf, cache)
 	return cache
 }
 
@@ -137,7 +142,8 @@ func (lc *lfuCache) gc() (cleans int) {
 func (lc *lfuCache) reset() {
 	lc.itemMap = make(map[string]*heap.Item, mapInitialCap)
 	lc.itemHeap = heap.New(sliceInitialCap)
-	lc.Loader.Reset()
+
+	lc.loader.Reset()
 }
 
 // Get gets the value of key from cache and returns value if found.
@@ -192,4 +198,16 @@ func (lc *lfuCache) Reset() {
 	defer lc.lock.Unlock()
 
 	lc.reset()
+}
+
+// Load loads a value by load function and sets it to cache.
+// Returns an error if load failed.
+func (lc *lfuCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+	value, err = lc.loader.Load(key, ttl, load)
+	if err != nil {
+		return value, err
+	}
+
+	lc.Set(key, value, ttl)
+	return value, nil
 }

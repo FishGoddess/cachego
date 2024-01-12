@@ -16,14 +16,18 @@ package cachego
 
 import (
 	"container/list"
+	"sync"
 	"time"
 )
 
 type lruCache struct {
-	cache
+	*config
 
 	elementMap  map[string]*list.Element
 	elementList *list.List
+	lock        sync.RWMutex
+
+	loader *Loader
 }
 
 func newLRUCache(conf *config) Cache {
@@ -32,11 +36,12 @@ func newLRUCache(conf *config) Cache {
 	}
 
 	cache := &lruCache{
+		config:      conf,
 		elementMap:  make(map[string]*list.Element, mapInitialCap),
 		elementList: list.New(),
+		loader:      NewLoader(conf.singleflight),
 	}
 
-	cache.setup(conf, cache)
 	return cache
 }
 
@@ -136,7 +141,8 @@ func (lc *lruCache) gc() (cleans int) {
 func (lc *lruCache) reset() {
 	lc.elementMap = make(map[string]*list.Element, mapInitialCap)
 	lc.elementList = list.New()
-	lc.Loader.Reset()
+
+	lc.loader.Reset()
 }
 
 // Get gets the value of key from cache and returns value if found.
@@ -191,4 +197,16 @@ func (lc *lruCache) Reset() {
 	defer lc.lock.Unlock()
 
 	lc.reset()
+}
+
+// Load loads a value by load function and sets it to cache.
+// Returns an error if load failed.
+func (lc *lruCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+	value, err = lc.loader.Load(key, ttl, load)
+	if err != nil {
+		return value, err
+	}
+
+	lc.Set(key, value, ttl)
+	return value, nil
 }

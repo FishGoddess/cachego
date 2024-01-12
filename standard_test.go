@@ -23,6 +23,7 @@ import (
 func newTestStandardCache() *standardCache {
 	conf := newDefaultConfig()
 	conf.maxEntries = maxTestEntries
+
 	return newStandardCache(conf).(*standardCache)
 }
 

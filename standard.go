@@ -15,21 +15,26 @@
 package cachego
 
 import (
+	"sync"
 	"time"
 )
 
 type standardCache struct {
-	cache
+	*config
 
 	entries map[string]*entry
+	lock    sync.RWMutex
+
+	loader *Loader
 }
 
 func newStandardCache(conf *config) Cache {
 	cache := &standardCache{
+		config:  conf,
 		entries: make(map[string]*entry, mapInitialCap),
+		loader:  NewLoader(conf.singleflight),
 	}
 
-	cache.setup(conf, cache)
 	return cache
 }
 
@@ -101,7 +106,7 @@ func (sc *standardCache) gc() (cleans int) {
 
 func (sc *standardCache) reset() {
 	sc.entries = make(map[string]*entry, mapInitialCap)
-	sc.Loader.Reset()
+	sc.loader.Reset()
 }
 
 // Get gets the value of key from cache and returns value if found.
@@ -156,4 +161,16 @@ func (sc *standardCache) Reset() {
 	defer sc.lock.Unlock()
 
 	sc.reset()
+}
+
+// Load loads a value by load function and sets it to cache.
+// Returns an error if load failed.
+func (sc *standardCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+	value, err = sc.loader.Load(key, ttl, load)
+	if err != nil {
+		return value, err
+	}
+
+	sc.Set(key, value, ttl)
+	return value, nil
 }
