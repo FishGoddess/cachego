@@ -21,15 +21,15 @@ import (
 	flight "github.com/FishGoddess/cachego/pkg/singleflight"
 )
 
-// Loader loads values from somewhere.
-type Loader struct {
+// loader loads values from somewhere.
+type loader struct {
 	group *flight.Group
 }
 
 // NewLoader creates a loader.
 // It also creates a singleflight group to call load if singleflight is true.
-func NewLoader(singleflight bool) *Loader {
-	loader := new(Loader)
+func NewLoader(singleflight bool) *loader {
+	loader := new(loader)
 
 	if singleflight {
 		loader.group = flight.NewGroup(mapInitialCap)
@@ -39,7 +39,7 @@ func NewLoader(singleflight bool) *Loader {
 }
 
 // Load loads a value of key with ttl and returns an error if failed.
-func (l *Loader) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+func (l *loader) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
 	if load == nil {
 		return nil, errors.New("cachego: load function is nil in loader")
 	}
@@ -52,7 +52,7 @@ func (l *Loader) Load(key string, ttl time.Duration, load func() (value interfac
 }
 
 // Reset resets loader to initial status which is like a new loader.
-func (l *Loader) Reset() {
+func (l *loader) Reset() {
 	if l.group != nil {
 		l.group.Reset()
 	}

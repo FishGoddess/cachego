@@ -27,7 +27,7 @@ const (
 
 type testCache struct {
 	*config
-	loader *Loader
+	loader *loader
 
 	count int32
 }

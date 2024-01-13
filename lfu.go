@@ -28,7 +28,7 @@ type lfuCache struct {
 	itemHeap *heap.Heap
 	lock     sync.RWMutex
 
-	loader *Loader
+	loader *loader
 }
 
 func newLFUCache(conf *config) Cache {

@@ -27,7 +27,7 @@ type lruCache struct {
 	elementList *list.List
 	lock        sync.RWMutex
 
-	loader *Loader
+	loader *loader
 }
 
 func newLRUCache(conf *config) Cache {

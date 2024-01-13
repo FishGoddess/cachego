@@ -25,7 +25,7 @@ type standardCache struct {
 	entries map[string]*entry
 	lock    sync.RWMutex
 
-	loader *Loader
+	loader *loader
 }
 
 func newStandardCache(conf *config) Cache {

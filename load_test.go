@@ -26,7 +26,7 @@ type testLoadCache struct {
 	value interface{}
 	ttl   time.Duration
 
-	loader *Loader
+	loader *loader
 }
 
 func newTestLoadCache(singleflight bool) Cache {
