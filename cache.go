@@ -16,7 +16,6 @@ package cachego
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/FishGoddess/cachego/pkg/task"
@@ -27,20 +26,6 @@ const (
 	NoTTL = 0
 )
 
-const (
-	// standard cache is a simple cache with locked map.
-	// It evicts entries randomly if cache size reaches to max entries.
-	standard CacheType = "standard"
-
-	// lru cache is a cache using lru to evict entries.
-	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU).
-	lru CacheType = "lru"
-
-	// lfu cache is a cache using lfu to evict entries.
-	// More details see https://en.wikipedia.org/wiki/Cache_replacement_policies#Least-frequently_used_(LFU).
-	lfu CacheType = "lfu"
-)
-
 var (
 	newCaches = map[CacheType]func(conf *config) Cache{
 		standard: newStandardCache,
@@ -48,29 +33,6 @@ var (
 		lfu:      newLFUCache,
 	}
 )
-
-// CacheType is the type of cache.
-type CacheType string
-
-// String returns the cache type in string form.
-func (ct CacheType) String() string {
-	return string(ct)
-}
-
-// IsStandard returns if cache type is standard.
-func (ct CacheType) IsStandard() bool {
-	return ct == standard
-}
-
-// IsLRU returns if cache type is lru.
-func (ct CacheType) IsLRU() bool {
-	return ct == lru
-}
-
-// IsLFU returns if cache type is lfu.
-func (ct CacheType) IsLFU() bool {
-	return ct == lfu
-}
 
 // Cache is the core interface of cachego.
 // We provide some implements including standard cache and sharding cache.
@@ -101,38 +63,10 @@ type Cache interface {
 	// Reset resets cache to initial status which is like a new cache.
 	Reset()
 
-	// Loader loads a value to cache.
-	// See Loader interface.
-	Loader
-}
-
-type cache struct {
-	*config
-	Loader
-
-	lock sync.RWMutex
-}
-
-func (c *cache) setup(conf *config, cache Cache) {
-	c.config = conf
-	c.Loader = NewLoader(cache, conf.singleflight)
-}
-
-// RunGCTask runs a gc task in a new goroutine and returns a cancel function to cancel the task.
-// However, you don't need to call it manually for most time, instead, use options is a better choice.
-// Making it a public function is for more customizations in some situations.
-// For example, using options to run gc task is un-cancelable, so you can use it to run gc task by your own
-// and get a cancel function to cancel the gc task.
-func RunGCTask(cache Cache, duration time.Duration) (cancel func()) {
-	fn := func(ctx context.Context) {
-		cache.GC()
-	}
-
-	ctx := context.Background()
-	ctx, cancel = context.WithCancel(ctx)
-
-	go task.New(fn).Context(ctx).Duration(duration).Run()
-	return cancel
+	// Load loads a key with ttl to cache and returns an error if failed.
+	// We recommend you use this method to load missed keys to cache,
+	// because it may use singleflight to reduce the times calling load function.
+	Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error)
 }
 
 func newCache(withReport bool, opts ...Option) (cache Cache, reporter *Reporter) {
@@ -179,4 +113,21 @@ func NewCache(opts ...Option) (cache Cache) {
 // Also, you can use options to specify the type of cache to others, such as lru.
 func NewCacheWithReport(opts ...Option) (cache Cache, reporter *Reporter) {
 	return newCache(true, opts...)
+}
+
+// RunGCTask runs a gc task in a new goroutine and returns a cancel function to cancel the task.
+// However, you don't need to call it manually for most time, instead, use options is a better choice.
+// Making it a public function is for more customizations in some situations.
+// For example, using options to run gc task is un-cancelable, so you can use it to run gc task by your own
+// and get a cancel function to cancel the gc task.
+func RunGCTask(cache Cache, duration time.Duration) (cancel func()) {
+	fn := func(ctx context.Context) {
+		cache.GC()
+	}
+
+	ctx := context.Background()
+	ctx, cancel = context.WithCancel(ctx)
+
+	go task.New(fn).Context(ctx).Duration(duration).Run()
+	return cancel
 }

@@ -55,13 +55,13 @@ func testGroupCall(t *testing.T, group *Group, concurrency int) {
 	wg.Wait()
 }
 
-// go test -v -cover -run=^TestGroupCall$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestGroupCall$
 func TestGroupCall(t *testing.T) {
 	group := NewGroup(128)
 	testGroupCall(t, group, 100000)
 }
 
-// go test -v -cover -run=^TestGroupCallMultiKey$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestGroupCallMultiKey$
 func TestGroupCallMultiKey(t *testing.T) {
 	group := NewGroup(128)
 
@@ -78,7 +78,7 @@ func TestGroupCallMultiKey(t *testing.T) {
 	wg.Wait()
 }
 
-// go test -v -cover -run=^TestGroupDelete$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestGroupDelete$
 func TestGroupDelete(t *testing.T) {
 	group := NewGroup(128)
 
@@ -114,7 +114,7 @@ func TestGroupDelete(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestGroupReset$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestGroupReset$
 func TestGroupReset(t *testing.T) {
 	group := NewGroup(128)
 

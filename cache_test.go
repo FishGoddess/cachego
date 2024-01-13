@@ -25,35 +25,10 @@ const (
 	maxTestEntries = 10
 )
 
-// go test -v -cover -run=^TestCacheType$
-func TestCacheType(t *testing.T) {
-	if standard.String() != string(standard) {
-		t.Fatalf("standard.String() %s is wrong", standard.String())
-	}
-
-	if lru.String() != string(lru) {
-		t.Fatalf("lru.String() %s is wrong", lru.String())
-	}
-
-	if lfu.String() != string(lfu) {
-		t.Fatalf("lfu.String() %s is wrong", lfu.String())
-	}
-
-	if !standard.IsStandard() {
-		t.Fatal("!standard.IsStandard()")
-	}
-
-	if !lru.IsLRU() {
-		t.Fatal("!standard.IsLRU()")
-	}
-
-	if !lfu.IsLFU() {
-		t.Fatal("!standard.IsLFU()")
-	}
-}
-
 type testCache struct {
-	cache
+	*config
+	loader *loader
+
 	count int32
 }
 
@@ -83,6 +58,10 @@ func (tc *testCache) GC() (cleans int) {
 }
 
 func (tc *testCache) Reset() {}
+
+func (tc *testCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
+	return nil, nil
+}
 
 func testCacheGet(t *testing.T, cache Cache) {
 	value, found := cache.Get("key")
@@ -273,7 +252,7 @@ func testCacheImplement(t *testing.T, cache Cache) {
 	}
 }
 
-// go test -v -cover=^TestNewCache$
+// go test -v -cover -count=1 -test.cpu=1=^TestNewCache$
 func TestNewCache(t *testing.T) {
 	cache := NewCache()
 
@@ -317,7 +296,7 @@ func TestNewCache(t *testing.T) {
 	cache = NewCache(WithLRU(0))
 }
 
-// go test -v -cover=^TestNewCacheWithReport$
+// go test -v -cover -count=1 -test.cpu=1=^TestNewCacheWithReport$
 func TestNewCacheWithReport(t *testing.T) {
 	cache, reporter := NewCacheWithReport()
 
@@ -335,7 +314,7 @@ func TestNewCacheWithReport(t *testing.T) {
 	}
 }
 
-// go test -v -cover=^TestRunGCTask$
+// go test -v -cover -count=1 -test.cpu=1=^TestRunGCTask$
 func TestRunGCTask(t *testing.T) {
 	cache := new(testCache)
 

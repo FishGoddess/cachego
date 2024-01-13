@@ -2,7 +2,7 @@
 
 [![Go Doc](_icons/godoc.svg)](https://pkg.go.dev/github.com/FishGoddess/cachego)
 [![License](_icons/license.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![License](_icons/coverage.svg)](_icons/coverage.svg)
+[![Coverage](_icons/coverage.svg)](_icons/coverage.svg)
 ![Test](https://github.com/FishGoddess/cachego/actions/workflows/test.yml/badge.svg)
 
 **cachego** is an api friendly memory-based cache for [GoLang](https://golang.org) applications.

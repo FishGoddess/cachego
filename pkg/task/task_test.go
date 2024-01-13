@@ -27,7 +27,7 @@ type testEntry struct {
 	value string
 }
 
-// go test -v -cover -run=^TestTickerTaskRun$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestTickerTaskRun$
 func TestTickerTaskRun(t *testing.T) {
 	before := testEntry{key: "before_key", value: "before_value"}
 	fn := testEntry{key: "task_key", value: "task_value"}

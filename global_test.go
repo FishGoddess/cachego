@@ -29,7 +29,7 @@ func BenchmarkHash(b *testing.B) {
 	}
 }
 
-// go test -v -cover -run=^TestHash$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestHash$
 func TestHash(t *testing.T) {
 	hash := hash("test")
 	if hash < 0 {
@@ -37,7 +37,7 @@ func TestHash(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestNow$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNow$
 func TestNow(t *testing.T) {
 	got := now()
 	expect := time.Now().UnixNano()
@@ -47,7 +47,7 @@ func TestNow(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestSetMapInitialCap$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestSetMapInitialCap$
 func TestSetMapInitialCap(t *testing.T) {
 	oldInitialCap := mapInitialCap
 
@@ -67,7 +67,7 @@ func TestSetMapInitialCap(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestSetSliceInitialCap$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestSetSliceInitialCap$
 func TestSetSliceInitialCap(t *testing.T) {
 	oldInitialCap := sliceInitialCap
 

@@ -38,15 +38,18 @@ func newShardingCache(conf *config, newCache func(conf *config) Cache) Cache {
 		caches = append(caches, newCache(conf))
 	}
 
-	return &shardingCache{
+	cache := &shardingCache{
 		config: conf,
 		caches: caches,
 	}
+
+	return cache
 }
 
 func (sc *shardingCache) cacheOf(key string) Cache {
 	hash := sc.hash(key)
 	mask := len(sc.caches) - 1
+
 	return sc.caches[hash&mask]
 }
 
@@ -95,8 +98,8 @@ func (sc *shardingCache) Reset() {
 	}
 }
 
-// Load loads a key with ttl to cache and returns an error if failed.
-// See Cache interface.
+// Load loads a value by load function and sets it to cache.
+// Returns an error if load failed.
 func (sc *shardingCache) Load(key string, ttl time.Duration, load func() (value interface{}, err error)) (value interface{}, err error) {
 	return sc.cacheOf(key).Load(key, ttl, load)
 }

@@ -24,7 +24,7 @@ const (
 	testDurationGap = 10 * time.Microsecond
 )
 
-// go test -v -cover -run=^TestNewEntry$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewEntry$
 func TestNewEntry(t *testing.T) {
 	e := newEntry("key", "value", 0, now)
 
@@ -69,7 +69,7 @@ func TestNewEntry(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestEntrySetup$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestEntrySetup$
 func TestEntrySetup(t *testing.T) {
 	e := newEntry("key", "value", 0, now)
 
