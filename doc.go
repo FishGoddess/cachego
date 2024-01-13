@@ -437,12 +437,7 @@ Package cachego provides an easy way to use foundation for your caching operatio
 	// Duration is the duration between two loop of fn, optional.
 	// Run will start a new goroutine and run the task loop.
 	// The task will stop if context is done.
-	task.New(printContextValue).
-		Before(beforePrint).
-		After(afterPrint).
-		Context(ctx).
-		Duration(time.Second).
-		Run()
+	task.New(printContextValue).Before(beforePrint).After(afterPrint).Context(ctx).Duration(time.Second).Run()
 
 10. clock:
 
