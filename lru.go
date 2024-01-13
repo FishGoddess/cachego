@@ -39,7 +39,7 @@ func newLRUCache(conf *config) Cache {
 		config:      conf,
 		elementMap:  make(map[string]*list.Element, mapInitialCap),
 		elementList: list.New(),
-		loader:      NewLoader(conf.singleflight),
+		loader:      newLoader(conf.singleflight),
 	}
 
 	return cache

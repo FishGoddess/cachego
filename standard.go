@@ -32,7 +32,7 @@ func newStandardCache(conf *config) Cache {
 	cache := &standardCache{
 		config:  conf,
 		entries: make(map[string]*entry, mapInitialCap),
-		loader:  NewLoader(conf.singleflight),
+		loader:  newLoader(conf.singleflight),
 	}
 
 	return cache

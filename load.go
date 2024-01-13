@@ -26,9 +26,9 @@ type loader struct {
 	group *flight.Group
 }
 
-// NewLoader creates a loader.
+// newLoader creates a loader.
 // It also creates a singleflight group to call load if singleflight is true.
-func NewLoader(singleflight bool) *loader {
+func newLoader(singleflight bool) *loader {
 	loader := new(loader)
 
 	if singleflight {

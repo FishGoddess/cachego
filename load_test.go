@@ -31,7 +31,7 @@ type testLoadCache struct {
 
 func newTestLoadCache(singleflight bool) Cache {
 	cache := &testLoadCache{
-		loader: NewLoader(singleflight),
+		loader: newLoader(singleflight),
 	}
 
 	return cache
@@ -69,12 +69,12 @@ func (tlc *testLoadCache) Load(key string, ttl time.Duration, load func() (value
 
 // go test -v -cover -count=1 -test.cpu=1 -run=^TestNewLoader$
 func TestNewLoader(t *testing.T) {
-	loader := NewLoader(false)
+	loader := newLoader(false)
 	if loader.group != nil {
 		t.Fatalf("loader.group %+v != nil", loader.group)
 	}
 
-	loader = NewLoader(true)
+	loader = newLoader(true)
 	if loader.group == nil {
 		t.Fatal("loader.group == nil")
 	}

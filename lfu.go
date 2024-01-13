@@ -40,7 +40,7 @@ func newLFUCache(conf *config) Cache {
 		config:   conf,
 		itemMap:  make(map[string]*heap.Item, mapInitialCap),
 		itemHeap: heap.New(sliceInitialCap),
-		loader:   NewLoader(conf.singleflight),
+		loader:   newLoader(conf.singleflight),
 	}
 
 	return cache
