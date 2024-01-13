@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// go test -v -cover -run=^TestWithCacheName$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithCacheName$
 func TestWithCacheName(t *testing.T) {
 	got := &config{cacheName: ""}
 	expect := &config{cacheName: "-"}
@@ -30,7 +30,7 @@ func TestWithCacheName(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithLRU$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithLRU$
 func TestWithLRU(t *testing.T) {
 	got := &config{cacheType: standard, maxEntries: 0}
 	expect := &config{cacheType: lru, maxEntries: 666}
@@ -41,7 +41,7 @@ func TestWithLRU(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithLFU$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithLFU$
 func TestWithLFU(t *testing.T) {
 	got := &config{cacheType: standard, maxEntries: 0}
 	expect := &config{cacheType: lfu, maxEntries: 999}
@@ -52,7 +52,7 @@ func TestWithLFU(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithShardings$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithShardings$
 func TestWithShardings(t *testing.T) {
 	got := &config{shardings: 0}
 	expect := &config{shardings: 1024}
@@ -63,7 +63,7 @@ func TestWithShardings(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithDisableSingleflight$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithDisableSingleflight$
 func TestWithDisableSingleflight(t *testing.T) {
 	got := &config{singleflight: true}
 	expect := &config{singleflight: false}
@@ -74,7 +74,7 @@ func TestWithDisableSingleflight(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithGC$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithGC$
 func TestWithGC(t *testing.T) {
 	got := &config{gcDuration: 0}
 	expect := &config{gcDuration: 1024}
@@ -85,7 +85,7 @@ func TestWithGC(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithMaxScans$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxScans$
 func TestWithMaxScans(t *testing.T) {
 	got := &config{maxScans: 0}
 	expect := &config{maxScans: 1024}
@@ -96,7 +96,7 @@ func TestWithMaxScans(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithMaxEntries$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithMaxEntries$
 func TestWithMaxEntries(t *testing.T) {
 	got := &config{maxEntries: 0}
 	expect := &config{maxEntries: 1024}
@@ -107,7 +107,7 @@ func TestWithMaxEntries(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithNow$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithNow$
 func TestWithNow(t *testing.T) {
 	now := func() int64 {
 		return 0
@@ -122,7 +122,7 @@ func TestWithNow(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithHash$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithHash$
 func TestWithHash(t *testing.T) {
 	hash := func(key string) int {
 		return 0
@@ -137,7 +137,7 @@ func TestWithHash(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithRecordMissed$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithRecordMissed$
 func TestWithRecordMissed(t *testing.T) {
 	got := &config{recordMissed: false}
 	expect := &config{recordMissed: true}
@@ -148,7 +148,7 @@ func TestWithRecordMissed(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithRecordHit$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithRecordHit$
 func TestWithRecordHit(t *testing.T) {
 	got := &config{recordHit: false}
 	expect := &config{recordHit: true}
@@ -159,7 +159,7 @@ func TestWithRecordHit(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithRecordGC$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithRecordGC$
 func TestWithRecordGC(t *testing.T) {
 	got := &config{recordGC: false}
 	expect := &config{recordGC: true}
@@ -170,7 +170,7 @@ func TestWithRecordGC(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithRecordLoad$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithRecordLoad$
 func TestWithRecordLoad(t *testing.T) {
 	got := &config{recordLoad: false}
 	expect := &config{recordLoad: true}
@@ -181,7 +181,7 @@ func TestWithRecordLoad(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithReportMissed$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithReportMissed$
 func TestWithReportMissed(t *testing.T) {
 	reportMissed := func(reporter *Reporter, key string) {}
 
@@ -194,7 +194,7 @@ func TestWithReportMissed(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithReportHit$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithReportHit$
 func TestWithReportHit(t *testing.T) {
 	reportHit := func(reporter *Reporter, key string, value interface{}) {}
 
@@ -207,7 +207,7 @@ func TestWithReportHit(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithReportGC$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithReportGC$
 func TestWithReportGC(t *testing.T) {
 	reportGC := func(reporter *Reporter, cost time.Duration, cleans int) {}
 
@@ -220,7 +220,7 @@ func TestWithReportGC(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestWithReportLoad$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestWithReportLoad$
 func TestWithReportLoad(t *testing.T) {
 	reportLoad := func(reporter *Reporter, key string, value interface{}, ttl time.Duration, err error) {}
 

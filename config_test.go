@@ -87,7 +87,7 @@ func isConfigEquals(conf1 *config, conf2 *config) bool {
 	return true
 }
 
-// go test -v -cover -run=^TestApplyOptions$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestApplyOptions$
 func TestApplyOptions(t *testing.T) {
 	got := &config{
 		shardings:    0,

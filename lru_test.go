@@ -28,13 +28,13 @@ func newTestLRUCache() *lruCache {
 	return newLRUCache(conf).(*lruCache)
 }
 
-// go test -v -cover -run=^TestLRUCache$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLRUCache$
 func TestLRUCache(t *testing.T) {
 	cache := newTestLRUCache()
 	testCacheImplement(t, cache)
 }
 
-// go test -v -cover -run=^TestLRUCacheEvict$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLRUCacheEvict$
 func TestLRUCacheEvict(t *testing.T) {
 	cache := newTestLRUCache()
 
@@ -74,7 +74,7 @@ func TestLRUCacheEvict(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLRUCacheEvictSimulate$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLRUCacheEvictSimulate$
 func TestLRUCacheEvictSimulate(t *testing.T) {
 	cache := newTestLRUCache()
 

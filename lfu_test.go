@@ -29,13 +29,13 @@ func newTestLFUCache() *lfuCache {
 	return newLFUCache(conf).(*lfuCache)
 }
 
-// go test -v -cover -run=^TestLFUCache$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLFUCache$
 func TestLFUCache(t *testing.T) {
 	cache := newTestLFUCache()
 	testCacheImplement(t, cache)
 }
 
-// go test -v -cover -run=^TestLFUCacheEvict$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLFUCacheEvict$
 func TestLFUCacheEvict(t *testing.T) {
 	cache := newTestLFUCache()
 
@@ -85,7 +85,7 @@ func TestLFUCacheEvict(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLFUCacheEvictSimulate$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLFUCacheEvictSimulate$
 func TestLFUCacheEvictSimulate(t *testing.T) {
 	cache := newTestLFUCache()
 

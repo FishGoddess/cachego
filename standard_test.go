@@ -27,13 +27,13 @@ func newTestStandardCache() *standardCache {
 	return newStandardCache(conf).(*standardCache)
 }
 
-// go test -v -cover -run=^TestStandardCache$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestStandardCache$
 func TestStandardCache(t *testing.T) {
 	cache := newTestStandardCache()
 	testCacheImplement(t, cache)
 }
 
-// go test -v -cover -run=^TestStandardCacheEvict$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestStandardCacheEvict$
 func TestStandardCacheEvict(t *testing.T) {
 	cache := newTestStandardCache()
 

@@ -43,7 +43,7 @@ func BenchmarkClockNow(b *testing.B) {
 	}
 }
 
-// go test -v -cover -run=^TestNew$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNew$
 func TestNew(t *testing.T) {
 	var clocks []*Clock
 
@@ -58,7 +58,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestClock$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestClock$
 func TestClock(t *testing.T) {
 	testClock := New()
 

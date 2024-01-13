@@ -67,7 +67,7 @@ func (tlc *testLoadCache) Load(key string, ttl time.Duration, load func() (value
 	return tlc.loader.Load(key, ttl, load)
 }
 
-// go test -v -cover -run=^TestNewLoader$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestNewLoader$
 func TestNewLoader(t *testing.T) {
 	loader := NewLoader(false)
 	if loader.group != nil {
@@ -80,7 +80,7 @@ func TestNewLoader(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestLoaderLoad$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestLoaderLoad$
 func TestLoaderLoad(t *testing.T) {
 	cache := newTestLoadCache(false)
 	loadCount := 0

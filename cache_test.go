@@ -252,7 +252,7 @@ func testCacheImplement(t *testing.T, cache Cache) {
 	}
 }
 
-// go test -v -cover=^TestNewCache$
+// go test -v -cover -count=1 -test.cpu=1=^TestNewCache$
 func TestNewCache(t *testing.T) {
 	cache := NewCache()
 
@@ -296,7 +296,7 @@ func TestNewCache(t *testing.T) {
 	cache = NewCache(WithLRU(0))
 }
 
-// go test -v -cover=^TestNewCacheWithReport$
+// go test -v -cover -count=1 -test.cpu=1=^TestNewCacheWithReport$
 func TestNewCacheWithReport(t *testing.T) {
 	cache, reporter := NewCacheWithReport()
 
@@ -314,7 +314,7 @@ func TestNewCacheWithReport(t *testing.T) {
 	}
 }
 
-// go test -v -cover=^TestRunGCTask$
+// go test -v -cover -count=1 -test.cpu=1=^TestRunGCTask$
 func TestRunGCTask(t *testing.T) {
 	cache := new(testCache)
 

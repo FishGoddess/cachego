@@ -16,7 +16,7 @@ package cachego
 
 import "testing"
 
-// go test -v -cover -run=^TestCacheType$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestCacheType$
 func TestCacheType(t *testing.T) {
 	if standard.String() != string(standard) {
 		t.Fatalf("standard.String() %s is wrong", standard.String())

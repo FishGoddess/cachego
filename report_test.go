@@ -39,13 +39,13 @@ func newTestReportableCache() (*reportableCache, *Reporter) {
 	return cache.(*reportableCache), reporter
 }
 
-// go test -v -cover -run=^TestReportableCache$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReportableCache$
 func TestReportableCache(t *testing.T) {
 	cache, _ := newTestReportableCache()
 	testCacheImplement(t, cache)
 }
 
-// go test -v -cover -run=^TestReportableCacheReportMissed$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReportableCacheReportMissed$
 func TestReportableCacheReportMissed(t *testing.T) {
 	cache, reporter := newTestReportableCache()
 	cache.Set("key", 666, NoTTL)
@@ -80,7 +80,7 @@ func TestReportableCacheReportMissed(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReportableCacheReportHit$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReportableCacheReportHit$
 func TestReportableCacheReportHit(t *testing.T) {
 	cache, reporter := newTestReportableCache()
 	cache.Set("key", 666, NoTTL)
@@ -119,7 +119,7 @@ func TestReportableCacheReportHit(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReportableCacheReportGC$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReportableCacheReportGC$
 func TestReportableCacheReportGC(t *testing.T) {
 	cache, reporter := newTestReportableCache()
 	cache.Set("key1", 1, time.Millisecond)
@@ -160,7 +160,7 @@ func TestReportableCacheReportGC(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReportableCacheReportLoad$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReportableCacheReportLoad$
 func TestReportableCacheReportLoad(t *testing.T) {
 	cache, reporter := newTestReportableCache()
 
@@ -209,7 +209,7 @@ func TestReportableCacheReportLoad(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReporterCacheName$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReporterCacheName$
 func TestReporterCacheName(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheName() != reporter.conf.cacheName {
@@ -221,7 +221,7 @@ func TestReporterCacheName(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReporterCacheType$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReporterCacheType$
 func TestReporterCacheType(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheType() != reporter.conf.cacheType {
@@ -233,7 +233,7 @@ func TestReporterCacheType(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReporterCacheShardings$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReporterCacheShardings$
 func TestReporterCacheShardings(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheShardings() != reporter.conf.shardings {
@@ -245,7 +245,7 @@ func TestReporterCacheShardings(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReporterCacheGC$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReporterCacheGC$
 func TestReporterCacheGC(t *testing.T) {
 	_, reporter := newTestReportableCache()
 	if reporter.CacheGC() != reporter.conf.gcDuration {
@@ -257,7 +257,7 @@ func TestReporterCacheGC(t *testing.T) {
 	}
 }
 
-// go test -v -cover -run=^TestReporterCacheSize$
+// go test -v -cover -count=1 -test.cpu=1 -run=^TestReporterCacheSize$
 func TestReporterCacheSize(t *testing.T) {
 	cache, reporter := newTestReportableCache()
 	cache.Set("key1", 1, time.Millisecond)
