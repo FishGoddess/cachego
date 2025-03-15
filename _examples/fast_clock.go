@@ -1,4 +1,4 @@
-// Copyright 2023 FishGoddess. All Rights Reserved.
+// Copyright 2025 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,21 +20,17 @@ import (
 	"time"
 
 	"github.com/FishGoddess/cachego"
-	"github.com/FishGoddess/cachego/pkg/clock"
+	"github.com/FishGoddess/cachego/pkg/fastclock"
 )
 
 func main() {
-	// Create a fast clock and get current time in nanosecond by Now.
-	c := clock.New()
-	c.Now()
-
 	// Fast clock may return an "incorrect" time compared with time.Now.
 	// The gap will be smaller than about 100 ms.
 	for i := 0; i < 10; i++ {
 		time.Sleep(time.Duration(rand.Int63n(int64(time.Second))))
 
 		timeNow := time.Now().UnixNano()
-		clockNow := c.Now()
+		clockNow := fastclock.NowNanos()
 
 		fmt.Println(timeNow)
 		fmt.Println(clockNow)
@@ -43,8 +39,8 @@ func main() {
 	}
 
 	// You can specify the fast clock to cache by WithNow.
-	// All getting current time operations in this cache will use fast clock.
-	cache := cachego.NewCache(cachego.WithNow(clock.New().Now))
+	// All time used in this cache will be got from fast clock.
+	cache := cachego.NewCache(cachego.WithNow(fastclock.NowNanos))
 	cache.Set("key", 666, 100*time.Millisecond)
 
 	value, ok := cache.Get("key")
