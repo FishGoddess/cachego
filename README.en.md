@@ -23,7 +23,8 @@
 * Sentinel cleanup supports, cleaning up at fixed duration
 * Singleflight supports, which can decrease the times of cache penetration
 * Timer task supports, which is convenient to load data to cache
-* Report supports, providing several reporting points.
+* Report supports, providing several reporting points
+* Fast clock supports, fetching current time in nanoseconds
 
 _Check [HISTORY.md](./HISTORY.md) and [FUTURE.md](./FUTURE.md) to get more information._
 
@@ -143,11 +144,7 @@ BenchmarkGoCacheSet-12                   4921483               249.0 ns/op      
 
 > Notice: Ecache only has lru mode, including v1 and v2; Freecache has 256 shardings, and we can't reset to 1.
 
-> Benchmarks: [_examples/performance_test.go](./_examples/performance_test.go)
-
-As you can see, cachego has a higher performance with sharding, but sharding has one-more-time positioning
-operation, so if the locking cost is less than the cost of positioning, this sharding is dragging. However, it has
-better performance in most time.
+> Benchmarks: [_examples/performance_test.go](./_examples/performance_test.go).
 
 ### 👥 Contributors
 

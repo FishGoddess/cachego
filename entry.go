@@ -1,4 +1,4 @@
-// Copyright 2023 FishGoddess. All Rights Reserved.
+// Copyright 2025 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package cachego
 import "time"
 
 type entry struct {
-	key        string
-	value      interface{}
-	expiration int64 // Time in nanosecond, valid util 2262 year (enough, uh?)
+	key   string
+	value interface{}
+
+	// Time in nanosecond, valid util 2262 year (enough, right?)
+	expiration int64
 	now        func() int64
 }
 

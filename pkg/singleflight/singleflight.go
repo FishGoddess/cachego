@@ -1,4 +1,4 @@
-// Copyright 2021 FishGoddess. All Rights Reserved.
+// Copyright 2025 FishGoddess. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import (
 	"sync"
 )
 
-// call wraps function with some information and stores result and error after calling.
 type call struct {
 	fn     func() (result interface{}, err error)
 	result interface{}
@@ -37,11 +36,10 @@ func newCall(fn func() (result interface{}, err error)) *call {
 	}
 }
 
-// do will call fn and fill result and error to call.
-// Notice: Any panics or runtime.Goexit() happening in fn() will be ignored.
 func (c *call) do() {
 	defer c.wg.Done()
 
+	// Notice: Any panics or runtime.Goexit() happening in fn() will be ignored.
 	c.result, c.err = c.fn()
 }
 
@@ -65,7 +63,6 @@ func (g *Group) Call(key string, fn func() (interface{}, error)) (interface{}, e
 	if c, ok := g.calls[key]; ok {
 		g.lock.Unlock()
 
-		// Waiting...
 		c.wg.Wait()
 		return c.result, c.err
 	}
